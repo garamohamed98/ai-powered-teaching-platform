@@ -1,0 +1,19 @@
+<div class="page-container">
+  <p-card header="Courses List">
+    <p-table [value]="courses" [tableStyle]="{ 'min-width': '50rem' }">
+      <ng-template #header>
+        <tr>
+          <th>Title</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-courses>
+        <tr>
+          <td class="title-row">
+            <p>{{ courses.title }}</p>
+            <p-button routerLink="/{{courses.id}}" [rounded]="true" icon="pi pi-chevron-right" text="true" size="small"/>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>

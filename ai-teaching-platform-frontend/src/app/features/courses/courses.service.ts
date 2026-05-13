@@ -15,4 +15,21 @@ export class CoursesService {
   getCourses() {
     return this.http.get<Course[]>(this.baseUrl);
   }
+
+  getCourseDetails(courseId: string) {
+    return this.http.get<Course>(this.baseUrl +"/" +courseId);
+  }
+
+  updateCourseContent(courseId: string, content: string) {
+    const url = `${this.baseUrl}/${courseId}/content`;
+    const body = {
+      content: content
+    };
+    console.log("update course content course id: ", courseId,
+      " content: ",content,
+      " in url: ",url,
+      " with body: ",body
+      );
+    return this.http.patch<Course>(url,body);
+  }
 }

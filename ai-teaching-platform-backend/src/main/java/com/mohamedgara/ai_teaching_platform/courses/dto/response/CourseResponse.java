@@ -8,7 +8,9 @@ import java.util.UUID;
 public record CourseResponse (
         @JsonProperty("id")
         UUID id,
-        @JsonProperty("course")
-        String course
+        @JsonProperty("title")
+        String title,
+        @JsonProperty("content")
+        String content
 ){
 }

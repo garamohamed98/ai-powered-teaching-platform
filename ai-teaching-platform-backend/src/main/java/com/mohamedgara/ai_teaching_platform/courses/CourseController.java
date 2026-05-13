@@ -1,5 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.courses;
 
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseContentUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import jakarta.validation.Valid;
@@ -41,5 +42,11 @@ public class CourseController {
     public ResponseEntity<Void> deleteCourse(@PathVariable UUID id){
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{courseId}/content")
+    public ResponseEntity<CourseResponse> updateCourseContentContent(@PathVariable UUID courseId, @RequestBody CourseContentUpdateRequest courseContentUpdateRequest){
+        CourseResponse courseResponse = courseService.updateCourseContent(courseId,courseContentUpdateRequest);
+        return ResponseEntity.ok(courseResponse);
     }
 }

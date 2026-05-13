@@ -19,6 +19,8 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    private String title;
+
     @Column(columnDefinition = "TEXT")
-    private String course;
+    private String content;
 }

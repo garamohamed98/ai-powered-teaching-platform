@@ -1,5 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.courses;
 
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseContentUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
@@ -40,6 +41,16 @@ public class CourseService {
     public void deleteCourse(UUID id){
         Course course = courseRepository.findById(id).orElseThrow(()-> new ServiceNotFoundException());
         courseRepository.delete(course);
+    }
+
+    @Transactional
+    public CourseResponse updateCourseContent (UUID courseId, CourseContentUpdateRequest courseContentUpdateRequest){
+        Course course = courseRepository.findById(courseId).orElseThrow(()-> new ServiceNotFoundException());
+        String courseContent = courseContentUpdateRequest.content();
+
+        course.setContent(courseContent);
+        Course updatedCourse = courseRepository.save(course);
+        return courseResponseMapper.toCourseResponse(updatedCourse);
     }
 
 }
