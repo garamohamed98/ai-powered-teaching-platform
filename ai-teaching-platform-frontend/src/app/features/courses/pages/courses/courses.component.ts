@@ -6,25 +6,27 @@ import {CardModule} from 'primeng/card';
 import {Button} from 'primeng/button';
 import {RouterLink} from '@angular/router';
 import {MessageService} from 'primeng/api';
-import {Toast} from 'primeng/toast';
+import {Skeleton, SkeletonModule} from 'primeng/skeleton';
+import {NgIf} from '@angular/common';
+import {Message} from 'primeng/message';
 
 @Component({
   selector: 'app-courses',
-  imports: [TableModule, CardModule, Button, RouterLink],
+  imports: [TableModule, CardModule, Button, RouterLink, SkeletonModule, NgIf, Message],
   providers: [CoursesService, MessageService],
   templateUrl: './courses.component.html',
   styleUrl: './courses.component.scss'
 })
 export class CoursesComponent implements OnInit {
   private coursesService = inject(CoursesService);
-  private messageService = inject(MessageService);
   loading: boolean = false;
+  maxRows = 10;
   courses!: Course[];
 
 
   ngOnInit() {
     this.loading = true;
-
+    this.courses =  Array(this.maxRows).fill({});
     this.coursesService.getCourses()
       .subscribe({
         next: (res)=>{
@@ -33,6 +35,7 @@ export class CoursesComponent implements OnInit {
         },
         error: (error) => {
           this.loading = false;
+          this.courses = [];
           console.log("Error: ",error.message);
         }
       })
