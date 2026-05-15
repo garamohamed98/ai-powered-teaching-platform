@@ -1,34 +1,18 @@
 <div class="page-container">
-  <p-card header="Courses List">
-    <p-table [value]="courses" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true" [rows]="maxRows">
-      <ng-template #header>
-        <tr>
-          <th>Title</th>
-        </tr>
-      </ng-template>
-      <ng-template #body let-course>
-        <tr>
-          <td>
-          <ng-container *ngIf="loading; else content">
-              <p-skeleton />
-          </ng-container>
-          <ng-template #content>
-            <div class="title-row">
-              <p>{{ course.title }}</p>
-              <p-button routerLink="/{{course.id}}" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
-            </div>
-          </ng-template>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td>
-            <p-message severity="info" text="No courses found." />
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </p-card>
+  <div>
+    <p-button
+      label="New Course"
+      (onClick)="showCreateCourseModal()"
+      icon="pi pi-plus"
+    />
+  </div>
+  <app-courses-form-modal
+    [isVisible]="isCreateModalVisible()"
+    (isVisibleChange)="isCreateModalVisible.set($event)"
+  ></app-courses-form-modal>
+  <app-courses-table
+    [maxRows]="maxRows"
+    [courses]="courses()"
+    [loading]="loading()"
+  ></app-courses-table>
 </div>

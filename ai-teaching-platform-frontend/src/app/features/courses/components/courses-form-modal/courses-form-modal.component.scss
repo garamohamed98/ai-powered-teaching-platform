@@ -1,0 +1,12 @@
+.courseDialogForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formElementContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+}

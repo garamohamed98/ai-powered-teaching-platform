@@ -1,0 +1,14 @@
+<p-dialog header="Create New Course" [modal]="true" [(visible)]="isVisible" (onHide)="close()" [style]="{ width: '25rem' }">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="courseDialogForm" >
+    @if(form.get('title')?.touched && !form.get('title')?.valid){
+      <div>
+        . More then 3 character in course title is required
+      </div>
+    }
+    <div class="formElementContainer">
+      <label>Course Title</label>
+      <input pInputText formControlName="title" placeholder="Enter Course Title">
+    </div>
+    <p-button type="submit" label="Create Course" />
+  </form>
+</p-dialog>
