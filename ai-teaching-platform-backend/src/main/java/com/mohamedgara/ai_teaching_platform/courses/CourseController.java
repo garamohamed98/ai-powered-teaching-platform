@@ -1,7 +1,7 @@
 package com.mohamedgara.ai_teaching_platform.courses;
 
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseContentUpdateRequest;
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,8 @@ public class CourseController {
     private final CourseService courseService;
 
     @PostMapping
-    public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CourseRequest course){
-        CourseResponse courseResponse = courseService.createCourse(course);
+    public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CreateCourseRequest createCourseRequest){
+        CourseResponse courseResponse = courseService.createCourse(createCourseRequest);
         URI location  = URI.create("/api/course/"+ courseResponse.id());
         return ResponseEntity.created(location).body(courseResponse);
     }

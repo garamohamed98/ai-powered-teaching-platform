@@ -1,6 +1,7 @@
 import {inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import {Course} from './models/course.model';
+import {Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -31,5 +32,14 @@ export class CoursesService {
       " with body: ",body
       );
     return this.http.patch<Course>(url,body);
+  }
+
+  createCourse(title:string) : Observable<HttpResponse<Course>>{
+    const body = {
+      title: title,
+    }
+    return this.http.post<Course>(this.baseUrl, body,{
+      observe: 'response'
+    });
   }
 }

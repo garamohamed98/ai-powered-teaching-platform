@@ -19,6 +19,7 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false, length = 50)
     private String title;
 
     @Column(columnDefinition = "TEXT")

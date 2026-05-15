@@ -1,11 +1,10 @@
 package com.mohamedgara.ai_teaching_platform.courses;
 
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseContentUpdateRequest;
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
 import com.mohamedgara.ai_teaching_platform.courses.exceptions.ServiceNotFoundException;
-import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseRequestMapper;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +16,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CourseService {
-    private final CourseRequestMapper courseRequestMapper;
     private final CourseRepository courseRepository;
     private final CourseResponseMapper courseResponseMapper;
 
-    public CourseResponse createCourse(CourseRequest courseRequest){
-        Course course = courseRequestMapper.toCourse(courseRequest);
+    public CourseResponse createCourse(CreateCourseRequest createCourseRequest){
+        String courseTitle = createCourseRequest.title();
+        Course course = Course.builder().title(courseTitle).build();
         Course savedCourse = courseRepository.save(course);
         return courseResponseMapper.toCourseResponse(savedCourse);
     }
