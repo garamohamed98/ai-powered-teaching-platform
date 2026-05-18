@@ -42,4 +42,8 @@ export class CoursesService {
       observe: 'response'
     });
   }
+
+  deleteCourse(id: number) {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
 }
