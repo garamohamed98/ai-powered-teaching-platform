@@ -9,6 +9,7 @@
   <app-courses-form-modal
     [isVisible]="isCreateModalVisible()"
     (isVisibleChange)="isCreateModalVisible.set($event)"
+    (courseCreated)="loadCourses()"
   ></app-courses-form-modal>
   <app-courses-table
     [maxRows]="maxRows"

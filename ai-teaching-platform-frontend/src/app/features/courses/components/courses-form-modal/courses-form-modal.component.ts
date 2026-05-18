@@ -15,7 +15,7 @@ import {MessageService} from 'primeng/api';
         ReactiveFormsModule
     ],
   providers: [
-    CoursesService
+    CoursesService,
   ],
   templateUrl: './courses-form-modal.component.html',
   styleUrl: './courses-form-modal.component.scss'
@@ -26,6 +26,7 @@ export class CoursesFormModalComponent {
 
   @Input({required:true}) isVisible!:boolean;
   @Output() isVisibleChange = new EventEmitter<boolean>();
+  @Output() courseCreated = new EventEmitter<void>();
 
   private formBuilder = inject(FormBuilder);
   form = this.formBuilder.group({
@@ -51,12 +52,14 @@ export class CoursesFormModalComponent {
 
     this.coursesService.createCourse(title).subscribe({
       next: (res) => {
+        console.log("Course Created Successfully");
         this.messageService.add({
-          severity: 'info',
+          severity: 'success',
           summary: 'New course is created successfully.',
           detail: `New Course is created with title ${res.body?.title}`,
           sticky: false,
         });
+        this.courseCreated.emit();
         this.close();
       }
     });

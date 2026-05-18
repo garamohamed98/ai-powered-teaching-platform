@@ -4,7 +4,6 @@ import {CoursesService} from '../../courses.service';
 import {Course} from '../../models/course.model';
 import {CardModule} from 'primeng/card';
 import {Button} from 'primeng/button';
-import {MessageService} from 'primeng/api';
 import {SkeletonModule} from 'primeng/skeleton';
 import { ReactiveFormsModule} from '@angular/forms';
 import {CoursesTableComponent} from '../../components/courses-table/courses-table.component';
@@ -13,7 +12,7 @@ import {CoursesFormModalComponent} from '../../components/courses-form-modal/cou
 @Component({
   selector: 'app-courses',
   imports: [TableModule, CardModule, Button, SkeletonModule, ReactiveFormsModule, CoursesTableComponent, CoursesFormModalComponent],
-  providers: [CoursesService, MessageService],
+  providers: [CoursesService,],
   templateUrl: './courses.component.html',
   styleUrl: './courses.component.scss'
 })
@@ -21,12 +20,16 @@ export class CoursesComponent implements OnInit {
   private coursesService = inject(CoursesService);
 
   loading = signal<boolean>(false);
-  maxRows:number = 10;
+  maxRows:number = 5;
   courses = signal<Course[]>([]);
   isCreateModalVisible= signal<boolean>(false);
 
 
   ngOnInit() {
+    this.loadCourses();
+  };
+
+  loadCourses(){
     this.loading.set(true);
     this.courses.set(Array(this.maxRows).fill({}));
     this.coursesService.getCourses()
@@ -41,7 +44,7 @@ export class CoursesComponent implements OnInit {
           console.log("Error: ",error.message);
         }
       })
-  };
+  }
 
   showCreateCourseModal(){
     this.isCreateModalVisible.set(true);
