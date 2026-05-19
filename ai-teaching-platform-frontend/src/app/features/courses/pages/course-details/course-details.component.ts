@@ -1,55 +1,61 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {Editor, EditorModule} from 'primeng/editor';
 import {FormsModule} from '@angular/forms';
-import {Button} from 'primeng/button';
-import {Card} from 'primeng/card';
-import {Toolbar} from 'primeng/toolbar';
 import {CoursesService} from '../../courses.service';
 import {Course} from '../../models/course.model';
+import {CourseEditorComponent} from '../../components/course-editor/course-editor.component';
 
 @Component({
   selector: 'app-course-details',
   imports: [
-    Editor,
     FormsModule,
-    Button,
-    Card,
-    Toolbar,
+    CourseEditorComponent,
   ],
   providers: [CoursesService],
   templateUrl: './course-details.component.html',
   styleUrl: './course-details.component.scss'
 })
 export class CourseDetailsComponent implements OnInit {
-  courseId: string | null = null;
-  text: string | undefined;
   private coursesService = inject(CoursesService);
-  course!: Course;
+
+  course = signal<Course>({id:"",title:"",content:""});
+  loading = signal<boolean>(false);
 
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit():void {
-    this.courseId = this.route.snapshot.paramMap.get('id');
 
-    if (this.courseId) {
-      this.coursesService.getCourseDetails(this.courseId).subscribe((data: any) => {
-        this.course = data;
-        this.text = data.content;
-        console.log(this.course.title);
-      });
+    const courseId = this.route.snapshot.paramMap.get('id');
+
+    if(!courseId){
+      // TODO: route To 404 page
+      console.log("Page not found");
+      return;
     }
-
+    this.course.update(currentCourse => ({...currentCourse, id : courseId }));
+    this.loadCourse();
 
   }
 
-  onSaveCourse(){
-   if(this.courseId != null && this.text != undefined) {
-     console.log("onSaveCourse event triggered",this.text)
-     this.coursesService.updateCourseContent(this.courseId,this.text).subscribe((data:any)=>{
-       this.course = data;
-       this.text = data.content;
-     });
-   }
+  loadCourse(){
+    if (this.course().id == "") return;
+    this.loading.set(true);
+    this.coursesService.getCourseDetails(this.course().id).subscribe({
+      next: (data: Course) => {
+        console.log("Course details fetched successfully.");
+        this.course.set(data);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.log("An error appeared during fetching course details: ",error);
+        this.loading.set(false);
+
+      }
+    });
+  }
+
+
+  handleCourseContentChanged(event:string){
+    this.course.update(currentCourse=>({...currentCourse, content: event}));
   }
 }

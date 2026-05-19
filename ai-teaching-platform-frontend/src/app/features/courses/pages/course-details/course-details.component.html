@@ -1,20 +1,5 @@
 <div class="page-container">
 
-  <p-card >
-    <div class="card-content">
-      <p-toolbar>
-        <ng-template #start>
-          {{course?.title}}
-        </ng-template>
-        <ng-template #end>
-          <p-button type="button" (click)="onSaveCourse()" [rounded]="true" text="true" icon="pi pi-check" size="small"/>
-        </ng-template>
-      </p-toolbar>
-      <p-editor
-        [(ngModel)]="text"
-        [style]="{ height: '320px' }"
-      />
-    </div>
-  </p-card>
+  <app-course-editor [course]="course()" (onCourseContentChanged)="handleCourseContentChanged($event)" [loading]="loading()"></app-course-editor>
 
 </div>

@@ -14,10 +14,12 @@ export class CoursesService {
   constructor() {}
 
   getCourses() {
+    console.log("fetching courses");
     return this.http.get<Course[]>(this.baseUrl);
   }
 
   getCourseDetails(courseId: string) {
+    console.log("fetching course details")
     return this.http.get<Course>(this.baseUrl +"/" +courseId);
   }
 
@@ -26,7 +28,7 @@ export class CoursesService {
     const body = {
       content: content
     };
-    console.log("update course content course id: ", courseId,
+    console.log("updating course content course id: ", courseId,
       " content: ",content,
       " in url: ",url,
       " with body: ",body
@@ -38,12 +40,14 @@ export class CoursesService {
     const body = {
       title: title,
     }
+    console.log("creating course: ",body);
     return this.http.post<Course>(this.baseUrl, body,{
       observe: 'response'
     });
   }
 
   deleteCourse(id: number) {
+    console.log("deleting course id: ",id);
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

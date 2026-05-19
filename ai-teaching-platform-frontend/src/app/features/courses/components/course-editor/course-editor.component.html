@@ -1,0 +1,25 @@
+<p-card >
+  <div class="card-content">
+    <p-toolbar>
+      <ng-template #start>
+        @if(loading){
+          <p-skeleton height="20px" width="200px" />
+        }@else{
+          @if(course.title === ""){
+            <p-message severity="info" text="No data available" />
+          } @else {
+            {{course.title}}
+          }
+        }
+      </ng-template>
+      <ng-template #end>
+        <p-button type="button" (click)="handleSaveCourse()" [rounded]="true" text="true" icon="pi pi-check" size="small"/>
+      </ng-template>
+    </p-toolbar>
+    <p-editor
+      [ngModel]="course.content"
+      [style]="{ height: '320px' }"
+      (onTextChange)="handleTextChange($event)"
+    />
+  </div>
+</p-card>
