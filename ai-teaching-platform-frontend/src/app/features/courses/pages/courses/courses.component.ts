@@ -34,9 +34,6 @@ export class CoursesComponent implements OnInit {
     this.loading.set(true);
     this.courses.set(Array(this.maxRows).fill({}));
     this.coursesService.getCourses()
-      .pipe(
-        delay(2000)
-      )
       .subscribe({
         next: (res)=>{
           this.courses.set(res);
