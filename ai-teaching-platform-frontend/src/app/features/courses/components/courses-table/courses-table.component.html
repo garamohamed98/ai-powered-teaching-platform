@@ -1,5 +1,10 @@
 <p-card header="Courses List">
-  <p-table [value]="courses" [tableStyle]="{ 'min-width': '50rem' }" [paginator]="true" [rows]="maxRows">
+  <p-table
+    [value]="courses"
+    [tableStyle]="{ 'min-height': '60vh' }"
+    [paginator]="true"
+    [rows]="maxRows"
+  >
     <ng-template #header>
       <tr>
         <th>Title</th>
@@ -7,17 +12,14 @@
     </ng-template>
     <ng-template #body let-course>
       <tr>
-        <td>
-          <ng-container *ngIf="loading; else content">
-            <p-skeleton />
-          </ng-container>
-          <ng-template #content>
-            <div class="title-row">
-              <p>{{ course.title }}</p>
-              <p-button [routerLink]="['/', course.id]" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
-              <p-button [rounded]="true" icon="pi pi-trash" [text]="true" size="small" (onClick)="onDeleteCourse(course.id)" />
-            </div>
-          </ng-template>
+        <td class="title-row">
+          @if (loading){
+            <p-skeleton  width="8rem" height="1rem"/>
+          } @else {
+            <p>{{ course.title }}</p>
+          }
+          <p-button [routerLink]="['/', course.id]" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
+          <p-button [rounded]="true" icon="pi pi-trash" [text]="true" size="small" (onClick)="onDeleteCourse(course.id)" />
         </td>
       </tr>
     </ng-template>

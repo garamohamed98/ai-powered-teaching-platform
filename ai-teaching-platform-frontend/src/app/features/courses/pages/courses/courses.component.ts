@@ -8,6 +8,7 @@ import {SkeletonModule} from 'primeng/skeleton';
 import { ReactiveFormsModule} from '@angular/forms';
 import {CoursesTableComponent} from '../../components/courses-table/courses-table.component';
 import {CoursesFormModalComponent} from '../../components/courses-form-modal/courses-form-modal.component';
+import {delay} from 'rxjs';
 
 @Component({
   selector: 'app-courses',
@@ -20,7 +21,7 @@ export class CoursesComponent implements OnInit {
   private coursesService = inject(CoursesService);
 
   loading = signal<boolean>(false);
-  maxRows:number = 5;
+  maxRows:number = 6;
   courses = signal<Course[]>([]);
   isCreateModalVisible= signal<boolean>(false);
 
@@ -33,6 +34,9 @@ export class CoursesComponent implements OnInit {
     this.loading.set(true);
     this.courses.set(Array(this.maxRows).fill({}));
     this.coursesService.getCourses()
+      .pipe(
+        delay(2000)
+      )
       .subscribe({
         next: (res)=>{
           this.courses.set(res);
