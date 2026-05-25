@@ -22,6 +22,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/test/db").permitAll()
                         .requestMatchers("/api/course/**").permitAll()
+                        .requestMatchers("/api/exercise/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.permitAll());
