@@ -1,6 +1,7 @@
 package com.mohamedgara.ai_teaching_platform.exercises;
 
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
+import com.mohamedgara.ai_teaching_platform.exercises.services.ExerciseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ExerciseController {
 
+    private final ExerciseService exerciseService;
+
     @PostMapping
     private ResponseEntity<CreateExerciseRequest> createExercise(
             @RequestBody @Valid CreateExerciseRequest createExerciseRequest
             ){
-        System.out.println(createExerciseRequest);
+        exerciseService.createExercise(createExerciseRequest);
         return ResponseEntity.ok(createExerciseRequest);
     }
 }
