@@ -1,6 +1,5 @@
 package com.mohamedgara.ai_teaching_platform.exercises.dto.request.content;
 
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -15,7 +14,4 @@ public record MultipleChoiceContent(
         List<@NotBlank String> options,
         @NotBlank
         String correctAnswer
-) implements ExerciseContent {
-        @Override
-        public ExerciseType getType() { return ExerciseType.MULTIPLE_CHOICE; }
-}
+) implements ExerciseContent {}

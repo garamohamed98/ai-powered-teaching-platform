@@ -25,3 +25,8 @@ logging:
     com.mohamedgara: DEBUG
     org.springframework.web: DEBUG
     org.hibernate: INFO
+
+gemini:
+  api-key: AIzaSyBzunGeECzKL4qZVpvhufZp6i5Fm6HcKWc
+  model: gemini-2.5-flash
+  base-url: https://generativelanguage.googleapis.com

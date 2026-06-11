@@ -9,7 +9,6 @@ import java.util.List;
 public record FillInBlankSentence(
         @NotBlank
         String text,
-        @NotEmpty
         @Size(max = 10)
         List<@NotBlank String> answers
 ) {

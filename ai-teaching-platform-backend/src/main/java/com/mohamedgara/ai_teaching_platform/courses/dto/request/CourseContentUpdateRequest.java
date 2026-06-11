@@ -1,5 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.courses.dto.request;
 
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 

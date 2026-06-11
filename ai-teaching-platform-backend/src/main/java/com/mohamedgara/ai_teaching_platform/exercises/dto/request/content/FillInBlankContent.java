@@ -11,6 +11,4 @@ public record FillInBlankContent(
         @Valid
         List<FillInBlankSentence> sentences
 ) implements  ExerciseContent{
-        @Override
-        public ExerciseType getType() { return ExerciseType.FILL_IN_BLANK; }
 }
