@@ -27,6 +27,6 @@ logging:
     org.hibernate: INFO
 
 gemini:
-  api-key: AIzaSyBzunGeECzKL4qZVpvhufZp6i5Fm6HcKWc
-  model: gemini-2.5-flash
-  base-url: https://generativelanguage.googleapis.com
+  api-key: ${ai-api-key}
+  model: ${ai-model}
+  base-url: ${ai-base-url}
