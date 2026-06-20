@@ -2,6 +2,9 @@ spring:
   application:
     name: ai-teaching-platform
 
+  config:
+    import: "optional:file:.env[.properties]"
+
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:teaching_platform}
     username: ${DB_USER:teaching_platform_user}
@@ -27,6 +30,6 @@ logging:
     org.hibernate: INFO
 
 gemini:
-  api-key: ${ai-api-key}
-  model: ${ai-model}
-  base-url: ${ai-base-url}
+  api-key: ${AI_API_KEY}
+  model: ${AI_MODEL}
+  base-url: ${AI_BASE_URL}
