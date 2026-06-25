@@ -2,7 +2,7 @@ package com.mohamedgara.ai_teaching_platform.AI.services;
 
 
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 
 @Service
@@ -20,11 +20,12 @@ public class PromptBuilderService {
             
             Rules:
             - Return ONLY the same JSON structure with the "answers" field filled in
-            - Each "answers" value must be a string with the correct word(s)
+            - Each "answer" value must be a string or an array of strings with the correct word
+            - Each ""answers" value must be an array of strings with the correct words
             - Do NOT change any other field
             - Do NOT wrap the response in markdown or code blocks
             - Do NOT add any explanation or extra text
+            - Pay special attention to arrays/collections and singular vs plural field names if it's plural it mostly should be an array.
             """.formatted(exercise.toPrettyString());
     }
-
 }

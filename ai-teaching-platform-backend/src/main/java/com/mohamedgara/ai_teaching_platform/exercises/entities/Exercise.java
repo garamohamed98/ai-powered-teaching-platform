@@ -1,6 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.exercises.entities;
 
-import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import tools.jackson.databind.JsonNode;
+
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,9 +25,8 @@ public class Exercise {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id",nullable = false)
-    private Course course;
+    @Column(nullable = false)
+    private UUID courseId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

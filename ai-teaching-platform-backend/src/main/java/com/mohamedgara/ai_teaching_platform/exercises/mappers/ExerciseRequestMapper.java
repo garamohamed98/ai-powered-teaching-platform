@@ -1,13 +1,15 @@
 package com.mohamedgara.ai_teaching_platform.exercises.mappers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.ExerciseContent;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+
 
 @Mapper(componentModel = "spring")
 public abstract class ExerciseRequestMapper {
@@ -21,6 +23,6 @@ public abstract class ExerciseRequestMapper {
     public abstract Exercise toExercise(CreateExerciseRequest createExerciseRequest);
 
     protected JsonNode toJsonNode(ExerciseContent content) {
-        return objectMapper.valueToTree(content);
+        return  objectMapper.valueToTree(content);
     }
 }

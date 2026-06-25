@@ -52,4 +52,8 @@ public class CourseService {
         return courseResponseMapper.toCourseResponse(updatedCourse);
     }
 
+    public boolean courseExists(UUID courseId){
+        return courseRepository.existsById(courseId);
+    }
+
 }

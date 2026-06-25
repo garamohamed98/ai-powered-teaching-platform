@@ -1,6 +1,8 @@
 package com.mohamedgara.ai_teaching_platform.exercises.mappers;
 
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.ExerciseContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.FillInBlankContent;
@@ -10,8 +12,6 @@ import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 
 @Mapper(componentModel = "spring")

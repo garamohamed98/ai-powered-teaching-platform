@@ -1,6 +1,7 @@
 package com.mohamedgara.ai_teaching_platform.exercises;
 
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.services.ExerciseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,13 @@ public class ExerciseController {
     private final ExerciseService exerciseService;
 
     @PostMapping
-    private ResponseEntity<CreateExerciseRequest> createExercise(
+    private ResponseEntity<CreateExerciseResponse> createExercise(
             @RequestBody @Valid CreateExerciseRequest createExerciseRequest
             ){
-        exerciseService.createExercise(createExerciseRequest);
-        return ResponseEntity.ok(createExerciseRequest);
+
+        CreateExerciseResponse response = exerciseService
+                .createExercise(createExerciseRequest);
+
+        return ResponseEntity.ok(response);
     }
 }

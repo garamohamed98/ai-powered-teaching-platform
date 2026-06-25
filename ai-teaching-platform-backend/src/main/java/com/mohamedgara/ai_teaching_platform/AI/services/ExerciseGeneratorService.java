@@ -2,11 +2,12 @@ package com.mohamedgara.ai_teaching_platform.AI.services;
 
 
 import com.mohamedgara.ai_teaching_platform.AI.client.GeminiClient;
+import com.mohamedgara.ai_teaching_platform.AI.exceptions.GeminiParseFailException;
 import com.mohamedgara.ai_teaching_platform.AI.parsers.GeminiResponseParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @Service
@@ -21,6 +22,11 @@ public class ExerciseGeneratorService {
     public JsonNode generateExerciseAnswer(JsonNode exercise){
         String prompt = promptBuilderService.generateExerciseAnswers(exercise);
         String aiGenerated = geminiClient.generateContent(prompt);
-        return geminiResponseParser.parse(aiGenerated);
+        try{
+            return geminiResponseParser.parse(aiGenerated);
+        }catch (Exception e){
+            throw new GeminiParseFailException();
+        }
+
     }
 }

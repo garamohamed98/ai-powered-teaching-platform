@@ -1,15 +1,16 @@
 package com.mohamedgara.ai_teaching_platform.exercises.dto.request;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.ExerciseContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.FillInBlankContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.MultipleChoiceContent;
 import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.JsonParser;
-import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.deser.std.StdDeserializer;
 
+
+import java.io.IOException;
 import java.util.UUID;
 
 public class CreateExerciseRequestDeserializer extends StdDeserializer<CreateExerciseRequest> {
@@ -18,13 +19,14 @@ public class CreateExerciseRequestDeserializer extends StdDeserializer<CreateExe
     }
 
     @Override
-    public CreateExerciseRequest deserialize(JsonParser p, DeserializationContext ctx) throws JacksonException {
+    public CreateExerciseRequest deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
         JsonNode root = p.readValueAsTree();
 
         UUID courseId        = ctx.readTreeAsValue(root.get("course_id"), UUID.class);
         ExerciseType type    = ctx.readTreeAsValue(root.get("type"), ExerciseType.class);
         String title         = ctx.readTreeAsValue(root.get("title"), String.class);
         String instructions  = ctx.readTreeAsValue(root.get("instructions"), String.class);
+        boolean correctAnswers = ctx.readTreeAsValue(root.get("correct_answers"), Boolean.class);
         JsonNode contentNode = root.get("content");
 
         ExerciseContent content = switch (type){
@@ -32,6 +34,6 @@ public class CreateExerciseRequestDeserializer extends StdDeserializer<CreateExe
             case FILL_IN_BLANK   -> ctx.readTreeAsValue(contentNode, FillInBlankContent.class);
         };
 
-        return new CreateExerciseRequest(courseId, type, title, instructions, content);
+        return new CreateExerciseRequest(courseId, type, title, instructions,correctAnswers, content);
     }
 }
