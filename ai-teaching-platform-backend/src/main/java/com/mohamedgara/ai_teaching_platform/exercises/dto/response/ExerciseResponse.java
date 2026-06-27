@@ -9,7 +9,7 @@ import java.util.UUID;
 public record ExerciseResponse(
         UUID id,
         @JsonProperty("course_id")
-        UUID courseID,
+        UUID courseId,
         ExerciseType type,
         String title,
         String instructions,

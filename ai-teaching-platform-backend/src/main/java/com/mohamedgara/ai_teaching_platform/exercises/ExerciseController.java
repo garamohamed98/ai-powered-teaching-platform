@@ -47,4 +47,10 @@ public class ExerciseController {
         exerciseService.deleteExercise(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ExerciseResponse> correctExercise(@PathVariable UUID id){
+        ExerciseResponse response = exerciseService.correctExercise(id);
+        return ResponseEntity.ok(response);
+    }
 }

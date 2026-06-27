@@ -34,9 +34,7 @@ public class ExerciseService {
         if(!courseService.courseExists(createExerciseRequest.courseId())){
             throw new CourseNotFoundException();
         }
-        System.out.println("DTO: " + createExerciseRequest.content());
         Exercise exercise = exerciseRequestMapper.toExercise(createExerciseRequest);
-        System.out.println("mapper: " + exercise);
 
         boolean correctAnswers = createExerciseRequest.correctAnswers();
 
@@ -44,9 +42,7 @@ public class ExerciseService {
             JsonNode result = exerciseGeneratorService.generateExerciseAnswer(exercise.getContent());
             exercise.setContent(result);
         }
-        System.out.println("Exercise: " + exercise.getContent());
         Exercise savedExercise = exerciseRepository.save(exercise);
-        System.out.println("Saved exercise: " + savedExercise.getContent());
 
         return exerciseResponseMapper.toCreateExerciseResponse(savedExercise);
     }
@@ -68,5 +64,17 @@ public class ExerciseService {
                 ()-> new ExerciseNotFoundException()
         );
         exerciseRepository.delete(exercise);
+    }
+
+    public ExerciseResponse correctExercise(UUID id){
+        Exercise exercise = exerciseRepository.findById(id).orElseThrow(
+                ()-> new ExerciseNotFoundException()
+        );
+
+        JsonNode result = exerciseGeneratorService.generateExerciseAnswer(exercise.getContent());
+        exercise.setContent(result);
+        Exercise savedExercise = exerciseRepository.save(exercise);
+
+        return exerciseResponseMapper.toExerciseResponse(savedExercise);
     }
 }
