@@ -5,14 +5,19 @@ import com.mohamedgara.ai_teaching_platform.AI.services.ExerciseGeneratorService
 import com.mohamedgara.ai_teaching_platform.courses.CourseService;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.CourseNotFoundException;
+import com.mohamedgara.ai_teaching_platform.exercises.exceptions.ExerciseNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseRequestMapper;
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseResponseMapper;
 import com.mohamedgara.ai_teaching_platform.exercises.repositories.ExerciseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -46,4 +51,22 @@ public class ExerciseService {
         return exerciseResponseMapper.toCreateExerciseResponse(savedExercise);
     }
 
+    public List<ExerciseResponse> getExercises() {
+        List<Exercise> exerciseList = exerciseRepository.findAll();
+        return exerciseResponseMapper.toExerciseListResponse(exerciseList);
+    }
+
+    public ExerciseResponse getExercise(UUID id) {
+        Exercise exercise = exerciseRepository.findById(id).orElseThrow(
+                ()-> new ExerciseNotFoundException()
+        );
+        return exerciseResponseMapper.toExerciseResponse(exercise);
+    }
+
+    public void deleteExercise(UUID id) {
+        Exercise exercise = exerciseRepository.findById(id).orElseThrow(
+                ()-> new ExerciseNotFoundException()
+        );
+        exerciseRepository.delete(exercise);
+    }
 }

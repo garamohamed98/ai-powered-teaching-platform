@@ -20,4 +20,14 @@ public class ExercisesExceptionHandler {
                 .build();
         return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
     }
+
+    public ResponseEntity<ErrorResponse> handleExerciseNotFound(ExerciseNotFoundException exception){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error("EXERCISE_NOT_FOUND")
+                .message(exception.getMessage())
+                .status(HttpStatus.NOT_FOUND)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
 }
