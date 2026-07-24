@@ -1,6 +1,7 @@
-package com.mohamedgara.ai_teaching_platform.courses;
+package com.mohamedgara.ai_teaching_platform.courses.controller;
 
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseContentUpdateRequest;
+import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import jakarta.validation.Valid;
@@ -32,21 +33,15 @@ public class CourseController {
         return ResponseEntity.ok(courseResponseList);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CourseResponse> getCourse(@PathVariable UUID id){
-        CourseResponse courseResponse = courseService.getCourse(id);
-        return ResponseEntity.ok(courseResponse);
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCourse(@PathVariable UUID id){
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{courseId}/content")
-    public ResponseEntity<CourseResponse> updateCourseContentContent(@PathVariable UUID courseId, @RequestBody CourseContentUpdateRequest courseContentUpdateRequest){
-        CourseResponse courseResponse = courseService.updateCourseContent(courseId,courseContentUpdateRequest);
+    @PatchMapping("/{courseId}/title")
+    public ResponseEntity<CourseResponse> updateCourseTitle(@PathVariable UUID courseId, @RequestBody CourseTitleUpdateRequest courseTitleUpdateRequest){
+        CourseResponse courseResponse = courseService.updateCourseTitle(courseId,courseTitleUpdateRequest);
         return ResponseEntity.ok(courseResponse);
     }
 }

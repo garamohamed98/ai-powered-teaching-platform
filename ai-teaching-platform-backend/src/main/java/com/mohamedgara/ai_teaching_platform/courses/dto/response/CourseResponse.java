@@ -9,8 +9,6 @@ public record CourseResponse (
         @JsonProperty("id")
         UUID id,
         @JsonProperty("title")
-        String title,
-        @JsonProperty("content")
-        String content
+        String title
 ){
 }

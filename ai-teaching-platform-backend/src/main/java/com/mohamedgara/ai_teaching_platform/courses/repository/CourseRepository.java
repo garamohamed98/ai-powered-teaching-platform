@@ -1,4 +1,4 @@
-package com.mohamedgara.ai_teaching_platform.courses;
+package com.mohamedgara.ai_teaching_platform.courses.repository;
 
 
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;

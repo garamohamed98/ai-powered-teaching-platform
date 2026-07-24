@@ -1,4 +1,4 @@
-package com.mohamedgara.ai_teaching_platform.courses.exceptions;
+package com.mohamedgara.ai_teaching_platform.courses.exception;
 
 public class CourseNotFoundException extends RuntimeException{
 

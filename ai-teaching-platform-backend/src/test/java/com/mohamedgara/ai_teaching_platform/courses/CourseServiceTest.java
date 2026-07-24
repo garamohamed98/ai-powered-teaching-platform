@@ -7,6 +7,8 @@ import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapper
 import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapperImpl;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
+import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +18,8 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseContentUpdateRequest;
-import com.mohamedgara.ai_teaching_platform.courses.exceptions.CourseNotFoundException;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
+import com.mohamedgara.ai_teaching_platform.courses.exception.CourseNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +59,6 @@ public class CourseServiceTest {
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.id()).isEqualTo(courseId);
         Assertions.assertThat(result.title()).isEqualTo(createCourseRequest.title());
-        Assertions.assertThat(result.content()).isNull();
 
 
         Mockito.verify(courseRepository).save(Mockito.any(Course.class));
@@ -111,39 +112,7 @@ public class CourseServiceTest {
         Mockito.verify(courseResponseMapper).toCourseListResponse(emptyList);
     }
 
-    @Test
-    public void getCourse_shouldReturnCourseResponse_whenCourseExists(){
-        //Arrange
-        UUID courseId = UUID.randomUUID();
-        Course course = Course.builder().id(courseId).title("title example").build();
 
-        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
-
-        //Act
-        CourseResponse result = courseService.getCourse(courseId);
-
-        //Assert
-        Assertions.assertThat(result).isNotNull();
-        Assertions.assertThat(result.id()).isEqualTo(courseId);
-        Assertions.assertThat(result.title()).isEqualTo("title example");
-
-        Mockito.verify(courseRepository).findById(courseId);
-        Mockito.verify(courseResponseMapper).toCourseResponse(course);
-    }
-
-    @Test
-    public void getCourse_shouldThrowServiceNotFoundException_whenCourseDoesNotExist(){
-        //Arrange
-        UUID courseId = UUID.randomUUID();
-
-        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
-
-        //Act & Assert
-        assertThrows(CourseNotFoundException.class,
-                () -> courseService.getCourse(courseId));
-
-        Mockito.verify(courseRepository).findById(courseId);
-    }
 
     @Test
     public void deleteCourse_shouldDeleteCourse_whenCourseExists(){
@@ -176,25 +145,24 @@ public class CourseServiceTest {
     }
 
     @Test
-    public void updateCourseContent_shouldReturnUpdatedCourseResponse_whenCourseExists(){
+    public void updateCourseTitle_shouldReturnUpdatedCourseResponse_whenCourseExists(){
         //Arrange
         UUID courseId = UUID.randomUUID();
         Course course = Course.builder().id(courseId).title("title example").build();
-        String newContent = "new content";
-        CourseContentUpdateRequest updateRequest = new CourseContentUpdateRequest(newContent);
+        String newTitle = "new title";
+        CourseTitleUpdateRequest updateRequest = new CourseTitleUpdateRequest(newTitle);
 
         Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
         Mockito.when(courseRepository.save(Mockito.any(Course.class)))
                 .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
 
         //Act
-        CourseResponse result = courseService.updateCourseContent(courseId, updateRequest);
+        CourseResponse result = courseService.updateCourseTitle(courseId, updateRequest);
 
         //Assert
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.id()).isEqualTo(courseId);
-        Assertions.assertThat(result.title()).isEqualTo("title example");
-        Assertions.assertThat(result.content()).isEqualTo(newContent);
+        Assertions.assertThat(result.title()).isEqualTo("new title");
 
         Mockito.verify(courseRepository).findById(courseId);
         Mockito.verify(courseRepository).save(course);
@@ -202,16 +170,16 @@ public class CourseServiceTest {
     }
 
     @Test
-    public void updateCourseContent_shouldThrowCourseNotFoundException_whenCourseDoesNotExist(){
+    public void updateCourseTitle_shouldThrowCourseNotFoundException_whenCourseDoesNotExist(){
         //Arrange
         UUID courseId = UUID.randomUUID();
-        CourseContentUpdateRequest updateRequest = new CourseContentUpdateRequest("new content");
+        CourseTitleUpdateRequest updateRequest = new CourseTitleUpdateRequest("new content");
 
         Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
 
         //Assert
         assertThrows(CourseNotFoundException.class,
-                () -> courseService.updateCourseContent(courseId,updateRequest));
+                () -> courseService.updateCourseTitle(courseId,updateRequest));
 
         Mockito.verify(courseRepository).findById(courseId);
         Mockito.verify(courseRepository, Mockito.never()).save(Mockito.any());
