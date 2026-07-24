@@ -1,19 +1,22 @@
-name: Spring Boot CI
+name: Backend CI
 
 on:
   push:
-    branches:
-      - develop
-      - main
-
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'backend/**'
 
 jobs:
-  test:
-
+  backend-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
 
     steps:
       - name: Checkout repository
@@ -25,6 +28,7 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+          cache-dependency-path: 'backend/pom.xml'
 
       - name: Make mvnw executable
         run: chmod +x mvnw
