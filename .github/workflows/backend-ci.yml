@@ -4,19 +4,20 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'backend/**'
+      - 'ai-teaching-platform-backend/**'
       - '.github/workflows/backend-ci.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'backend/**'
+      - 'ai-teaching-platform-backend/**'
 
 jobs:
   backend-test:
     runs-on: ubuntu-latest
+
     defaults:
       run:
-        working-directory: backend
+        working-directory: ai-teaching-platform-backend
 
     steps:
       - name: Checkout repository
@@ -28,7 +29,7 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
-          cache-dependency-path: 'backend/pom.xml'
+          cache-dependency-path: 'ai-teaching-platform-backend/pom.xml'
 
       - name: Make mvnw executable
         run: chmod +x mvnw
