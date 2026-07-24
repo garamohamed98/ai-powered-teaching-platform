@@ -24,4 +24,5 @@ public class Course {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
 }

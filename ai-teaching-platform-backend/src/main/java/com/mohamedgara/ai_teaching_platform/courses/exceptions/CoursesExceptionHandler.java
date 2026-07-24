@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class CoursesExceptionHandler {
-    @ExceptionHandler(ServiceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleServiceNotFound(ServiceNotFoundException exception){
+    @ExceptionHandler(CourseNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCourseNotFound(CourseNotFoundException exception){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error("SERVICE_NOT_FOUND")
                 .message(exception.getMessage())

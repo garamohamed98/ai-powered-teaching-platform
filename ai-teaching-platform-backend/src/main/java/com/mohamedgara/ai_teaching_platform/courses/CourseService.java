@@ -4,7 +4,7 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseContentUpd
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
-import com.mohamedgara.ai_teaching_platform.courses.exceptions.ServiceNotFoundException;
+import com.mohamedgara.ai_teaching_platform.courses.exceptions.CourseNotFoundException;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,19 +32,19 @@ public class CourseService {
     }
 
     public CourseResponse getCourse(UUID id){
-        Course course = courseRepository.findById(id).orElseThrow(()-> new ServiceNotFoundException());
+        Course course = courseRepository.findById(id).orElseThrow(()-> new CourseNotFoundException());
         return courseResponseMapper.toCourseResponse(course);
     }
 
     @Transactional
     public void deleteCourse(UUID id){
-        Course course = courseRepository.findById(id).orElseThrow(()-> new ServiceNotFoundException());
+        Course course = courseRepository.findById(id).orElseThrow(()-> new CourseNotFoundException());
         courseRepository.delete(course);
     }
 
     @Transactional
     public CourseResponse updateCourseContent (UUID courseId, CourseContentUpdateRequest courseContentUpdateRequest){
-        Course course = courseRepository.findById(courseId).orElseThrow(()-> new ServiceNotFoundException());
+        Course course = courseRepository.findById(courseId).orElseThrow(()-> new CourseNotFoundException());
         String courseContent = courseContentUpdateRequest.content();
 
         course.setContent(courseContent);
