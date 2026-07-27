@@ -1,5 +1,8 @@
 package com.mohamedgara.ai_teaching_platform.courses.controller;
 
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
+import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
@@ -40,8 +43,15 @@ public class CourseController {
     }
 
     @PatchMapping("/{courseId}/title")
-    public ResponseEntity<CourseResponse> updateCourseTitle(@PathVariable UUID courseId, @RequestBody CourseTitleUpdateRequest courseTitleUpdateRequest){
+    public ResponseEntity<CourseResponse> updateCourseTitle(@PathVariable UUID courseId, @Valid @RequestBody CourseTitleUpdateRequest courseTitleUpdateRequest){
         CourseResponse courseResponse = courseService.updateCourseTitle(courseId,courseTitleUpdateRequest);
         return ResponseEntity.ok(courseResponse);
+    }
+
+    @PostMapping("/{courseId}/lesson")
+    public ResponseEntity<LessonResponse> createLesson(@PathVariable UUID courseId, @Valid @RequestBody CreateLessonRequest createLessonRequest){
+        LessonResponse lessonResponse = courseService.createLesson(courseId,createLessonRequest);
+        URI location  = URI.create("/api/lesson/"+ lessonResponse.id());
+        return ResponseEntity.created(location).body(lessonResponse);
     }
 }

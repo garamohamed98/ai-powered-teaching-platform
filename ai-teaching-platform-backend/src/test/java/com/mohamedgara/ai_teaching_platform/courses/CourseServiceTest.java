@@ -1,13 +1,19 @@
 package com.mohamedgara.ai_teaching_platform.courses;
 
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
+import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
+import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapper;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapperImpl;
+import com.mohamedgara.ai_teaching_platform.courses.mappers.LessonResponseMapper;
+import com.mohamedgara.ai_teaching_platform.courses.mappers.LessonResponseMapperImpl;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
+import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,8 +36,12 @@ public class CourseServiceTest {
 
     @Mock
     private CourseRepository courseRepository;
+    @Mock
+    private LessonRepository lessonRepository;
     @Spy
     private final CourseResponseMapper courseResponseMapper = new CourseResponseMapperImpl();
+    @Spy
+    private final LessonResponseMapper lessonResponseMapper = new LessonResponseMapperImpl();
     @InjectMocks
     private CourseService courseService;
 
@@ -215,6 +225,54 @@ public class CourseServiceTest {
         Assertions.assertThat(result).isFalse();
 
         Mockito.verify(courseRepository).existsById(courseId);
+    }
+
+    @Test
+    public void createLesson_shouldReturnLessonResponse_whenCourseExists(){
+        //Arrange
+        UUID courseId = UUID.randomUUID();
+        UUID lessonId = UUID.randomUUID();
+        Course course = Course.builder().id(courseId).title("Course Title").build();
+
+        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        Mockito.when(lessonRepository.save(Mockito.any(Lesson.class)))
+                .thenAnswer(invocationOnMock -> {
+                    Lesson lesson = invocationOnMock.getArgument(0);
+                    lesson.setId(lessonId);
+                    return lesson;
+                });
+
+        CreateLessonRequest createLessonRequest = new CreateLessonRequest("lesson title");
+
+        //Act
+        LessonResponse result = courseService.createLesson(courseId, createLessonRequest);
+
+        //Assert
+        Assertions.assertThat(result).isNotNull();
+        Assertions.assertThat(result.id()).isEqualTo(lessonId);
+        Assertions.assertThat(result.title()).isEqualTo(createLessonRequest.title());
+        Assertions.assertThat(result.courseId()).isEqualTo(courseId);
+
+        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(lessonRepository).save(Mockito.any(Lesson.class));
+        Mockito.verify(lessonResponseMapper).toLessonResponse(Mockito.any(Lesson.class));
+    }
+
+    @Test
+    public void createLesson_shouldThrowCourseNotFoundException_whenCourseDoesNotExist(){
+        //Arrange
+        UUID courseId = UUID.randomUUID();
+
+        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
+
+        CreateLessonRequest createLessonRequest = new CreateLessonRequest("lesson title");
+
+        //Act & Assert
+        assertThrows(CourseNotFoundException.class,
+                () -> courseService.createLesson(courseId, createLessonRequest));
+
+        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(lessonRepository, Mockito.never()).save(Mockito.any());
     }
 
 }
