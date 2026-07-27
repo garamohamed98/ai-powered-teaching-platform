@@ -1,11 +1,17 @@
-package com.mohamedgara.ai_teaching_platform.courses;
+package com.mohamedgara.ai_teaching_platform.courses.service;
 
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseContentUpdateRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
+import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
-import com.mohamedgara.ai_teaching_platform.courses.exceptions.CourseNotFoundException;
+import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
+import com.mohamedgara.ai_teaching_platform.courses.exception.CourseNotFoundException;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapper;
+import com.mohamedgara.ai_teaching_platform.courses.mappers.LessonResponseMapper;
+import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
+import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +24,8 @@ import java.util.UUID;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final CourseResponseMapper courseResponseMapper;
+    private final LessonRepository lessonRepository;
+    private final LessonResponseMapper lessonResponseMapper;
 
     public CourseResponse createCourse(CreateCourseRequest createCourseRequest){
         String courseTitle = createCourseRequest.title();
@@ -31,11 +39,6 @@ public class CourseService {
         return courseResponseMapper.toCourseListResponse(courseList);
     }
 
-    public CourseResponse getCourse(UUID id){
-        Course course = courseRepository.findById(id).orElseThrow(()-> new CourseNotFoundException());
-        return courseResponseMapper.toCourseResponse(course);
-    }
-
     @Transactional
     public void deleteCourse(UUID id){
         Course course = courseRepository.findById(id).orElseThrow(()-> new CourseNotFoundException());
@@ -43,11 +46,11 @@ public class CourseService {
     }
 
     @Transactional
-    public CourseResponse updateCourseContent (UUID courseId, CourseContentUpdateRequest courseContentUpdateRequest){
+    public CourseResponse updateCourseTitle (UUID courseId, CourseTitleUpdateRequest courseTitleUpdateRequest){
         Course course = courseRepository.findById(courseId).orElseThrow(()-> new CourseNotFoundException());
-        String courseContent = courseContentUpdateRequest.content();
+        String courseTitle = courseTitleUpdateRequest.title();
 
-        course.setContent(courseContent);
+        course.setTitle(courseTitle);
         Course updatedCourse = courseRepository.save(course);
         return courseResponseMapper.toCourseResponse(updatedCourse);
     }
@@ -56,4 +59,17 @@ public class CourseService {
         return courseRepository.existsById(courseId);
     }
 
+    public LessonResponse createLesson(UUID courseId, CreateLessonRequest createLessonRequest) {
+        Course course = courseRepository.findById(courseId).orElseThrow(()-> new CourseNotFoundException());
+        String lessonTitle = createLessonRequest.title();
+
+        Lesson lesson = Lesson.builder()
+                .course(course)
+                .title(lessonTitle)
+                .build();
+
+        Lesson savedLesson = lessonRepository.save(lesson);
+        return lessonResponseMapper.toLessonResponse(savedLesson);
+
+    }
 }

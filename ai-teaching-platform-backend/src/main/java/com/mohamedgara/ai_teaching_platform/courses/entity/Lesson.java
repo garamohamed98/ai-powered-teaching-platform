@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -14,8 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "courses")
-public class Course {
+@Table(name = "lessons")
+public class Lesson {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -23,7 +22,10 @@ public class Course {
     @Column(nullable = false, length = 50)
     private String title;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Lesson> lessons;
+    @Column(columnDefinition = "TEXT")
+    private String content;
 
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
 }

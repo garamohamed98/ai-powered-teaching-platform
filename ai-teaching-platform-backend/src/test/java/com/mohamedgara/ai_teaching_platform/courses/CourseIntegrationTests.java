@@ -1,7 +1,10 @@
 package com.mohamedgara.ai_teaching_platform.courses;
 
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
+import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
+import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.mohamedgara.ai_teaching_platform.TestcontainersConfiguration;
 import org.springframework.http.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseContentUpdateRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
 
 import java.util.UUID;
 
@@ -33,6 +36,9 @@ public class CourseIntegrationTests {
 
     @Autowired
     private CourseRepository courseRepository;
+
+    @Autowired
+    private LessonRepository lessonRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -88,25 +94,6 @@ public class CourseIntegrationTests {
     }
 
     @Test
-    void getCourse_shouldReturnCourseWhenFound() throws Exception {
-        Course saved = courseRepository.save(Course.builder().title("Java Basics").build());
-
-        mockMvc.perform(get("/api/course/{id}", saved.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(saved.getId().toString()))
-                .andExpect(jsonPath("$.title").value("Java Basics"));
-    }
-
-    @Test
-    void getCourse_shouldReturn404WhenNotFound() throws Exception {
-        UUID randomId = UUID.randomUUID();
-
-        mockMvc.perform(get("/api/course/{id}", randomId))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("SERVICE_NOT_FOUND"));
-    }
-
-    @Test
     void deleteCourse_shouldRemoveCourseWhenFound() throws Exception {
         Course saved = courseRepository.save(Course.builder().title("To Delete").build());
 
@@ -125,26 +112,78 @@ public class CourseIntegrationTests {
     }
 
     @Test
-    void updateCourseContent_shouldUpdateContentWhenFound() throws Exception {
+    void updateCourseTitle_shouldUpdateContentWhenFound() throws Exception {
         Course saved = courseRepository.save(Course.builder().title("Spring Data JPA").build());
-        CourseContentUpdateRequest request = new CourseContentUpdateRequest("New lesson content here");
+        CourseTitleUpdateRequest request = new CourseTitleUpdateRequest("New course title here");
 
-        mockMvc.perform(patch("/api/course/{courseId}/content", saved.getId())
+        mockMvc.perform(patch("/api/course/{courseId}/title", saved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value("New lesson content here"));
+                .andExpect(jsonPath("$.title").value("New course title here"));
 
         Course updated = courseRepository.findById(saved.getId()).orElseThrow();
-        assert updated.getContent().equals("New lesson content here");
+        assert updated.getTitle().equals("New course title here");
     }
 
     @Test
-    void updateCourseContent_shouldReturn404WhenNotFound() throws Exception {
+    void updateCourseTitle_shouldReturn404WhenNotFound() throws Exception {
         UUID randomId = UUID.randomUUID();
-        CourseContentUpdateRequest request = new CourseContentUpdateRequest("Some content");
+        CourseTitleUpdateRequest request = new CourseTitleUpdateRequest("Some title");
 
         mockMvc.perform(patch("/api/course/{courseId}/content", randomId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createLesson_shouldReturn201AndPersistLesson() throws Exception {
+        Course saved = courseRepository.save(Course.builder().title("Spring Boot Course").build());
+        CreateLessonRequest request = new CreateLessonRequest("Introduction to Controllers");
+
+        mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("location"))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title").value("Introduction to Controllers"))
+                .andExpect(jsonPath("$.course_id").value(saved.getId().toString()));
+
+        assert lessonRepository.count() == 1;
+    }
+
+    @Test
+    void createLesson_shouldReturn400WhenTitleIsBlank() throws Exception {
+        Course saved = courseRepository.save(Course.builder().title("Spring Boot Course").build());
+        CreateLessonRequest request = new CreateLessonRequest("");
+
+        mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        assert lessonRepository.count() == 0;
+    }
+
+    @Test
+    void createLesson_shouldReturn400WhenTitleTooShort() throws Exception {
+        Course saved = courseRepository.save(Course.builder().title("Spring Boot Course").build());
+        CreateLessonRequest request = new CreateLessonRequest("ab");
+
+        mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createLesson_shouldReturn404WhenCourseNotFound() throws Exception {
+        UUID randomId = UUID.randomUUID();
+        CreateLessonRequest request = new CreateLessonRequest("Introduction to Controllers");
+
+        mockMvc.perform(post("/api/course/{courseId}/lesson", randomId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());

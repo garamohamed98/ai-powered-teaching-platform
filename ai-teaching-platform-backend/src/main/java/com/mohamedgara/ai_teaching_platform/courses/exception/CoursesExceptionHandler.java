@@ -1,4 +1,4 @@
-package com.mohamedgara.ai_teaching_platform.courses.exceptions;
+package com.mohamedgara.ai_teaching_platform.courses.exception;
 
 import com.mohamedgara.ai_teaching_platform.exception.ErrorResponse;
 import org.springframework.http.HttpStatus;

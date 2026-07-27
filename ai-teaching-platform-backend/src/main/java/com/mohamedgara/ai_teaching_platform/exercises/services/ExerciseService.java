@@ -2,7 +2,7 @@ package com.mohamedgara.ai_teaching_platform.exercises.services;
 
 
 import com.mohamedgara.ai_teaching_platform.AI.services.ExerciseGeneratorService;
-import com.mohamedgara.ai_teaching_platform.courses.CourseService;
+import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
