@@ -4,6 +4,7 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequ
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
+import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponseSummary;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapper;
@@ -273,6 +274,76 @@ public class CourseServiceTest {
 
         Mockito.verify(courseRepository).findById(courseId);
         Mockito.verify(lessonRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
+    public void getCourseLessonList_shouldReturnLessonResponseSummaryList_whenCourseExistsAndLessonsExist(){
+        //Arrange
+        UUID courseId = UUID.randomUUID();
+        UUID lessonId1 = UUID.randomUUID();
+        UUID lessonId2 = UUID.randomUUID();
+        Course course = Course.builder().id(courseId).title("Course Title").build();
+
+        Lesson lesson1 = Lesson.builder().id(lessonId1).title("Lesson 1").course(course).build();
+        Lesson lesson2 = Lesson.builder().id(lessonId2).title("Lesson 2").course(course).build();
+        List<Lesson> lessonList = List.of(lesson1, lesson2);
+
+        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        Mockito.when(lessonRepository.findByCourseId(courseId)).thenReturn(lessonList);
+
+        //Act
+        List<LessonResponseSummary> result = courseService.getCourseLessonList(courseId);
+
+        //Assert
+        Assertions.assertThat(result).isNotNull();
+        Assertions.assertThat(result).hasSize(2);
+        Assertions.assertThat(result.get(0).id()).isEqualTo(lessonId1);
+        Assertions.assertThat(result.get(0).title()).isEqualTo("Lesson 1");
+        Assertions.assertThat(result.get(0).courseId()).isEqualTo(courseId);
+        Assertions.assertThat(result.get(1).id()).isEqualTo(lessonId2);
+        Assertions.assertThat(result.get(1).title()).isEqualTo("Lesson 2");
+        Assertions.assertThat(result.get(1).courseId()).isEqualTo(courseId);
+
+        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(lessonRepository).findByCourseId(courseId);
+        Mockito.verify(lessonResponseMapper).toLessonResponseSummaryList(lessonList);
+    }
+
+    @Test
+    public void getCourseLessonList_shouldReturnEmptyList_whenCourseExistsButNoLessonsExist(){
+        //Arrange
+        UUID courseId = UUID.randomUUID();
+        Course course = Course.builder().id(courseId).title("Course Title").build();
+        List<Lesson> emptyList = List.of();
+
+        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        Mockito.when(lessonRepository.findByCourseId(courseId)).thenReturn(emptyList);
+
+        //Act
+        List<LessonResponseSummary> result = courseService.getCourseLessonList(courseId);
+
+        //Assert
+        Assertions.assertThat(result).isNotNull();
+        Assertions.assertThat(result).isEmpty();
+
+        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(lessonRepository).findByCourseId(courseId);
+        Mockito.verify(lessonResponseMapper).toLessonResponseSummaryList(emptyList);
+    }
+
+    @Test
+    public void getCourseLessonList_shouldThrowCourseNotFoundException_whenCourseDoesNotExist(){
+        //Arrange
+        UUID courseId = UUID.randomUUID();
+
+        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
+
+        //Act & Assert
+        assertThrows(CourseNotFoundException.class,
+                () -> courseService.getCourseLessonList(courseId));
+
+        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(lessonRepository, Mockito.never()).findByCourseId(Mockito.any());
     }
 
 }
