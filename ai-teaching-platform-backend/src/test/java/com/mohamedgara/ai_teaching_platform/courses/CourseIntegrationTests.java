@@ -3,6 +3,7 @@ package com.mohamedgara.ai_teaching_platform.courses;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
+import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
 import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import jakarta.transaction.Transactional;
@@ -186,6 +187,36 @@ public class CourseIntegrationTests {
         mockMvc.perform(post("/api/course/{courseId}/lesson", randomId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCourseLessonList_shouldReturnAllLessonsForCourse() throws Exception {
+        Course saved = courseRepository.save(Course.builder().title("Spring Boot Course").build());
+        lessonRepository.save(Lesson.builder().title("Lesson 1").course(saved).build());
+        lessonRepository.save(Lesson.builder().title("Lesson 2").course(saved).build());
+
+        mockMvc.perform(get("/api/course/{courseId}/lesson", saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[*].title", containsInAnyOrder("Lesson 1", "Lesson 2")))
+                .andExpect(jsonPath("$[*].course_id", containsInAnyOrder(saved.getId().toString(), saved.getId().toString())));
+    }
+
+    @Test
+    void getCourseLessonList_shouldReturnEmptyListWhenNoLessonsExist() throws Exception {
+        Course saved = courseRepository.save(Course.builder().title("Empty Course").build());
+
+        mockMvc.perform(get("/api/course/{courseId}/lesson", saved.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    void getCourseLessonList_shouldReturn404WhenCourseNotFound() throws Exception {
+        UUID randomId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/course/{courseId}/lesson", randomId))
                 .andExpect(status().isNotFound());
     }
 }
