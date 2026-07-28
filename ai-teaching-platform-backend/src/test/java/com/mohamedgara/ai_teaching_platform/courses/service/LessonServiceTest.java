@@ -1,5 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.courses.service;
 
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.LessonContentUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.LessonTitleUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
@@ -37,6 +38,7 @@ public class LessonServiceTest {
     private UUID lessonId;
     private Lesson lesson;
     private LessonTitleUpdateRequest request;
+    private LessonContentUpdateRequest contentRequest;
     private Course course;
 
     @BeforeEach
@@ -52,6 +54,7 @@ public class LessonServiceTest {
                 .course(course)
                 .build();
         request = new LessonTitleUpdateRequest("New Title");
+        contentRequest = new LessonContentUpdateRequest("New content");
     }
 
     @Test
@@ -112,5 +115,65 @@ public class LessonServiceTest {
 
         assertThrows(LessonNotFoundException.class,
                 () -> lessonService.updateLessonTitle(invalidId, request));
+    }
+
+    @Test
+    void updateLessonContent_shouldUpdateContentAndReturnResponse() {
+        LessonResponse expectedResponse = new LessonResponse(lessonId, "Old Title", "New content", course.getId());
+
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
+        when(lessonRepository.save(any(Lesson.class))).thenReturn(lesson);
+        when(lessonResponseMapper.toLessonResponse(lesson)).thenReturn(expectedResponse);
+
+        LessonResponse response = lessonService.updateLessonContent(lessonId, contentRequest);
+
+        assertNotNull(response);
+        assertEquals("New content", response.content());
+        assertEquals(lessonId, response.id());
+        assertEquals("Old Title", response.title());
+        assertEquals(course.getId(), response.courseId());
+
+        verify(lessonRepository).findById(lessonId);
+        verify(lessonRepository).save(lesson);
+        verify(lessonResponseMapper).toLessonResponse(lesson);
+    }
+
+    @Test
+    void updateLessonContent_shouldSetNewContentOnLesson() {
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
+        when(lessonRepository.save(any(Lesson.class))).thenAnswer(invocation -> {
+            Lesson saved = invocation.getArgument(0);
+            assertEquals("New content", saved.getContent());
+            return saved;
+        });
+        when(lessonResponseMapper.toLessonResponse(any(Lesson.class)))
+                .thenReturn(new LessonResponse(lessonId, "Old Title", "New content", course.getId()));
+
+        lessonService.updateLessonContent(lessonId, contentRequest);
+
+        assertEquals("New content", lesson.getContent());
+    }
+
+    @Test
+    void updateLessonContent_shouldThrowLessonNotFoundException_whenLessonDoesNotExist() {
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.empty());
+
+        LessonNotFoundException exception = assertThrows(LessonNotFoundException.class,
+                () -> lessonService.updateLessonContent(lessonId, contentRequest));
+
+        assertEquals("Lesson not Found", exception.getMessage());
+
+        verify(lessonRepository).findById(lessonId);
+        verify(lessonRepository, never()).save(any());
+        verify(lessonResponseMapper, never()).toLessonResponse(any());
+    }
+
+    @Test
+    void updateLessonContent_shouldReturnLessonNotFoundForAnyInvalidId() {
+        UUID invalidId = UUID.randomUUID();
+        when(lessonRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        assertThrows(LessonNotFoundException.class,
+                () -> lessonService.updateLessonContent(invalidId, contentRequest));
     }
 }
