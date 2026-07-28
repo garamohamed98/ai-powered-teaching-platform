@@ -142,4 +142,23 @@ public class LessonIntegrationTests {
         mockMvc.perform(get("/api/lesson/{lessonId}", randomId))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void deleteLesson_shouldRemoveLessonWhenFound() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").content("Some content").course(savedCourse).build());
+
+        mockMvc.perform(delete("/api/lesson/{lessonId}", savedLesson.getId()))
+                .andExpect(status().isNoContent());
+
+        assert lessonRepository.count() == 0;
+    }
+
+    @Test
+    void deleteLesson_shouldReturn404WhenNotFound() throws Exception {
+        UUID randomId = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/lesson/{lessonId}", randomId))
+                .andExpect(status().isNotFound());
+    }
 }
