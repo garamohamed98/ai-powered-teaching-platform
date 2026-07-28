@@ -20,4 +20,15 @@ public class CoursesExceptionHandler {
                 .build();
         return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
     }
+
+    @ExceptionHandler(LessonNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLessonNotFound(LessonNotFoundException exception){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error("LESSON_NOT_FOUND")
+                .message(exception.getMessage())
+                .status(HttpStatus.NOT_FOUND)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
 }

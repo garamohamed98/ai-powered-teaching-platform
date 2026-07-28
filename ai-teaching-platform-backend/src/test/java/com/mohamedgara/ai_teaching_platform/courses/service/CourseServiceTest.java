@@ -1,4 +1,4 @@
-package com.mohamedgara.ai_teaching_platform.courses;
+package com.mohamedgara.ai_teaching_platform.courses.service;
 
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
