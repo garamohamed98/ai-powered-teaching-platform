@@ -121,4 +121,25 @@ public class LessonIntegrationTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void getLesson_shouldReturnLessonWhenFound() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").content("Some content").course(savedCourse).build());
+
+        mockMvc.perform(get("/api/lesson/{lessonId}", savedLesson.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.title").value("Lesson Title"))
+                .andExpect(jsonPath("$.content").value("Some content"))
+                .andExpect(jsonPath("$.course_id").value(savedCourse.getId().toString()));
+    }
+
+    @Test
+    void getLesson_shouldReturn404WhenNotFound() throws Exception {
+        UUID randomId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/lesson/{lessonId}", randomId))
+                .andExpect(status().isNotFound());
+    }
 }
