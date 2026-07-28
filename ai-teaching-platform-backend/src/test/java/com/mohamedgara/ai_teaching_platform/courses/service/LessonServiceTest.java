@@ -176,4 +176,45 @@ public class LessonServiceTest {
         assertThrows(LessonNotFoundException.class,
                 () -> lessonService.updateLessonContent(invalidId, contentRequest));
     }
+
+    @Test
+    void getLessonById_shouldReturnLessonResponse_whenLessonExists() {
+        LessonResponse expectedResponse = new LessonResponse(lessonId, "Old Title", "Some content", course.getId());
+
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.of(lesson));
+        when(lessonResponseMapper.toLessonResponse(lesson)).thenReturn(expectedResponse);
+
+        LessonResponse response = lessonService.getLessonById(lessonId);
+
+        assertNotNull(response);
+        assertEquals(lessonId, response.id());
+        assertEquals("Old Title", response.title());
+        assertEquals("Some content", response.content());
+        assertEquals(course.getId(), response.courseId());
+
+        verify(lessonRepository).findById(lessonId);
+        verify(lessonResponseMapper).toLessonResponse(lesson);
+    }
+
+    @Test
+    void getLessonById_shouldThrowLessonNotFoundException_whenLessonDoesNotExist() {
+        when(lessonRepository.findById(lessonId)).thenReturn(Optional.empty());
+
+        LessonNotFoundException exception = assertThrows(LessonNotFoundException.class,
+                () -> lessonService.getLessonById(lessonId));
+
+        assertEquals("Lesson not Found", exception.getMessage());
+
+        verify(lessonRepository).findById(lessonId);
+        verify(lessonResponseMapper, never()).toLessonResponse(any());
+    }
+
+    @Test
+    void getLessonById_shouldReturnLessonNotFoundForAnyInvalidId() {
+        UUID invalidId = UUID.randomUUID();
+        when(lessonRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        assertThrows(LessonNotFoundException.class,
+                () -> lessonService.getLessonById(invalidId));
+    }
 }

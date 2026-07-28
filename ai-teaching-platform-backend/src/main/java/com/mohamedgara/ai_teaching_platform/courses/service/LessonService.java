@@ -34,4 +34,10 @@ public class LessonService {
 
         return lessonResponseMapper.toLessonResponse(savedLesson);
     }
+
+    public LessonResponse getLessonById(UUID lessonId){
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()->new LessonNotFoundException());
+
+        return lessonResponseMapper.toLessonResponse(lesson);
+    }
 }

@@ -36,4 +36,12 @@ public class LessonController {
         return ResponseEntity.ok(lessonResponse);
     }
 
+    @GetMapping("/{lessonId}")
+    public ResponseEntity<LessonResponse> getLesson(
+            @PathVariable UUID lessonId
+    ){
+        LessonResponse lessonResponse = lessonService.getLessonById(lessonId);
+        return ResponseEntity.ok(lessonResponse);
+    }
+
 }
