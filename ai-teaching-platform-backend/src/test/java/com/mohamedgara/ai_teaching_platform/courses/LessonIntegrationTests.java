@@ -1,5 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.courses;
 
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.LessonContentUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.LessonTitleUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
@@ -90,5 +91,34 @@ public class LessonIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateLessonContent_shouldUpdateContentWhenFound() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").content("Old content").course(savedCourse).build());
+        LessonContentUpdateRequest request = new LessonContentUpdateRequest("New content here");
+
+        mockMvc.perform(patch("/api/lesson/{lessonId}/content", savedLesson.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value("New content here"))
+                .andExpect(jsonPath("$.id").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.course_id").value(savedCourse.getId().toString()));
+
+        Lesson updated = lessonRepository.findById(savedLesson.getId()).orElseThrow();
+        assert updated.getContent().equals("New content here");
+    }
+
+    @Test
+    void updateLessonContent_shouldReturn404WhenNotFound() throws Exception {
+        UUID randomId = UUID.randomUUID();
+        LessonContentUpdateRequest request = new LessonContentUpdateRequest("Some content");
+
+        mockMvc.perform(patch("/api/lesson/{lessonId}/content", randomId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
     }
 }
