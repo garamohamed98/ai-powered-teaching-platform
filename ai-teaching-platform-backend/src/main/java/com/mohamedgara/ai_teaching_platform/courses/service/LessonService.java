@@ -40,4 +40,9 @@ public class LessonService {
 
         return lessonResponseMapper.toLessonResponse(lesson);
     }
+
+    public void deleteLesson(UUID lessonId){
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()->new LessonNotFoundException());
+        lessonRepository.delete(lesson);
+    }
 }

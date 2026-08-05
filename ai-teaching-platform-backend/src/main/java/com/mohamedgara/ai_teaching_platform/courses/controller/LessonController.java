@@ -44,4 +44,10 @@ public class LessonController {
         return ResponseEntity.ok(lessonResponse);
     }
 
+    @DeleteMapping("/{lessonId}")
+    public ResponseEntity<Void> deleteCourse(@PathVariable UUID lessonId){
+        lessonService.deleteLesson(lessonId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
