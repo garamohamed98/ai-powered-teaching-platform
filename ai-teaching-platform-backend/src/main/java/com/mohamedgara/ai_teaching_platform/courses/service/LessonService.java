@@ -45,4 +45,8 @@ public class LessonService {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()->new LessonNotFoundException());
         lessonRepository.delete(lesson);
     }
+
+    public boolean lessonExists(UUID lessonId){
+        return lessonRepository.existsById(lessonId);
+    }
 }

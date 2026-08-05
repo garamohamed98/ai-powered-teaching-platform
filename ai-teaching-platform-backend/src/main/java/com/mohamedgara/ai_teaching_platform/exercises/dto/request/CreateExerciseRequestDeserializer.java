@@ -22,7 +22,7 @@ public class CreateExerciseRequestDeserializer extends StdDeserializer<CreateExe
     public CreateExerciseRequest deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
         JsonNode root = p.readValueAsTree();
 
-        UUID courseId        = ctx.readTreeAsValue(root.get("course_id"), UUID.class);
+        UUID lessonId        = ctx.readTreeAsValue(root.get("lesson_id"), UUID.class);
         ExerciseType type    = ctx.readTreeAsValue(root.get("type"), ExerciseType.class);
         String title         = ctx.readTreeAsValue(root.get("title"), String.class);
         String instructions  = ctx.readTreeAsValue(root.get("instructions"), String.class);
@@ -34,6 +34,6 @@ public class CreateExerciseRequestDeserializer extends StdDeserializer<CreateExe
             case FILL_IN_BLANK   -> ctx.readTreeAsValue(contentNode, FillInBlankContent.class);
         };
 
-        return new CreateExerciseRequest(courseId, type, title, instructions,correctAnswers, content);
+        return new CreateExerciseRequest(lessonId, type, title, instructions,correctAnswers, content);
     }
 }

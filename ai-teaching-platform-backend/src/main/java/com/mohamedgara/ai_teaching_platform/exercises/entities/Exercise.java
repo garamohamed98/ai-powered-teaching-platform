@@ -26,7 +26,7 @@ public class Exercise {
     private UUID id;
 
     @Column(nullable = false)
-    private UUID courseId;
+    private UUID lessonId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

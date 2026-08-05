@@ -249,4 +249,38 @@ public class LessonServiceTest {
         assertThrows(LessonNotFoundException.class,
                 () -> lessonService.deleteLesson(invalidId));
     }
+
+    @Test
+    void lessonExists_shouldReturnTrue_whenLessonExists() {
+        when(lessonRepository.existsById(lessonId)).thenReturn(true);
+
+        boolean exists = lessonService.lessonExists(lessonId);
+
+        assertTrue(exists);
+
+        verify(lessonRepository).existsById(lessonId);
+    }
+
+    @Test
+    void lessonExists_shouldReturnFalse_whenLessonDoesNotExist() {
+        when(lessonRepository.existsById(lessonId)).thenReturn(false);
+
+        boolean exists = lessonService.lessonExists(lessonId);
+
+        assertFalse(exists);
+
+        verify(lessonRepository).existsById(lessonId);
+    }
+
+    @Test
+    void lessonExists_shouldReturnFalseForAnyInvalidId() {
+        UUID invalidId = UUID.randomUUID();
+        when(lessonRepository.existsById(invalidId)).thenReturn(false);
+
+        boolean exists = lessonService.lessonExists(invalidId);
+
+        assertFalse(exists);
+
+        verify(lessonRepository).existsById(invalidId);
+    }
 }

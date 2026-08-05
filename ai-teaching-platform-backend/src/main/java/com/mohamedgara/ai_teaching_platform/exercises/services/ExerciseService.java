@@ -2,7 +2,7 @@ package com.mohamedgara.ai_teaching_platform.exercises.services;
 
 
 import com.mohamedgara.ai_teaching_platform.AI.services.ExerciseGeneratorService;
-import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
+import com.mohamedgara.ai_teaching_platform.courses.service.LessonService;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
@@ -27,11 +27,11 @@ public class ExerciseService {
     private final ExerciseRequestMapper exerciseRequestMapper;
     private final ExerciseResponseMapper exerciseResponseMapper;
     private final ExerciseGeneratorService exerciseGeneratorService;
-    private final CourseService courseService;
+    private final LessonService lessonService;
 
 
     public CreateExerciseResponse createExercise(CreateExerciseRequest createExerciseRequest){
-        if(!courseService.courseExists(createExerciseRequest.courseId())){
+        if(!lessonService.lessonExists(createExerciseRequest.lessonId())){
             throw new CourseNotFoundException();
         }
         Exercise exercise = exerciseRequestMapper.toExercise(createExerciseRequest);
