@@ -13,7 +13,7 @@ import java.util.UUID;
 @JsonDeserialize(using = CreateExerciseRequestDeserializer.class)
 public record CreateExerciseRequest(
         @NotNull
-        UUID courseId,
+        UUID lessonId,
         @NotNull
         @JsonProperty(value = "type", access = JsonProperty.Access.READ_ONLY)
         ExerciseType type,
