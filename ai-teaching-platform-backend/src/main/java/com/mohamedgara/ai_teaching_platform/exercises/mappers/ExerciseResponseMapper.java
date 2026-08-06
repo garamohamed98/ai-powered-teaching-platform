@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.ExerciseContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.FillInBlankContent;
@@ -15,6 +16,8 @@ import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 
 @Mapper(componentModel = "spring")
@@ -34,7 +37,25 @@ public abstract class ExerciseResponseMapper {
     )
     public abstract ExerciseResponse toExerciseResponse(Exercise exercise);
 
-    public abstract List<ExerciseResponse> toExerciseListResponse(List<Exercise> exercises);
+    public List<ExerciseSummaryResponse> toExerciseListResponse(
+            List<Exercise> exercises,
+            Map<UUID, String > lessonTitlesById
+    ){
+        return exercises.stream()
+                .map(exercise -> {
+                    UUID lessonId = exercise.getLessonId();
+
+                    return new ExerciseSummaryResponse(
+                            exercise.getId(),
+                            exercise.getTitle(),
+                            exercise.getType(),
+                            new ExerciseSummaryResponse.LessonSummaryResponse(
+                                    lessonId,
+                                    lessonTitlesById.get(lessonId)
+                            )
+                    );
+                }).toList();
+    };
 
     protected ExerciseContent toContentResponse(ExerciseType type, JsonNode content) {
         return switch (type) {

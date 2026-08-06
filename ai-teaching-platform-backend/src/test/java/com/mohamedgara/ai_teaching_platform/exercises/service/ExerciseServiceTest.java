@@ -8,6 +8,7 @@ import com.mohamedgara.ai_teaching_platform.courses.service.LessonService;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.MultipleChoiceContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.CourseNotFoundException;
@@ -22,7 +23,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,6 +57,7 @@ public class ExerciseServiceTest {
 
     private UUID lessonId;
     private UUID exerciseId;
+    private UUID courseId;
     private JsonNode contentJson;
     private Exercise exercise;
     private CreateExerciseRequest createRequest;
@@ -64,6 +68,7 @@ public class ExerciseServiceTest {
         objectMapper = new ObjectMapper();
         lessonId = UUID.randomUUID();
         exerciseId = UUID.randomUUID();
+        courseId = UUID.randomUUID();
         ObjectNode contentNode = objectMapper.createObjectNode();
         contentNode.put("question", "What is 2+2?");
         contentNode.put("correctAnswer", "4");
@@ -157,5 +162,71 @@ public class ExerciseServiceTest {
         verify(exerciseGeneratorService).generateExerciseAnswer(contentJson);
         verify(exerciseRepository).save(exercise);
         verify(exerciseResponseMapper).toCreateExerciseResponse(exercise);
+    }
+
+    @Test
+    void getExercises_shouldReturnExerciseListResponse_whenCourseHasLessonsAndExercisesExist() {
+        Map<UUID, String> lessonsIdAndTitleList = Map.of(lessonId, "Lesson Title");
+        List<Exercise> exerciseList = List.of(exercise);
+        ExerciseSummaryResponse expectedResponse = new ExerciseSummaryResponse(
+                exerciseId, "Addition", ExerciseType.MULTIPLE_CHOICE,
+                new ExerciseSummaryResponse.LessonSummaryResponse(lessonId, "Lesson Title"));
+        List<ExerciseSummaryResponse> expectedList = List.of(expectedResponse);
+
+        when(lessonService.getLessonIdAndTitleListByCourseId(courseId)).thenReturn(lessonsIdAndTitleList);
+        when(exerciseRepository.findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()))).thenReturn(exerciseList);
+        when(exerciseResponseMapper.toExerciseListResponse(exerciseList, lessonsIdAndTitleList)).thenReturn(expectedList);
+
+        List<ExerciseSummaryResponse> result = exerciseService.getExercises(courseId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(exerciseId, result.get(0).id());
+        assertEquals("Addition", result.get(0).title());
+        assertEquals(ExerciseType.MULTIPLE_CHOICE, result.get(0).type());
+        assertEquals(lessonId, result.get(0).lesson().id());
+        assertEquals("Lesson Title", result.get(0).lesson().title());
+
+        verify(lessonService).getLessonIdAndTitleListByCourseId(courseId);
+        verify(exerciseRepository).findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()));
+        verify(exerciseResponseMapper).toExerciseListResponse(exerciseList, lessonsIdAndTitleList);
+    }
+
+    @Test
+    void getExercises_shouldReturnEmptyList_whenCourseHasNoLessons() {
+        Map<UUID, String> emptyMap = Map.of();
+        List<ExerciseSummaryResponse> emptyList = List.of();
+
+        when(lessonService.getLessonIdAndTitleListByCourseId(courseId)).thenReturn(emptyMap);
+        when(exerciseRepository.findExercises(new ArrayList<>(emptyMap.keySet()))).thenReturn(List.of());
+        when(exerciseResponseMapper.toExerciseListResponse(List.of(), emptyMap)).thenReturn(emptyList);
+
+        List<ExerciseSummaryResponse> result = exerciseService.getExercises(courseId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(lessonService).getLessonIdAndTitleListByCourseId(courseId);
+        verify(exerciseRepository).findExercises(new ArrayList<>(emptyMap.keySet()));
+        verify(exerciseResponseMapper).toExerciseListResponse(List.of(), emptyMap);
+    }
+
+    @Test
+    void getExercises_shouldReturnEmptyList_whenCourseHasLessonsButNoExercises() {
+        Map<UUID, String> lessonsIdAndTitleList = Map.of(lessonId, "Lesson Title");
+        List<ExerciseSummaryResponse> emptyList = List.of();
+
+        when(lessonService.getLessonIdAndTitleListByCourseId(courseId)).thenReturn(lessonsIdAndTitleList);
+        when(exerciseRepository.findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()))).thenReturn(List.of());
+        when(exerciseResponseMapper.toExerciseListResponse(List.of(), lessonsIdAndTitleList)).thenReturn(emptyList);
+
+        List<ExerciseSummaryResponse> result = exerciseService.getExercises(courseId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(lessonService).getLessonIdAndTitleListByCourseId(courseId);
+        verify(exerciseRepository).findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()));
+        verify(exerciseResponseMapper).toExerciseListResponse(List.of(), lessonsIdAndTitleList);
     }
 }

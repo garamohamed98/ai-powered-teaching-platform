@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -169,5 +170,75 @@ public class ExerciseIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getExercises_shouldReturnExerciseSummaryList_whenCourseHasLessonsWithExercises() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
+        Exercise savedExercise = exerciseRepository.save(Exercise.builder()
+                .lessonId(savedLesson.getId())
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Addition")
+                .instructions("Choose the correct answer")
+                .content(objectMapper.valueToTree(Map.of(
+                        "question", "What is 2+2?",
+                        "options", List.of("4", "5"),
+                        "correctAnswer", "4")))
+                .build());
+
+        mockMvc.perform(get("/api/exercise/course/{courseId}", savedCourse.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(savedExercise.getId().toString()))
+                .andExpect(jsonPath("$[0].title").value("Addition"))
+                .andExpect(jsonPath("$[0].type").value("MULTIPLE_CHOICE"))
+                .andExpect(jsonPath("$[0].lesson.id").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$[0].lesson.title").value("Lesson Title"));
+    }
+
+    @Test
+    void getExercises_shouldReturnOnlyExercisesOfGivenCourse() throws Exception {
+        Course savedCourseOne = courseRepository.save(Course.builder().title("Course One").build());
+        Lesson savedLessonOne = lessonRepository.save(Lesson.builder().title("Lesson One").course(savedCourseOne).build());
+        Exercise savedExerciseOne = exerciseRepository.save(Exercise.builder()
+                .lessonId(savedLessonOne.getId())
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Exercise One")
+                .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
+                .build());
+        Course savedCourseTwo = courseRepository.save(Course.builder().title("Course Two").build());
+        Lesson savedLessonTwo = lessonRepository.save(Lesson.builder().title("Lesson Two").course(savedCourseTwo).build());
+        exerciseRepository.save(Exercise.builder()
+                .lessonId(savedLessonTwo.getId())
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Exercise Two")
+                .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
+                .build());
+
+        mockMvc.perform(get("/api/exercise/course/{courseId}", savedCourseOne.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(savedExerciseOne.getId().toString()))
+                .andExpect(jsonPath("$[0].title").value("Exercise One"))
+                .andExpect(jsonPath("$[0].lesson.id").value(savedLessonOne.getId().toString()));
+    }
+
+    @Test
+    void getExercises_shouldReturnEmptyList_whenCourseHasLessonsButNoExercises() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
+
+        mockMvc.perform(get("/api/exercise/course/{courseId}", savedCourse.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void getExercises_shouldReturnEmptyList_whenCourseDoesNotExist() throws Exception {
+        UUID randomCourseId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/exercise/course/{courseId}", randomCourseId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }
