@@ -279,4 +279,38 @@ public class ExerciseServiceTest {
 
         verify(exerciseRepository).findById(invalidId);
     }
+
+    @Test
+    void deleteExercise_shouldDeleteExercise_whenExerciseExists() {
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
+
+        exerciseService.deleteExercise(exerciseId);
+
+        verify(exerciseRepository).findById(exerciseId);
+        verify(exerciseRepository).delete(exercise);
+    }
+
+    @Test
+    void deleteExercise_shouldThrowExerciseNotFoundException_whenExerciseDoesNotExist() {
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.empty());
+
+        ExerciseNotFoundException exception = assertThrows(ExerciseNotFoundException.class,
+                () -> exerciseService.deleteExercise(exerciseId));
+
+        assertEquals("Exercise not Found", exception.getMessage());
+
+        verify(exerciseRepository).findById(exerciseId);
+        verify(exerciseRepository, never()).delete(any());
+    }
+
+    @Test
+    void deleteExercise_shouldThrowExerciseNotFoundExceptionForAnyInvalidId() {
+        UUID invalidId = UUID.randomUUID();
+        when(exerciseRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        assertThrows(ExerciseNotFoundException.class,
+                () -> exerciseService.deleteExercise(invalidId));
+
+        verify(exerciseRepository).findById(invalidId);
+    }
 }

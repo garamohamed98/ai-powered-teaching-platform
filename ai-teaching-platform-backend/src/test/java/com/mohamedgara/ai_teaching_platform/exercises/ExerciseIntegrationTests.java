@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -275,6 +276,31 @@ public class ExerciseIntegrationTests {
         UUID randomId = UUID.randomUUID();
 
         mockMvc.perform(get("/api/exercise/{id}", randomId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteExercise_shouldRemoveExerciseWhenFound() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
+        Exercise savedExercise = exerciseRepository.save(Exercise.builder()
+                .lessonId(savedLesson.getId())
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Addition")
+                .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
+                .build());
+
+        mockMvc.perform(delete("/api/exercise/{id}", savedExercise.getId()))
+                .andExpect(status().isNoContent());
+
+        assert exerciseRepository.count() == 0;
+    }
+
+    @Test
+    void deleteExercise_shouldReturn404WhenNotFound() throws Exception {
+        UUID randomId = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/exercise/{id}", randomId))
                 .andExpect(status().isNotFound());
     }
 }
