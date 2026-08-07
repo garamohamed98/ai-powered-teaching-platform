@@ -6,6 +6,7 @@ import com.mohamedgara.ai_teaching_platform.courses.service.LessonService;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.CourseNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.ExerciseNotFoundException;
@@ -16,7 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -47,9 +50,11 @@ public class ExerciseService {
         return exerciseResponseMapper.toCreateExerciseResponse(savedExercise);
     }
 
-    public List<ExerciseResponse> getExercises() {
-        List<Exercise> exerciseList = exerciseRepository.findAll();
-        return exerciseResponseMapper.toExerciseListResponse(exerciseList);
+    public List<ExerciseSummaryResponse> getExercises(UUID courseId) {
+        Map<UUID,String> lessonsIdAndTitleList = lessonService.getLessonIdAndTitleListByCourseId(courseId);
+        List<Exercise> exerciseList = exerciseRepository.findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()));
+
+        return exerciseResponseMapper.toExerciseListResponse(exerciseList, lessonsIdAndTitleList);
     }
 
     public ExerciseResponse getExercise(UUID id) {

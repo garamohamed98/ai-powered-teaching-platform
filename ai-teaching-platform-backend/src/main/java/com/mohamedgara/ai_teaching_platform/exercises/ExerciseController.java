@@ -3,6 +3,7 @@ package com.mohamedgara.ai_teaching_platform.exercises;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.services.ExerciseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +31,11 @@ public class ExerciseController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
-    public ResponseEntity<List<ExerciseResponse>> getExercises(){
-        List<ExerciseResponse> response = exerciseService.getExercises();
+    @GetMapping("course/{courseId}")
+    public ResponseEntity<List<ExerciseSummaryResponse>> getExercises(
+            @PathVariable UUID courseId
+    ){
+        List<ExerciseSummaryResponse> response = exerciseService.getExercises(courseId);
         return ResponseEntity.ok(response);
     }
 

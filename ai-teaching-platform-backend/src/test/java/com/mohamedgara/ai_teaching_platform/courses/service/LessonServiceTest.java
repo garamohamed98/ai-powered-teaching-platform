@@ -7,6 +7,7 @@ import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.exception.LessonNotFoundException;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.LessonResponseMapper;
+import com.mohamedgara.ai_teaching_platform.courses.projection.LessonTitle;
 import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import com.mohamedgara.ai_teaching_platform.courses.service.LessonService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,10 +35,14 @@ public class LessonServiceTest {
     @Mock
     private LessonResponseMapper lessonResponseMapper;
 
+    @Mock
+    private CourseService courseService;
+
     @InjectMocks
     private LessonService lessonService;
 
     private UUID lessonId;
+    private UUID courseId;
     private Lesson lesson;
     private LessonTitleUpdateRequest request;
     private LessonContentUpdateRequest contentRequest;
@@ -44,6 +51,7 @@ public class LessonServiceTest {
     @BeforeEach
     void setUp() {
         lessonId = UUID.randomUUID();
+        courseId = UUID.randomUUID();
         course = Course.builder()
                 .id(UUID.randomUUID())
                 .build();
@@ -282,5 +290,52 @@ public class LessonServiceTest {
         assertFalse(exists);
 
         verify(lessonRepository).existsById(invalidId);
+    }
+
+    @Test
+    void getLessonIdAndTitleListByCourseId_shouldReturnMapOfLessonIdsAndTitles_whenCourseExistsAndLessonsExist() {
+        LessonTitle lessonTitleOne = new LessonTitle(UUID.randomUUID(), "Lesson One");
+        LessonTitle lessonTitleTwo = new LessonTitle(UUID.randomUUID(), "Lesson Two");
+        List<LessonTitle> lessonTitles = List.of(lessonTitleOne, lessonTitleTwo);
+
+        when(courseService.courseExists(courseId)).thenReturn(true);
+        when(lessonRepository.findLessonIdAndTitleListByCourseId(courseId)).thenReturn(lessonTitles);
+
+        Map<UUID, String> result = lessonService.getLessonIdAndTitleListByCourseId(courseId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("Lesson One", result.get(lessonTitleOne.id()));
+        assertEquals("Lesson Two", result.get(lessonTitleTwo.id()));
+
+        verify(courseService).courseExists(courseId);
+        verify(lessonRepository).findLessonIdAndTitleListByCourseId(courseId);
+    }
+
+    @Test
+    void getLessonIdAndTitleListByCourseId_shouldReturnEmptyMap_whenCourseExistsButNoLessonsExist() {
+        when(courseService.courseExists(courseId)).thenReturn(true);
+        when(lessonRepository.findLessonIdAndTitleListByCourseId(courseId)).thenReturn(List.of());
+
+        Map<UUID, String> result = lessonService.getLessonIdAndTitleListByCourseId(courseId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(courseService).courseExists(courseId);
+        verify(lessonRepository).findLessonIdAndTitleListByCourseId(courseId);
+    }
+
+    @Test
+    void getLessonIdAndTitleListByCourseId_shouldReturnEmptyMap_whenCourseDoesNotExist() {
+        when(courseService.courseExists(courseId)).thenReturn(false);
+
+        Map<UUID, String> result = lessonService.getLessonIdAndTitleListByCourseId(courseId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(courseService).courseExists(courseId);
+        verify(lessonRepository, never()).findLessonIdAndTitleListByCourseId(any());
     }
 }

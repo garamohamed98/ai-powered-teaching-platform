@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public record ExerciseResponse(
         UUID id,
-        @JsonProperty("course_id")
-        UUID courseId,
+        @JsonProperty("lesson_id")
+        UUID lessonId,
         ExerciseType type,
         String title,
         String instructions,
