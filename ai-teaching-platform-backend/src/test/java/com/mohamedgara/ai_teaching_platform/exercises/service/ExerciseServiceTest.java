@@ -8,10 +8,12 @@ import com.mohamedgara.ai_teaching_platform.courses.service.LessonService;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.MultipleChoiceContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.CourseNotFoundException;
+import com.mohamedgara.ai_teaching_platform.exercises.exceptions.ExerciseNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseRequestMapper;
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseResponseMapper;
 import com.mohamedgara.ai_teaching_platform.exercises.repositories.ExerciseRepository;
@@ -26,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -120,7 +123,7 @@ public class ExerciseServiceTest {
 
         assertNotNull(response);
         assertEquals(exerciseId, response.id());
-        assertEquals(lessonId, response.courseId());
+        assertEquals(lessonId, response.lessonId());
         assertEquals(ExerciseType.MULTIPLE_CHOICE, response.type());
         assertEquals("Addition", response.title());
         assertEquals("Choose the correct answer", response.instructions());
@@ -154,7 +157,7 @@ public class ExerciseServiceTest {
 
         assertNotNull(response);
         assertEquals(exerciseId, response.id());
-        assertEquals(lessonId, response.courseId());
+        assertEquals(lessonId, response.lessonId());
         assertEquals(generatedContent, exercise.getContent());
 
         verify(lessonService).lessonExists(lessonId);
@@ -228,5 +231,52 @@ public class ExerciseServiceTest {
         verify(lessonService).getLessonIdAndTitleListByCourseId(courseId);
         verify(exerciseRepository).findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()));
         verify(exerciseResponseMapper).toExerciseListResponse(List.of(), lessonsIdAndTitleList);
+    }
+
+    @Test
+    void getExercise_shouldReturnExerciseResponse_whenExerciseExists() {
+        ExerciseResponse expectedResponse = new ExerciseResponse(
+                exerciseId, lessonId, ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                        "What is 2+2?", List.of("4", "5"), "4"));
+
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
+        when(exerciseResponseMapper.toExerciseResponse(exercise)).thenReturn(expectedResponse);
+
+        ExerciseResponse response = exerciseService.getExercise(exerciseId);
+
+        assertNotNull(response);
+        assertEquals(exerciseId, response.id());
+        assertEquals(lessonId, response.lessonId());
+        assertEquals(ExerciseType.MULTIPLE_CHOICE, response.type());
+        assertEquals("Addition", response.title());
+        assertEquals("Choose the correct answer", response.instructions());
+
+        verify(exerciseRepository).findById(exerciseId);
+        verify(exerciseResponseMapper).toExerciseResponse(exercise);
+    }
+
+    @Test
+    void getExercise_shouldThrowExerciseNotFoundException_whenExerciseDoesNotExist() {
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.empty());
+
+        ExerciseNotFoundException exception = assertThrows(ExerciseNotFoundException.class,
+                () -> exerciseService.getExercise(exerciseId));
+
+        assertEquals("Exercise not Found", exception.getMessage());
+
+        verify(exerciseRepository).findById(exerciseId);
+        verify(exerciseResponseMapper, never()).toExerciseResponse(any());
+    }
+
+    @Test
+    void getExercise_shouldThrowExerciseNotFoundExceptionForAnyInvalidId() {
+        UUID invalidId = UUID.randomUUID();
+        when(exerciseRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        assertThrows(ExerciseNotFoundException.class,
+                () -> exerciseService.getExercise(invalidId));
+
+        verify(exerciseRepository).findById(invalidId);
     }
 }

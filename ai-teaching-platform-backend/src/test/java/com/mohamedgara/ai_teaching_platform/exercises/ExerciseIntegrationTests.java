@@ -241,4 +241,40 @@ public class ExerciseIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());
     }
+
+    @Test
+    void getExercise_shouldReturnExerciseResponse_whenExerciseExists() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
+        Exercise savedExercise = exerciseRepository.save(Exercise.builder()
+                .lessonId(savedLesson.getId())
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Addition")
+                .instructions("Choose the correct answer")
+                .content(objectMapper.valueToTree(Map.of(
+                        "question", "What is 2+2?",
+                        "options", List.of("4", "5"),
+                        "correctAnswer", "4")))
+                .build());
+
+        mockMvc.perform(get("/api/exercise/{id}", savedExercise.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(savedExercise.getId().toString()))
+                .andExpect(jsonPath("$.lesson_id").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
+                .andExpect(jsonPath("$.title").value("Addition"))
+                .andExpect(jsonPath("$.instructions").value("Choose the correct answer"))
+                .andExpect(jsonPath("$.content.question").value("What is 2+2?"))
+                .andExpect(jsonPath("$.content.options[0]").value("4"))
+                .andExpect(jsonPath("$.content.options[1]").value("5"))
+                .andExpect(jsonPath("$.content.correctAnswer").value("4"));
+    }
+
+    @Test
+    void getExercise_shouldReturn404WhenNotFound() throws Exception {
+        UUID randomId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/exercise/{id}", randomId))
+                .andExpect(status().isNotFound());
+    }
 }

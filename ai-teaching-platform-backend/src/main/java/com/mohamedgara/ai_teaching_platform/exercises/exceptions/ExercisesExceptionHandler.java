@@ -21,6 +21,7 @@ public class ExercisesExceptionHandler {
         return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
     }
 
+    @ExceptionHandler(ExerciseNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleExerciseNotFound(ExerciseNotFoundException exception){
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .error("EXERCISE_NOT_FOUND")
