@@ -1,6 +1,7 @@
 package com.mohamedgara.ai_teaching_platform.exercises;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mohamedgara.ai_teaching_platform.AI.services.ExerciseGeneratorService;
 import com.mohamedgara.ai_teaching_platform.TestcontainersConfiguration;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.http.MediaType;
 
@@ -22,8 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -47,6 +52,9 @@ public class ExerciseIntegrationTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private ExerciseGeneratorService exerciseGeneratorService;
 
     @Test
     void createExercise_shouldCreateExerciseWhenValid() throws Exception {
@@ -301,6 +309,48 @@ public class ExerciseIntegrationTests {
         UUID randomId = UUID.randomUUID();
 
         mockMvc.perform(delete("/api/exercise/{id}", randomId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void correctExercise_shouldGenerateAnswersAndReturnUpdatedExerciseWhenFound() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
+        Exercise savedExercise = exerciseRepository.save(Exercise.builder()
+                .lessonId(savedLesson.getId())
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Addition")
+                .instructions("Choose the correct answer")
+                .content(objectMapper.valueToTree(Map.of(
+                        "question", "What is 2+2?",
+                        "options", List.of("4", "5"))))
+                .build());
+
+        when(exerciseGeneratorService.generateExerciseAnswer(any())).thenReturn(objectMapper.valueToTree(Map.of(
+                "question", "What is 2+2?",
+                "options", List.of("4", "5"),
+                "correctAnswer", "4")));
+
+        mockMvc.perform(patch("/api/exercise/{id}", savedExercise.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(savedExercise.getId().toString()))
+                .andExpect(jsonPath("$.lesson_id").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
+                .andExpect(jsonPath("$.title").value("Addition"))
+                .andExpect(jsonPath("$.content.question").value("What is 2+2?"))
+                .andExpect(jsonPath("$.content.options[0]").value("4"))
+                .andExpect(jsonPath("$.content.options[1]").value("5"))
+                .andExpect(jsonPath("$.content.correctAnswer").value("4"));
+
+        Exercise updated = exerciseRepository.findById(savedExercise.getId()).orElseThrow();
+        assert updated.getContent().get("correctAnswer").asText().equals("4");
+    }
+
+    @Test
+    void correctExercise_shouldReturn404WhenNotFound() throws Exception {
+        UUID randomId = UUID.randomUUID();
+
+        mockMvc.perform(patch("/api/exercise/{id}", randomId))
                 .andExpect(status().isNotFound());
     }
 }

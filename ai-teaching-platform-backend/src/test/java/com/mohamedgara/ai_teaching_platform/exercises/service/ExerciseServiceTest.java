@@ -313,4 +313,60 @@ public class ExerciseServiceTest {
 
         verify(exerciseRepository).findById(invalidId);
     }
+
+    @Test
+    void correctExercise_shouldGenerateAnswersSetContentAndReturnResponse_whenExerciseExists() {
+        ObjectNode generatedContentNode = objectMapper.createObjectNode();
+        generatedContentNode.put("question", "What is 2+2?");
+        generatedContentNode.put("correctAnswer", "4");
+        JsonNode generatedContent = generatedContentNode;
+
+        ExerciseResponse expectedResponse = new ExerciseResponse(
+                exerciseId, lessonId, ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                        "What is 2+2?", List.of("4", "5"), "4"));
+
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
+        when(exerciseGeneratorService.generateExerciseAnswer(contentJson)).thenReturn(generatedContent);
+        when(exerciseRepository.save(exercise)).thenReturn(exercise);
+        when(exerciseResponseMapper.toExerciseResponse(exercise)).thenReturn(expectedResponse);
+
+        ExerciseResponse response = exerciseService.correctExercise(exerciseId);
+
+        assertNotNull(response);
+        assertEquals(exerciseId, response.id());
+        assertEquals(lessonId, response.lessonId());
+        assertEquals(generatedContent, exercise.getContent());
+
+        verify(exerciseRepository).findById(exerciseId);
+        verify(exerciseGeneratorService).generateExerciseAnswer(contentJson);
+        verify(exerciseRepository).save(exercise);
+        verify(exerciseResponseMapper).toExerciseResponse(exercise);
+    }
+
+    @Test
+    void correctExercise_shouldThrowExerciseNotFoundException_whenExerciseDoesNotExist() {
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.empty());
+
+        ExerciseNotFoundException exception = assertThrows(ExerciseNotFoundException.class,
+                () -> exerciseService.correctExercise(exerciseId));
+
+        assertEquals("Exercise not Found", exception.getMessage());
+
+        verify(exerciseRepository).findById(exerciseId);
+        verify(exerciseGeneratorService, never()).generateExerciseAnswer(any());
+        verify(exerciseRepository, never()).save(any());
+        verify(exerciseResponseMapper, never()).toExerciseResponse(any());
+    }
+
+    @Test
+    void correctExercise_shouldThrowExerciseNotFoundExceptionForAnyInvalidId() {
+        UUID invalidId = UUID.randomUUID();
+        when(exerciseRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        assertThrows(ExerciseNotFoundException.class,
+                () -> exerciseService.correctExercise(invalidId));
+
+        verify(exerciseRepository).findById(invalidId);
+    }
 }
