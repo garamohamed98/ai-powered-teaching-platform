@@ -1,5 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.courses.service;
 
+import com.mohamedgara.ai_teaching_platform.courses.dto.LessonInfo;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.LessonContentUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.LessonTitleUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
@@ -7,6 +8,7 @@ import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.exception.LessonNotFoundException;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.LessonResponseMapper;
 import com.mohamedgara.ai_teaching_platform.courses.projection.LessonTitle;
+import com.mohamedgara.ai_teaching_platform.courses.projection.LessonTitleAndContent;
 import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -51,11 +53,11 @@ public class LessonService {
         lessonRepository.delete(lesson);
     }
 
-    public boolean lessonExists(UUID lessonId){
-        return lessonRepository.existsById(lessonId);
+    public boolean lessonListExists(List<UUID> lessonIdList){
+        return lessonRepository.countExistingLessons(lessonIdList) == lessonIdList.size();
     }
 
-    public Map<UUID, String> getLessonIdAndTitleListByCourseId(UUID courseId){
+    public Map<UUID, String> getLessonSummaryByCourseId(UUID courseId){
         if(!courseService.courseExists(courseId)){
             return Map.of();
         }
@@ -66,5 +68,34 @@ public class LessonService {
                         lesson -> lesson.id(),
                         lesson -> lesson.title()
                 ));
+    }
+
+    public List<LessonInfo> getCourseLessonInfoList(UUID courseId){
+        if(!courseService.courseExists(courseId)){
+            return List.of();
+        }
+        List<LessonTitleAndContent> result = lessonRepository.findLessonTitleAndContentByCourseId(courseId);
+
+        return result.stream()
+                .map(lesson->{
+                    return new LessonInfo(
+                            lesson.id(),
+                            lesson.title(),
+                            lesson.content()
+                    );
+                }).toList();
+    }
+
+    public List<LessonInfo> getLessonInfoList(List<UUID> lessonIdList){
+        List<LessonTitleAndContent> result = lessonRepository.findLessonTitleAndContentByLessonIdList(lessonIdList);
+
+        return result.stream()
+                .map(lesson->{
+                    return new LessonInfo(
+                            lesson.id(),
+                            lesson.title(),
+                            lesson.content()
+                    );
+                }).toList();
     }
 }

@@ -43,16 +43,18 @@ public abstract class ExerciseResponseMapper {
     ){
         return exercises.stream()
                 .map(exercise -> {
-                    UUID lessonId = exercise.getLessonId();
+                    List<UUID> lessonIdList = exercise.getLessonIdList();
 
                     return new ExerciseSummaryResponse(
                             exercise.getId(),
                             exercise.getTitle(),
                             exercise.getType(),
-                            new ExerciseSummaryResponse.LessonSummaryResponse(
-                                    lessonId,
-                                    lessonTitlesById.get(lessonId)
-                            )
+                            lessonIdList.stream().map(
+                                    lessonId -> new ExerciseSummaryResponse.LessonSummaryResponse(
+                                            lessonId,
+                                            lessonTitlesById.get(lessonId)
+                                    )
+                            ).toList()
                     );
                 }).toList();
     };

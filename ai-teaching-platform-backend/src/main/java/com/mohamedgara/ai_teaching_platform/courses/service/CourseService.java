@@ -5,7 +5,7 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequ
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
-import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponseSummary;
+import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.exception.CourseNotFoundException;
@@ -74,7 +74,7 @@ public class CourseService {
 
     }
 
-    public List<LessonResponseSummary> getCourseLessonList(UUID courseId) {
+    public List<LessonSummaryResponse> getCourseLessonList(UUID courseId) {
         courseRepository.findById(courseId).orElseThrow(()->new CourseNotFoundException());
         List<Lesson> lessonList = lessonRepository.findByCourseId(courseId);
 

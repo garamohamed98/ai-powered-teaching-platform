@@ -12,7 +12,7 @@ import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseRespo
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
-import com.mohamedgara.ai_teaching_platform.exercises.exceptions.CourseNotFoundException;
+import com.mohamedgara.ai_teaching_platform.exercises.exceptions.LessonNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.ExerciseNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseRequestMapper;
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseResponseMapper;
@@ -95,7 +95,7 @@ public class ExerciseServiceTest {
     void createExercise_shouldThrowCourseNotFoundException_whenLessonDoesNotExist() {
         when(lessonService.lessonExists(lessonId)).thenReturn(false);
 
-        CourseNotFoundException exception = assertThrows(CourseNotFoundException.class,
+        LessonNotFoundException exception = assertThrows(LessonNotFoundException.class,
                 () -> exerciseService.createExercise(createRequest));
 
         assertEquals("Course not Found", exception.getMessage());
@@ -176,7 +176,7 @@ public class ExerciseServiceTest {
                 new ExerciseSummaryResponse.LessonSummaryResponse(lessonId, "Lesson Title"));
         List<ExerciseSummaryResponse> expectedList = List.of(expectedResponse);
 
-        when(lessonService.getLessonIdAndTitleListByCourseId(courseId)).thenReturn(lessonsIdAndTitleList);
+        when(lessonService.getLessonSummaryByCourseId(courseId)).thenReturn(lessonsIdAndTitleList);
         when(exerciseRepository.findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()))).thenReturn(exerciseList);
         when(exerciseResponseMapper.toExerciseListResponse(exerciseList, lessonsIdAndTitleList)).thenReturn(expectedList);
 
@@ -190,7 +190,7 @@ public class ExerciseServiceTest {
         assertEquals(lessonId, result.get(0).lesson().id());
         assertEquals("Lesson Title", result.get(0).lesson().title());
 
-        verify(lessonService).getLessonIdAndTitleListByCourseId(courseId);
+        verify(lessonService).getLessonSummaryByCourseId(courseId);
         verify(exerciseRepository).findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()));
         verify(exerciseResponseMapper).toExerciseListResponse(exerciseList, lessonsIdAndTitleList);
     }
@@ -200,7 +200,7 @@ public class ExerciseServiceTest {
         Map<UUID, String> emptyMap = Map.of();
         List<ExerciseSummaryResponse> emptyList = List.of();
 
-        when(lessonService.getLessonIdAndTitleListByCourseId(courseId)).thenReturn(emptyMap);
+        when(lessonService.getLessonSummaryByCourseId(courseId)).thenReturn(emptyMap);
         when(exerciseRepository.findExercises(new ArrayList<>(emptyMap.keySet()))).thenReturn(List.of());
         when(exerciseResponseMapper.toExerciseListResponse(List.of(), emptyMap)).thenReturn(emptyList);
 
@@ -209,7 +209,7 @@ public class ExerciseServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
-        verify(lessonService).getLessonIdAndTitleListByCourseId(courseId);
+        verify(lessonService).getLessonSummaryByCourseId(courseId);
         verify(exerciseRepository).findExercises(new ArrayList<>(emptyMap.keySet()));
         verify(exerciseResponseMapper).toExerciseListResponse(List.of(), emptyMap);
     }
@@ -219,7 +219,7 @@ public class ExerciseServiceTest {
         Map<UUID, String> lessonsIdAndTitleList = Map.of(lessonId, "Lesson Title");
         List<ExerciseSummaryResponse> emptyList = List.of();
 
-        when(lessonService.getLessonIdAndTitleListByCourseId(courseId)).thenReturn(lessonsIdAndTitleList);
+        when(lessonService.getLessonSummaryByCourseId(courseId)).thenReturn(lessonsIdAndTitleList);
         when(exerciseRepository.findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()))).thenReturn(List.of());
         when(exerciseResponseMapper.toExerciseListResponse(List.of(), lessonsIdAndTitleList)).thenReturn(emptyList);
 
@@ -228,7 +228,7 @@ public class ExerciseServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
-        verify(lessonService).getLessonIdAndTitleListByCourseId(courseId);
+        verify(lessonService).getLessonSummaryByCourseId(courseId);
         verify(exerciseRepository).findExercises(new ArrayList<>(lessonsIdAndTitleList.keySet()));
         verify(exerciseResponseMapper).toExerciseListResponse(List.of(), lessonsIdAndTitleList);
     }

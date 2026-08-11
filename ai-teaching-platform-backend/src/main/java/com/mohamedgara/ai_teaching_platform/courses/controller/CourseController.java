@@ -2,8 +2,7 @@ package com.mohamedgara.ai_teaching_platform.courses.controller;
 
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
-import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponseSummary;
-import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
+import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
@@ -57,8 +56,8 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}/lesson")
-    public ResponseEntity<List<LessonResponseSummary>> getCourseLessonList(@PathVariable UUID courseId){
-        List<LessonResponseSummary> lessonResponseList = courseService.getCourseLessonList(courseId);
+    public ResponseEntity<List<LessonSummaryResponse>> getCourseLessonList(@PathVariable UUID courseId){
+        List<LessonSummaryResponse> lessonResponseList = courseService.getCourseLessonList(courseId);
         return ResponseEntity.ok(lessonResponseList);
     }
 }

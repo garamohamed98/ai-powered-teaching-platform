@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.UUID;
 
-public record LessonResponseSummary(
+public record LessonSummaryResponse(
         @JsonProperty("id")
         UUID id,
         @JsonProperty("title")

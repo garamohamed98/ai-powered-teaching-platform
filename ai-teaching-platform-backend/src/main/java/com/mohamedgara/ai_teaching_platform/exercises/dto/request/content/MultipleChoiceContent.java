@@ -1,5 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.exercises.dto.request.content;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -13,5 +14,6 @@ public record MultipleChoiceContent(
         @Size(min = 2, max = 10)
         List<@NotBlank String> options,
         @NotBlank
+        @JsonProperty("correct_answer")
         String correctAnswer
 ) implements ExerciseContent {}

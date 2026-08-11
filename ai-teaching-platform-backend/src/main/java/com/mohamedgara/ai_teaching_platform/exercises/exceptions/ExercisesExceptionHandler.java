@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class ExercisesExceptionHandler {
-    @ExceptionHandler(CourseNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleCourseNotFound(CourseNotFoundException exception){
+    @ExceptionHandler(LessonNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCourseNotFound(LessonNotFoundException exception){
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .error("COURSE_NOT_FOUND")
+                .error("LESSON_NOT_FOUND")
                 .message(exception.getMessage())
                 .status(HttpStatus.NOT_FOUND)
                 .timestamp(LocalDateTime.now())
@@ -27,6 +27,17 @@ public class ExercisesExceptionHandler {
                 .error("EXERCISE_NOT_FOUND")
                 .message(exception.getMessage())
                 .status(HttpStatus.NOT_FOUND)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(NoLessonReferenceException.class)
+    public ResponseEntity<ErrorResponse> handleNoLessonReferenceException(NoLessonReferenceException exception){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error("NO_REFERENCE_CONTENT")
+                .message(exception.getMessage())
+                .status(HttpStatus.BAD_REQUEST)
                 .timestamp(LocalDateTime.now())
                 .build();
         return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);

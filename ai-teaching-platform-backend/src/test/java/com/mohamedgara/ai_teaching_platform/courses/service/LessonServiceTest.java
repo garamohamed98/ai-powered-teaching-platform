@@ -9,7 +9,6 @@ import com.mohamedgara.ai_teaching_platform.courses.exception.LessonNotFoundExce
 import com.mohamedgara.ai_teaching_platform.courses.mappers.LessonResponseMapper;
 import com.mohamedgara.ai_teaching_platform.courses.projection.LessonTitle;
 import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
-import com.mohamedgara.ai_teaching_platform.courses.service.LessonService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -301,7 +300,7 @@ public class LessonServiceTest {
         when(courseService.courseExists(courseId)).thenReturn(true);
         when(lessonRepository.findLessonIdAndTitleListByCourseId(courseId)).thenReturn(lessonTitles);
 
-        Map<UUID, String> result = lessonService.getLessonIdAndTitleListByCourseId(courseId);
+        Map<UUID, String> result = lessonService.getLessonSummaryByCourseId(courseId);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -317,7 +316,7 @@ public class LessonServiceTest {
         when(courseService.courseExists(courseId)).thenReturn(true);
         when(lessonRepository.findLessonIdAndTitleListByCourseId(courseId)).thenReturn(List.of());
 
-        Map<UUID, String> result = lessonService.getLessonIdAndTitleListByCourseId(courseId);
+        Map<UUID, String> result = lessonService.getLessonSummaryByCourseId(courseId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -330,7 +329,7 @@ public class LessonServiceTest {
     void getLessonIdAndTitleListByCourseId_shouldReturnEmptyMap_whenCourseDoesNotExist() {
         when(courseService.courseExists(courseId)).thenReturn(false);
 
-        Map<UUID, String> result = lessonService.getLessonIdAndTitleListByCourseId(courseId);
+        Map<UUID, String> result = lessonService.getLessonSummaryByCourseId(courseId);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());

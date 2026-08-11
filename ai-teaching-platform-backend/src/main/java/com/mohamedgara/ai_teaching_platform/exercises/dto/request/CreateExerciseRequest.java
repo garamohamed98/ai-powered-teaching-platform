@@ -8,12 +8,14 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
 import java.util.UUID;
 
 @JsonDeserialize(using = CreateExerciseRequestDeserializer.class)
 public record CreateExerciseRequest(
         @NotNull
-        UUID lessonId,
+        @JsonProperty("lesson_id_list")
+        List<UUID> lessonIdList,
         @NotNull
         @JsonProperty(value = "type", access = JsonProperty.Access.READ_ONLY)
         ExerciseType type,
