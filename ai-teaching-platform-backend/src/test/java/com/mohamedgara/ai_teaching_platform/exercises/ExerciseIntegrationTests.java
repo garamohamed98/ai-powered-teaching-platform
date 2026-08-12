@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
@@ -469,5 +470,93 @@ public class ExerciseIntegrationTests {
 
         mockMvc.perform(patch("/api/exercise/{id}", randomId))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void generateExercise_shouldBuildAndReturnExerciseResponse_whenCourseIdIsProvided() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").content("Content One").course(savedCourse).build());
+
+        when(exerciseGeneratorService.generateExercise(any(), any())).thenReturn(
+                new com.mohamedgara.ai_teaching_platform.AI.dto.GeneratedExercise(
+                        "Generated Title",
+                        "Generated instructions",
+                        objectMapper.valueToTree(Map.of(
+                                "question", "What is 2+2?",
+                                "options", List.of("4"),
+                                "correct_answer", "4"))
+                )
+        );
+
+        Map<String, Object> requestBody = Map.of(
+                "lesson_id_list", List.of(),
+                "course_id", savedCourse.getId(),
+                "type", "MULTIPLE_CHOICE"
+        );
+
+        mockMvc.perform(post("/api/exercise/generate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.lesson_id_list[0]").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
+                .andExpect(jsonPath("$.title").value("Generated Title"))
+                .andExpect(jsonPath("$.instructions").value("Generated instructions"))
+                .andExpect(jsonPath("$.content.question").value("What is 2+2?"));
+
+        Exercise saved = exerciseRepository.findAll().get(0);
+        assert saved.getTitle().equals("Generated Title");
+        assert saved.getContent().get("question").asText().equals("What is 2+2?");
+    }
+
+    @Test
+    void generateExercise_shouldBuildAndReturnExerciseResponse_whenCourseIdIsNullAndLessonIdsAreProvided() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").content("Content One").course(savedCourse).build());
+
+        when(exerciseGeneratorService.generateExercise(any(), any())).thenReturn(
+                new com.mohamedgara.ai_teaching_platform.AI.dto.GeneratedExercise(
+                        "Generated Title",
+                        "Generated instructions",
+                        objectMapper.valueToTree(Map.of(
+                                "question", "What is 2+2?",
+                                "options", List.of("4"),
+                                "correct_answer", "4"))
+                )
+        );
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("lesson_id_list", List.of(savedLesson.getId()));
+        requestBody.put("course_id", null);
+        requestBody.put("type", "MULTIPLE_CHOICE");
+
+        mockMvc.perform(post("/api/exercise/generate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.lesson_id_list[0]").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
+                .andExpect(jsonPath("$.title").value("Generated Title"))
+                .andExpect(jsonPath("$.instructions").value("Generated instructions"))
+                .andExpect(jsonPath("$.content.question").value("What is 2+2?"));
+
+        Exercise saved = exerciseRepository.findAll().get(0);
+        assert saved.getTitle().equals("Generated Title");
+        assert saved.getContent().get("question").asText().equals("What is 2+2?");
+    }
+
+    @Test
+    void generateExercise_shouldReturnBadRequest_whenNoLessonReferenceProvided() throws Exception {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("lesson_id_list", List.of());
+        requestBody.put("course_id", null);
+        requestBody.put("type", "MULTIPLE_CHOICE");
+
+        mockMvc.perform(post("/api/exercise/generate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isBadRequest());
     }
 }

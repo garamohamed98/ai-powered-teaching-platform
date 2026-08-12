@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mohamedgara.ai_teaching_platform.AI.services.ExerciseGeneratorService;
+import com.mohamedgara.ai_teaching_platform.courses.dto.LessonInfo;
 import com.mohamedgara.ai_teaching_platform.courses.service.LessonService;
+import com.mohamedgara.ai_teaching_platform.AI.dto.GeneratedExercise;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.request.GenerateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.MultipleChoiceContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
@@ -14,6 +17,7 @@ import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.LessonNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.ExerciseNotFoundException;
+import com.mohamedgara.ai_teaching_platform.exercises.exceptions.NoLessonReferenceException;
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseRequestMapper;
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseResponseMapper;
 import com.mohamedgara.ai_teaching_platform.exercises.repositories.ExerciseRepository;
@@ -23,9 +27,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,7 +62,8 @@ public class ExerciseServiceTest {
     @InjectMocks
     private ExerciseService exerciseService;
 
-    private ObjectMapper objectMapper;
+    @Spy
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     private UUID lessonId;
     private UUID exerciseId;
@@ -519,5 +526,114 @@ public class ExerciseServiceTest {
                 () -> exerciseService.correctExercise(invalidId));
 
         verify(exerciseRepository).findById(invalidId);
+    }
+
+    @Test
+    void generateExercise_shouldBuildAndReturnExerciseResponse_whenCourseIdIsProvided() {
+        GenerateExerciseRequest request = new GenerateExerciseRequest(
+                List.of(lessonId),
+                courseId,
+                ExerciseType.MULTIPLE_CHOICE
+        );
+        LessonInfo lessonInfo = new LessonInfo(lessonId, "Lesson One", "Content One");
+        ObjectNode exerciseNode = objectMapper.createObjectNode();
+        exerciseNode.put("question", "What is 2+2?");
+        GeneratedExercise generatedExercise = new GeneratedExercise(
+                "Generated Title",
+                "Generated instructions",
+                exerciseNode
+        );
+        ExerciseResponse expectedResponse = new ExerciseResponse(
+                exerciseId,
+                List.of(lessonId),
+                ExerciseType.MULTIPLE_CHOICE,
+                "Generated Title",
+                "Generated instructions",
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                        "What is 2+2?", List.of("4"), "4"));
+
+        when(lessonService.getCourseLessonInfoList(courseId))
+                .thenReturn(Collections.singletonList(lessonInfo));
+        when(exerciseGeneratorService.generateExercise(any(JsonNode.class), any(JsonNode.class)))
+                .thenReturn(generatedExercise);
+        when(exerciseRepository.save(any(Exercise.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(exerciseResponseMapper.toExerciseResponse(any(Exercise.class))).thenReturn(expectedResponse);
+
+        ExerciseResponse response = exerciseService.generateExercise(request);
+
+        assertNotNull(response);
+        assertEquals(exerciseId, response.id());
+        assertEquals(List.of(lessonId), response.lessonIdList());
+        assertEquals("Generated Title", response.title());
+        assertEquals("Generated instructions", response.instructions());
+
+        verify(lessonService).getCourseLessonInfoList(courseId);
+        verify(exerciseGeneratorService).generateExercise(any(JsonNode.class), any(JsonNode.class));
+        verify(exerciseRepository).save(any(Exercise.class));
+        verify(exerciseResponseMapper).toExerciseResponse(any(Exercise.class));
+    }
+
+    @Test
+    void generateExercise_shouldBuildAndReturnExerciseResponse_whenCourseIdIsNullAndLessonIdsAreProvided() {
+        List<UUID> lessonIdList = List.of(lessonId);
+        GenerateExerciseRequest request = new GenerateExerciseRequest(
+                lessonIdList,
+                null,
+                ExerciseType.MULTIPLE_CHOICE
+        );
+        LessonInfo lessonInfo = new LessonInfo(lessonId, "Lesson One", "Content One");
+        ObjectNode exerciseNode = objectMapper.createObjectNode();
+        exerciseNode.put("question", "What is 2+2?");
+        GeneratedExercise generatedExercise = new GeneratedExercise(
+                "Generated Title",
+                "Generated instructions",
+                exerciseNode
+        );
+        ExerciseResponse expectedResponse = new ExerciseResponse(
+                exerciseId,
+                lessonIdList,
+                ExerciseType.MULTIPLE_CHOICE,
+                "Generated Title",
+                "Generated instructions",
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                        "What is 2+2?", List.of("4"), "4"));
+
+        when(lessonService.getLessonInfoList(lessonIdList))
+                .thenReturn(Collections.singletonList(lessonInfo));
+        when(exerciseGeneratorService.generateExercise(any(JsonNode.class), any(JsonNode.class)))
+                .thenReturn(generatedExercise);
+        when(exerciseRepository.save(any(Exercise.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(exerciseResponseMapper.toExerciseResponse(any(Exercise.class))).thenReturn(expectedResponse);
+
+        ExerciseResponse response = exerciseService.generateExercise(request);
+
+        assertNotNull(response);
+        assertEquals(exerciseId, response.id());
+        assertEquals(lessonIdList, response.lessonIdList());
+        assertEquals("Generated Title", response.title());
+        assertEquals("Generated instructions", response.instructions());
+
+        verify(lessonService).getLessonInfoList(lessonIdList);
+        verify(exerciseGeneratorService).generateExercise(any(JsonNode.class), any(JsonNode.class));
+        verify(exerciseRepository).save(any(Exercise.class));
+        verify(exerciseResponseMapper).toExerciseResponse(any(Exercise.class));
+    }
+
+    @Test
+    void generateExercise_shouldThrowNoLessonReferenceException_whenCourseIdIsProvidedButNoLessonInfoExists() {
+        GenerateExerciseRequest request = new GenerateExerciseRequest(
+                List.of(lessonId),
+                courseId,
+                ExerciseType.MULTIPLE_CHOICE
+        );
+
+        when(lessonService.getCourseLessonInfoList(courseId)).thenReturn(Collections.emptyList());
+
+        assertThrows(NoLessonReferenceException.class,
+                () -> exerciseService.generateExercise(request));
+
+        verify(exerciseGeneratorService, never()).generateExercise(any(JsonNode.class), any(JsonNode.class));
+        verify(exerciseRepository, never()).save(any());
+        verify(exerciseResponseMapper, never()).toExerciseResponse(any());
     }
 }
