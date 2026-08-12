@@ -16,10 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -258,37 +255,37 @@ public class LessonServiceTest {
     }
 
     @Test
-    void lessonExists_shouldReturnTrue_whenLessonExists() {
-        when(lessonRepository.existsById(lessonId)).thenReturn(true);
+    void lessonListExists_shouldReturnTrue_whenAllLessonsExist() {
+        List<UUID> lessonIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        when(lessonRepository.countExistingLessons(lessonIds)).thenReturn((long) lessonIds.size());
 
-        boolean exists = lessonService.lessonExists(lessonId);
+        boolean exists = lessonService.lessonListExists(lessonIds);
 
         assertTrue(exists);
 
-        verify(lessonRepository).existsById(lessonId);
+        verify(lessonRepository).countExistingLessons(lessonIds);
     }
 
     @Test
-    void lessonExists_shouldReturnFalse_whenLessonDoesNotExist() {
-        when(lessonRepository.existsById(lessonId)).thenReturn(false);
+    void lessonListExists_shouldReturnFalse_whenSomeOrAllLessonsDoNotExist() {
+        List<UUID> lessonIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+        when(lessonRepository.countExistingLessons(lessonIds)).thenReturn(1L);
 
-        boolean exists = lessonService.lessonExists(lessonId);
+        boolean exists = lessonService.lessonListExists(lessonIds);
 
         assertFalse(exists);
-
-        verify(lessonRepository).existsById(lessonId);
+        verify(lessonRepository).countExistingLessons(lessonIds);
     }
 
     @Test
-    void lessonExists_shouldReturnFalseForAnyInvalidId() {
-        UUID invalidId = UUID.randomUUID();
-        when(lessonRepository.existsById(invalidId)).thenReturn(false);
+    void lessonListExists_shouldReturnTrue_whenListIsEmpty() {
+        List<UUID> emptyList = Collections.emptyList();
+        when(lessonRepository.countExistingLessons(emptyList)).thenReturn(0L);
 
-        boolean exists = lessonService.lessonExists(invalidId);
+        boolean exists = lessonService.lessonListExists(emptyList);
 
-        assertFalse(exists);
-
-        verify(lessonRepository).existsById(invalidId);
+        assertTrue(exists);
+        verify(lessonRepository).countExistingLessons(emptyList);
     }
 
     @Test
