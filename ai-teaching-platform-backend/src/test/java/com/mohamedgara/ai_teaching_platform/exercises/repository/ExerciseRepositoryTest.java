@@ -30,7 +30,7 @@ public class ExerciseRepositoryTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void findExercises_shouldReturnExercisesWhenLessonIdListMatches() throws Exception {
+    void findExercises_shouldReturnExercisesWhenLessonIdListMatches(){
         UUID lessonIdOne = UUID.randomUUID();
         UUID lessonIdTwo = UUID.randomUUID();
         Exercise savedExerciseOne = exerciseRepository.save(buildExercise(lessonIdOne, "Exercise One"));
@@ -44,7 +44,7 @@ public class ExerciseRepositoryTest {
     }
 
     @Test
-    void findExercises_shouldReturnOnlyExercisesOfGivenLessonIdList() throws Exception {
+    void findExercises_shouldReturnOnlyExercisesOfGivenLessonIdList(){
         UUID lessonIdOne = UUID.randomUUID();
         UUID lessonIdTwo = UUID.randomUUID();
         Exercise savedExerciseOne = exerciseRepository.save(buildExercise(lessonIdOne, "Exercise One"));
@@ -55,6 +55,19 @@ public class ExerciseRepositoryTest {
         assertEquals(1, result.size());
         assertEquals(savedExerciseOne.getId(), result.get(0).getId());
         assertTrue(result.stream().noneMatch(exercise -> exercise.getId().equals(savedExerciseTwo.getId())));
+    }
+    @Test
+    void findExercises_shouldNotReturnDuplicates_whenExerciseMatchesMultipleQueriedLessons() {
+        UUID lessonIdOne = UUID.randomUUID();
+        UUID lessonIdTwo = UUID.randomUUID();
+        Exercise multiLessonExercise = exerciseRepository.save(
+                buildExercise(List.of(lessonIdOne, lessonIdTwo), "Multi-Lesson Exercise")
+        );
+
+        List<Exercise> result = exerciseRepository.findExercises(List.of(lessonIdOne, lessonIdTwo));
+
+        assertEquals(1, result.size());
+        assertEquals(multiLessonExercise.getId(), result.get(0).getId());
     }
 
     @Test
@@ -74,8 +87,12 @@ public class ExerciseRepositoryTest {
     }
 
     private Exercise buildExercise(UUID lessonId, String title) {
+        return buildExercise(List.of(lessonId), title);
+    }
+
+    private Exercise buildExercise(List<UUID> lessonIdlist, String title) {
         return Exercise.builder()
-                .lessonId(lessonId)
+                .lessonIdList(lessonIdlist)
                 .type(ExerciseType.MULTIPLE_CHOICE)
                 .title(title)
                 .instructions("Choose the correct answer")

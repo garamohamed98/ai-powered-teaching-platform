@@ -13,8 +13,13 @@ import java.util.UUID;
 public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
 
     @Query("""
-            SELECT e from Exercise e
-            WHERE e.lessonId IN :lessonIdList
-            """)
+    SELECT e
+    FROM Exercise e
+    WHERE EXISTS (
+        SELECT 1
+        FROM e.lessonIdList lessonId
+        WHERE lessonId IN :lessonIdList
+    )
+    """)
     List<Exercise> findExercises(@Param("lessonIdList") List<UUID> lessonIdList);
 }

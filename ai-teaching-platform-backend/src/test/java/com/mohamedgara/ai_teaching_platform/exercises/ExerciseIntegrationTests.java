@@ -22,6 +22,8 @@ import org.springframework.http.MediaType;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -61,7 +63,7 @@ public class ExerciseIntegrationTests {
         Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
         Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
         Map<String, Object> requestBody = Map.of(
-                "lesson_id", savedLesson.getId(),
+                "lesson_id_list", List.of(savedLesson.getId()),
                 "type", "MULTIPLE_CHOICE",
                 "title", "Addition",
                 "instructions", "Choose the correct answer",
@@ -69,20 +71,21 @@ public class ExerciseIntegrationTests {
                 "content", Map.of(
                         "question", "What is 2+2?",
                         "options", List.of("4", "5"),
-                        "correctAnswer", "4"));
+                        "correct_answer", "4"));
 
         mockMvc.perform(post("/api/exercise")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.lesson_id_list[0]").value(savedLesson.getId().toString()))
                 .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
                 .andExpect(jsonPath("$.title").value("Addition"))
                 .andExpect(jsonPath("$.instructions").value("Choose the correct answer"))
                 .andExpect(jsonPath("$.content.question").value("What is 2+2?"));
 
         Exercise saved = exerciseRepository.findAll().get(0);
-        assert saved.getLessonId().equals(savedLesson.getId());
+        assert Set.of(saved.getLessonIdList()).equals(Set.of(List.of(savedLesson.getId())));
         assert saved.getTitle().equals("Addition");
         assert saved.getType() == ExerciseType.MULTIPLE_CHOICE;
     }
@@ -92,7 +95,7 @@ public class ExerciseIntegrationTests {
         Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
         Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
         Map<String, Object> requestBody = Map.of(
-                "lesson_id", savedLesson.getId(),
+                "lesson_id_list", List.of(savedLesson.getId()),
                 "type", "FILL_IN_BLANK",
                 "title", "Fill the blanks",
                 "instructions", "Complete each sentence",
@@ -114,7 +117,7 @@ public class ExerciseIntegrationTests {
                 .andExpect(jsonPath("$.content.sentences[0].text").value("2 plus 2 is ____"));
 
         Exercise saved = exerciseRepository.findAll().get(0);
-        assert saved.getLessonId().equals(savedLesson.getId());
+        assert Set.of(saved.getLessonIdList()).equals(Set.of(List.of(savedLesson.getId())));
         assert saved.getTitle().equals("Fill the blanks");
         assert saved.getType() == ExerciseType.FILL_IN_BLANK;
     }
@@ -123,7 +126,7 @@ public class ExerciseIntegrationTests {
     void createExercise_shouldReturn404WhenLessonDoesNotExist() throws Exception {
         UUID randomLessonId = UUID.randomUUID();
         Map<String, Object> requestBody = Map.of(
-                "lesson_id", randomLessonId,
+                "lesson_id_list", List.of(randomLessonId),
                 "type", "MULTIPLE_CHOICE",
                 "title", "Addition",
                 "instructions", "Choose the correct answer",
@@ -131,7 +134,7 @@ public class ExerciseIntegrationTests {
                 "content", Map.of(
                         "question", "What is 2+2?",
                         "options", List.of("4", "5"),
-                        "correctAnswer", "4"));
+                        "correct_answer", "4"));
 
         mockMvc.perform(post("/api/exercise")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -144,7 +147,7 @@ public class ExerciseIntegrationTests {
         Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
         Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
         Map<String, Object> requestBody = Map.of(
-                "lesson_id", savedLesson.getId(),
+                "lesson_id_list", List.of(savedLesson.getId()),
                 "type", "MULTIPLE_CHOICE",
                 "title", "",
                 "instructions", "Choose the correct answer",
@@ -152,7 +155,7 @@ public class ExerciseIntegrationTests {
                 "content", Map.of(
                         "question", "What is 2+2?",
                         "options", List.of("4", "5"),
-                        "correctAnswer", "4"));
+                        "correct_answer", "4"));
 
         mockMvc.perform(post("/api/exercise")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -165,7 +168,7 @@ public class ExerciseIntegrationTests {
         Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
         Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
         Map<String, Object> requestBody = Map.of(
-                "lesson_id", savedLesson.getId(),
+                "lesson_id_list", List.of(savedLesson.getId()),
                 "type", "MULTIPLE_CHOICE",
                 "title", "Addition",
                 "instructions", "Choose the correct answer",
@@ -173,7 +176,7 @@ public class ExerciseIntegrationTests {
                 "content", Map.of(
                         "question", "What is 2+2?",
                         "options", List.of(),
-                        "correctAnswer", "4"));
+                        "correct_answer", "4"));
 
         mockMvc.perform(post("/api/exercise")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -182,18 +185,44 @@ public class ExerciseIntegrationTests {
     }
 
     @Test
+    void createExercise_shouldCreateExerciseWithMultipleLessonsWhenValid() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLessonOne = lessonRepository.save(Lesson.builder().title("Lesson One").course(savedCourse).build());
+        Lesson savedLessonTwo = lessonRepository.save(Lesson.builder().title("Lesson Two").course(savedCourse).build());
+        Map<String, Object> requestBody = Map.of(
+                "lesson_id_list", List.of(savedLessonOne.getId(), savedLessonTwo.getId()),
+                "type", "MULTIPLE_CHOICE",
+                "title", "Addition",
+                "instructions", "Choose the correct answer",
+                "correct_answers", false,
+                "content", Map.of(
+                        "question", "What is 2+2?",
+                        "options", List.of("4", "5"),
+                        "correct_answer", "4"));
+
+        mockMvc.perform(post("/api/exercise")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.lesson_id_list.length()").value(2));
+
+        Exercise saved = exerciseRepository.findAll().get(0);
+        assert Set.of(saved.getLessonIdList()).equals(Set.of(List.of(savedLessonOne.getId(), savedLessonTwo.getId())));
+    }
+
+    @Test
     void getExercises_shouldReturnExerciseSummaryList_whenCourseHasLessonsWithExercises() throws Exception {
         Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
         Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
         Exercise savedExercise = exerciseRepository.save(Exercise.builder()
-                .lessonId(savedLesson.getId())
+                .lessonIdList(List.of(savedLesson.getId()))
                 .type(ExerciseType.MULTIPLE_CHOICE)
                 .title("Addition")
                 .instructions("Choose the correct answer")
                 .content(objectMapper.valueToTree(Map.of(
                         "question", "What is 2+2?",
                         "options", List.of("4", "5"),
-                        "correctAnswer", "4")))
+                        "correct_answer", "4")))
                 .build());
 
         mockMvc.perform(get("/api/exercise/course/{courseId}", savedCourse.getId()))
@@ -201,8 +230,8 @@ public class ExerciseIntegrationTests {
                 .andExpect(jsonPath("$[0].id").value(savedExercise.getId().toString()))
                 .andExpect(jsonPath("$[0].title").value("Addition"))
                 .andExpect(jsonPath("$[0].type").value("MULTIPLE_CHOICE"))
-                .andExpect(jsonPath("$[0].lesson.id").value(savedLesson.getId().toString()))
-                .andExpect(jsonPath("$[0].lesson.title").value("Lesson Title"));
+                .andExpect(jsonPath("$[0].lesson[0].id").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$[0].lesson[0].title").value("Lesson Title"));
     }
 
     @Test
@@ -210,7 +239,7 @@ public class ExerciseIntegrationTests {
         Course savedCourseOne = courseRepository.save(Course.builder().title("Course One").build());
         Lesson savedLessonOne = lessonRepository.save(Lesson.builder().title("Lesson One").course(savedCourseOne).build());
         Exercise savedExerciseOne = exerciseRepository.save(Exercise.builder()
-                .lessonId(savedLessonOne.getId())
+                .lessonIdList(List.of(savedLessonOne.getId()))
                 .type(ExerciseType.MULTIPLE_CHOICE)
                 .title("Exercise One")
                 .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
@@ -218,7 +247,7 @@ public class ExerciseIntegrationTests {
         Course savedCourseTwo = courseRepository.save(Course.builder().title("Course Two").build());
         Lesson savedLessonTwo = lessonRepository.save(Lesson.builder().title("Lesson Two").course(savedCourseTwo).build());
         exerciseRepository.save(Exercise.builder()
-                .lessonId(savedLessonTwo.getId())
+                .lessonIdList(List.of(savedLessonTwo.getId()))
                 .type(ExerciseType.MULTIPLE_CHOICE)
                 .title("Exercise Two")
                 .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
@@ -229,7 +258,29 @@ public class ExerciseIntegrationTests {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(savedExerciseOne.getId().toString()))
                 .andExpect(jsonPath("$[0].title").value("Exercise One"))
-                .andExpect(jsonPath("$[0].lesson.id").value(savedLessonOne.getId().toString()));
+                .andExpect(jsonPath("$[0].lesson[0].id").value(savedLessonOne.getId().toString()));
+    }
+
+    @Test
+    void getExercises_shouldReturnExerciseSummaryWithMultipleLessons_whenExerciseHasMultipleLessons() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLessonOne = lessonRepository.save(Lesson.builder().title("Lesson One").course(savedCourse).build());
+        Lesson savedLessonTwo = lessonRepository.save(Lesson.builder().title("Lesson Two").course(savedCourse).build());
+        Exercise savedExercise = exerciseRepository.save(Exercise.builder()
+                .lessonIdList(List.of(savedLessonOne.getId(), savedLessonTwo.getId()))
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Addition")
+                .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
+                .build());
+
+        mockMvc.perform(get("/api/exercise/course/{courseId}", savedCourse.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(savedExercise.getId().toString()))
+                .andExpect(jsonPath("$[0].lesson.length()").value(2))
+                .andExpect(jsonPath("$[0].lesson[0].id").value(savedLessonOne.getId().toString()))
+                .andExpect(jsonPath("$[0].lesson[0].title").value("Lesson One"))
+                .andExpect(jsonPath("$[0].lesson[1].id").value(savedLessonTwo.getId().toString()))
+                .andExpect(jsonPath("$[0].lesson[1].title").value("Lesson Two"));
     }
 
     @Test
@@ -256,27 +307,49 @@ public class ExerciseIntegrationTests {
         Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
         Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
         Exercise savedExercise = exerciseRepository.save(Exercise.builder()
-                .lessonId(savedLesson.getId())
+                .lessonIdList(List.of(savedLesson.getId()))
                 .type(ExerciseType.MULTIPLE_CHOICE)
                 .title("Addition")
                 .instructions("Choose the correct answer")
                 .content(objectMapper.valueToTree(Map.of(
                         "question", "What is 2+2?",
                         "options", List.of("4", "5"),
-                        "correctAnswer", "4")))
+                        "correct_answer", "4")))
                 .build());
 
         mockMvc.perform(get("/api/exercise/{id}", savedExercise.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedExercise.getId().toString()))
-                .andExpect(jsonPath("$.lesson_id").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.lesson_id_list[0]").value(savedLesson.getId().toString()))
                 .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
                 .andExpect(jsonPath("$.title").value("Addition"))
                 .andExpect(jsonPath("$.instructions").value("Choose the correct answer"))
                 .andExpect(jsonPath("$.content.question").value("What is 2+2?"))
                 .andExpect(jsonPath("$.content.options[0]").value("4"))
                 .andExpect(jsonPath("$.content.options[1]").value("5"))
-                .andExpect(jsonPath("$.content.correctAnswer").value("4"));
+                .andExpect(jsonPath("$.content.correct_answer").value("4"));
+    }
+
+    @Test
+    void getExercise_shouldReturnExerciseResponseWithMultipleLessonIds_whenExerciseExists() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLessonOne = lessonRepository.save(Lesson.builder().title("Lesson One").course(savedCourse).build());
+        Lesson savedLessonTwo = lessonRepository.save(Lesson.builder().title("Lesson Two").course(savedCourse).build());
+        Exercise savedExercise = exerciseRepository.save(Exercise.builder()
+                .lessonIdList(List.of(savedLessonOne.getId(), savedLessonTwo.getId()))
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Addition")
+                .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
+                .build());
+
+        mockMvc.perform(get("/api/exercise/{id}", savedExercise.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(savedExercise.getId().toString()))
+                .andExpect(jsonPath("$.lesson_id_list.length()").value(2))
+                .andExpect(jsonPath("$.lesson_id_list[0]").value(savedLessonOne.getId().toString()))
+                .andExpect(jsonPath("$.lesson_id_list[1]").value(savedLessonTwo.getId().toString()))
+                .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
+                .andExpect(jsonPath("$.title").value("Addition"));
     }
 
     @Test
@@ -292,7 +365,25 @@ public class ExerciseIntegrationTests {
         Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
         Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
         Exercise savedExercise = exerciseRepository.save(Exercise.builder()
-                .lessonId(savedLesson.getId())
+                .lessonIdList(List.of(savedLesson.getId()))
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Addition")
+                .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
+                .build());
+
+        mockMvc.perform(delete("/api/exercise/{id}", savedExercise.getId()))
+                .andExpect(status().isNoContent());
+
+        assert exerciseRepository.count() == 0;
+    }
+
+    @Test
+    void deleteExercise_shouldRemoveExerciseWithMultipleLessonsWhenFound() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLessonOne = lessonRepository.save(Lesson.builder().title("Lesson One").course(savedCourse).build());
+        Lesson savedLessonTwo = lessonRepository.save(Lesson.builder().title("Lesson Two").course(savedCourse).build());
+        Exercise savedExercise = exerciseRepository.save(Exercise.builder()
+                .lessonIdList(List.of(savedLessonOne.getId(), savedLessonTwo.getId()))
                 .type(ExerciseType.MULTIPLE_CHOICE)
                 .title("Addition")
                 .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
@@ -317,7 +408,7 @@ public class ExerciseIntegrationTests {
         Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
         Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
         Exercise savedExercise = exerciseRepository.save(Exercise.builder()
-                .lessonId(savedLesson.getId())
+                .lessonIdList(List.of(savedLesson.getId()))
                 .type(ExerciseType.MULTIPLE_CHOICE)
                 .title("Addition")
                 .instructions("Choose the correct answer")
@@ -329,21 +420,48 @@ public class ExerciseIntegrationTests {
         when(exerciseGeneratorService.generateExerciseAnswer(any())).thenReturn(objectMapper.valueToTree(Map.of(
                 "question", "What is 2+2?",
                 "options", List.of("4", "5"),
-                "correctAnswer", "4")));
+                "correct_answer", "4")));
 
         mockMvc.perform(patch("/api/exercise/{id}", savedExercise.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(savedExercise.getId().toString()))
-                .andExpect(jsonPath("$.lesson_id").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.lesson_id_list[0]").value(savedLesson.getId().toString()))
                 .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
                 .andExpect(jsonPath("$.title").value("Addition"))
                 .andExpect(jsonPath("$.content.question").value("What is 2+2?"))
                 .andExpect(jsonPath("$.content.options[0]").value("4"))
                 .andExpect(jsonPath("$.content.options[1]").value("5"))
-                .andExpect(jsonPath("$.content.correctAnswer").value("4"));
+                .andExpect(jsonPath("$.content.correct_answer").value("4"));
 
         Exercise updated = exerciseRepository.findById(savedExercise.getId()).orElseThrow();
-        assert updated.getContent().get("correctAnswer").asText().equals("4");
+        assert updated.getContent().get("correct_answer").asText().equals("4");
+    }
+
+    @Test
+    void correctExercise_shouldReturnExerciseResponseWithMultipleLessonIdsWhenFound() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLessonOne = lessonRepository.save(Lesson.builder().title("Lesson One").course(savedCourse).build());
+        Lesson savedLessonTwo = lessonRepository.save(Lesson.builder().title("Lesson Two").course(savedCourse).build());
+        Exercise savedExercise = exerciseRepository.save(Exercise.builder()
+                .lessonIdList(List.of(savedLessonOne.getId(), savedLessonTwo.getId()))
+                .type(ExerciseType.MULTIPLE_CHOICE)
+                .title("Addition")
+                .content(objectMapper.valueToTree(Map.of("question", "What is 2+2?")))
+                .build());
+
+        when(exerciseGeneratorService.generateExerciseAnswer(any())).thenReturn(objectMapper.valueToTree(Map.of(
+                "question", "What is 2+2?",
+                "options", List.of("4", "5"),
+                "correct_answer", "4")));
+
+        mockMvc.perform(patch("/api/exercise/{id}", savedExercise.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(savedExercise.getId().toString()))
+                .andExpect(jsonPath("$.lesson_id_list.length()").value(2))
+                .andExpect(jsonPath("$.lesson_id_list[0]").value(savedLessonOne.getId().toString()))
+                .andExpect(jsonPath("$.lesson_id_list[1]").value(savedLessonTwo.getId().toString()))
+                .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
+                .andExpect(jsonPath("$.title").value("Addition"));
     }
 
     @Test
@@ -352,5 +470,93 @@ public class ExerciseIntegrationTests {
 
         mockMvc.perform(patch("/api/exercise/{id}", randomId))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void generateExercise_shouldBuildAndReturnExerciseResponse_whenCourseIdIsProvided() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").content("Content One").course(savedCourse).build());
+
+        when(exerciseGeneratorService.generateExercise(any(), any())).thenReturn(
+                new com.mohamedgara.ai_teaching_platform.AI.dto.GeneratedExercise(
+                        "Generated Title",
+                        "Generated instructions",
+                        objectMapper.valueToTree(Map.of(
+                                "question", "What is 2+2?",
+                                "options", List.of("4"),
+                                "correct_answer", "4"))
+                )
+        );
+
+        Map<String, Object> requestBody = Map.of(
+                "lesson_id_list", List.of(),
+                "course_id", savedCourse.getId(),
+                "type", "MULTIPLE_CHOICE"
+        );
+
+        mockMvc.perform(post("/api/exercise/generate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.lesson_id_list[0]").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
+                .andExpect(jsonPath("$.title").value("Generated Title"))
+                .andExpect(jsonPath("$.instructions").value("Generated instructions"))
+                .andExpect(jsonPath("$.content.question").value("What is 2+2?"));
+
+        Exercise saved = exerciseRepository.findAll().get(0);
+        assert saved.getTitle().equals("Generated Title");
+        assert saved.getContent().get("question").asText().equals("What is 2+2?");
+    }
+
+    @Test
+    void generateExercise_shouldBuildAndReturnExerciseResponse_whenCourseIdIsNullAndLessonIdsAreProvided() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").content("Content One").course(savedCourse).build());
+
+        when(exerciseGeneratorService.generateExercise(any(), any())).thenReturn(
+                new com.mohamedgara.ai_teaching_platform.AI.dto.GeneratedExercise(
+                        "Generated Title",
+                        "Generated instructions",
+                        objectMapper.valueToTree(Map.of(
+                                "question", "What is 2+2?",
+                                "options", List.of("4"),
+                                "correct_answer", "4"))
+                )
+        );
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("lesson_id_list", List.of(savedLesson.getId()));
+        requestBody.put("course_id", null);
+        requestBody.put("type", "MULTIPLE_CHOICE");
+
+        mockMvc.perform(post("/api/exercise/generate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.lesson_id_list[0]").value(savedLesson.getId().toString()))
+                .andExpect(jsonPath("$.type").value("MULTIPLE_CHOICE"))
+                .andExpect(jsonPath("$.title").value("Generated Title"))
+                .andExpect(jsonPath("$.instructions").value("Generated instructions"))
+                .andExpect(jsonPath("$.content.question").value("What is 2+2?"));
+
+        Exercise saved = exerciseRepository.findAll().get(0);
+        assert saved.getTitle().equals("Generated Title");
+        assert saved.getContent().get("question").asText().equals("What is 2+2?");
+    }
+
+    @Test
+    void generateExercise_shouldReturnBadRequest_whenNoLessonReferenceProvided() throws Exception {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("lesson_id_list", List.of());
+        requestBody.put("course_id", null);
+        requestBody.put("type", "MULTIPLE_CHOICE");
+
+        mockMvc.perform(post("/api/exercise/generate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isBadRequest());
     }
 }

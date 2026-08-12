@@ -1,6 +1,7 @@
 package com.mohamedgara.ai_teaching_platform.exercises;
 
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.request.GenerateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
@@ -54,6 +55,14 @@ public class ExerciseController {
     @PatchMapping("/{id}")
     public ResponseEntity<ExerciseResponse> correctExercise(@PathVariable UUID id){
         ExerciseResponse response = exerciseService.correctExercise(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/generate")
+    public ResponseEntity<ExerciseResponse> generateExercise(
+            @RequestBody @Valid GenerateExerciseRequest generateExerciseRequest
+    ){
+        ExerciseResponse response = exerciseService.generateExercise(generateExerciseRequest);
         return ResponseEntity.ok(response);
     }
 }

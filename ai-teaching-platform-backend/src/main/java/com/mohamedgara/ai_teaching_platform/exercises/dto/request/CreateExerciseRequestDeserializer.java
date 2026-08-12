@@ -11,6 +11,7 @@ import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 public class CreateExerciseRequestDeserializer extends StdDeserializer<CreateExerciseRequest> {
@@ -22,7 +23,7 @@ public class CreateExerciseRequestDeserializer extends StdDeserializer<CreateExe
     public CreateExerciseRequest deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
         JsonNode root = p.readValueAsTree();
 
-        UUID lessonId        = ctx.readTreeAsValue(root.get("lesson_id"), UUID.class);
+        List<UUID> lessonIdList        = ctx.readTreeAsValue(root.get("lesson_id_list"), ctx.getTypeFactory().constructCollectionType(List.class, UUID.class));
         ExerciseType type    = ctx.readTreeAsValue(root.get("type"), ExerciseType.class);
         String title         = ctx.readTreeAsValue(root.get("title"), String.class);
         String instructions  = ctx.readTreeAsValue(root.get("instructions"), String.class);
@@ -34,6 +35,6 @@ public class CreateExerciseRequestDeserializer extends StdDeserializer<CreateExe
             case FILL_IN_BLANK   -> ctx.readTreeAsValue(contentNode, FillInBlankContent.class);
         };
 
-        return new CreateExerciseRequest(lessonId, type, title, instructions,correctAnswers, content);
+        return new CreateExerciseRequest(lessonIdList, type, title, instructions,correctAnswers, content);
     }
 }

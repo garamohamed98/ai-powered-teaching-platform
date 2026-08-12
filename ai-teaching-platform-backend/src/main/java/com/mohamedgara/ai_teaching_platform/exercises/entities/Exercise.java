@@ -12,6 +12,7 @@ import org.hibernate.type.SqlTypes;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -25,8 +26,13 @@ public class Exercise {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
-    private UUID lessonId;
+    @ElementCollection
+    @CollectionTable(
+            name= "exercise_lessons",
+            joinColumns = @JoinColumn(name = "exercise_id")
+    )
+    @Column(name = "lesson_id")
+    private List<UUID> lessonIdList;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

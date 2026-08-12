@@ -2,7 +2,6 @@ package com.mohamedgara.ai_teaching_platform.exercises.mappers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.ExerciseContent;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;

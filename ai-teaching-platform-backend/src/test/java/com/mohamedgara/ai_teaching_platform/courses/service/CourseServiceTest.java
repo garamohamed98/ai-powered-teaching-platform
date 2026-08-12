@@ -4,7 +4,7 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequ
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
-import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponseSummary;
+import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapper;
@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
 import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
-import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -292,7 +291,7 @@ public class CourseServiceTest {
         Mockito.when(lessonRepository.findByCourseId(courseId)).thenReturn(lessonList);
 
         //Act
-        List<LessonResponseSummary> result = courseService.getCourseLessonList(courseId);
+        List<LessonSummaryResponse> result = courseService.getCourseLessonList(courseId);
 
         //Assert
         Assertions.assertThat(result).isNotNull();
@@ -320,7 +319,7 @@ public class CourseServiceTest {
         Mockito.when(lessonRepository.findByCourseId(courseId)).thenReturn(emptyList);
 
         //Act
-        List<LessonResponseSummary> result = courseService.getCourseLessonList(courseId);
+        List<LessonSummaryResponse> result = courseService.getCourseLessonList(courseId);
 
         //Assert
         Assertions.assertThat(result).isNotNull();
