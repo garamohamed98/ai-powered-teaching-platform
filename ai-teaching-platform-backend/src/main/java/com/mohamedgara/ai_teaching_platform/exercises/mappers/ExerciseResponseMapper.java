@@ -2,13 +2,17 @@ package com.mohamedgara.ai_teaching_platform.exercises.mappers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.ExerciseContent;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.StartExerciseResponse;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisestartcontent.ExerciseStartContent;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisestartcontent.FillInBlankStartContent;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisestartcontent.FillInBlankStartSentence;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisestartcontent.MultipleChoiceStartContent;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.ExerciseContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.FillInBlankContent;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.FillInBlankContent;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 import org.mapstruct.Mapper;
@@ -27,13 +31,13 @@ public abstract class ExerciseResponseMapper {
 
     @Mapping(
             target = "content",
-            expression = "java(toContentResponse(exercise.getType(), exercise.getContent()))"
+            expression = "java(toExerciseContentResponse(exercise.getType(), exercise.getContent()))"
     )
     public abstract CreateExerciseResponse toCreateExerciseResponse(Exercise exercise);
 
     @Mapping(
             target = "content",
-            expression = "java(toContentResponse(exercise.getType(), exercise.getContent()))"
+            expression = "java(toExerciseContentResponse(exercise.getType(), exercise.getContent()))"
     )
     public abstract ExerciseResponse toExerciseResponse(Exercise exercise);
 
@@ -59,10 +63,41 @@ public abstract class ExerciseResponseMapper {
                 }).toList();
     };
 
-    protected ExerciseContent toContentResponse(ExerciseType type, JsonNode content) {
+    @Mapping(target = "id", source = "exercise.id")
+    @Mapping(target = "exerciseAttemptId", source = "exerciseAttemptId")
+    @Mapping(target = "type", source = "exercise.type")
+    @Mapping(target = "title", source = "exercise.title")
+    @Mapping(target = "instructions", source = "exercise.instructions")
+    @Mapping(
+            target = "content",
+            expression = "java(toExerciseAttemptContentResponse(exercise.getType(), exercise.getContent()))"
+    )
+    public abstract StartExerciseResponse toExerciseAttemptResponse(Exercise exercise, UUID exerciseAttemptId);
+
+    protected ExerciseContent toExerciseContentResponse(ExerciseType type, JsonNode content) {
         return switch (type) {
             case MULTIPLE_CHOICE -> objectMapper.convertValue(content, MultipleChoiceContent.class);
             case FILL_IN_BLANK   -> objectMapper.convertValue(content, FillInBlankContent.class);
+        };
+    }
+
+    protected ExerciseStartContent toExerciseAttemptContentResponse(ExerciseType type, JsonNode content) {
+        return switch (type) {
+            case MULTIPLE_CHOICE -> new MultipleChoiceStartContent(
+                    content.get("question").asText(),
+                    objectMapper.convertValue(
+                            content.get("options"),
+                            objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
+                    )
+            );
+            case FILL_IN_BLANK   -> {
+                FillInBlankContent full = objectMapper.convertValue(content, FillInBlankContent.class);
+                yield new FillInBlankStartContent(
+                        full.sentences().stream()
+                                .map(s -> new FillInBlankStartSentence(s.text()))
+                                .toList()
+                );
+            }
         };
     }
 }

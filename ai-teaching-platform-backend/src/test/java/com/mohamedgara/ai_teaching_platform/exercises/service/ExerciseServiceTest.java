@@ -118,7 +118,7 @@ public class ExerciseServiceTest {
     void createExercise_shouldCreateExerciseAndReturnResponse_whenCorrectAnswersIsFalse() {
         CreateExerciseResponse expectedResponse = new CreateExerciseResponse(
                 exerciseId, List.of(lessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
-                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(lessonService.lessonListExists(List.of(lessonId))).thenReturn(true);
@@ -151,7 +151,7 @@ public class ExerciseServiceTest {
 
         CreateExerciseResponse expectedResponse = new CreateExerciseResponse(
                 exerciseId, List.of(lessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
-                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(lessonService.lessonListExists(List.of(lessonId))).thenReturn(true);
@@ -191,7 +191,7 @@ public class ExerciseServiceTest {
                 lessonIdList, ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer", false, content);
         CreateExerciseResponse expectedResponse = new CreateExerciseResponse(
                 exerciseId, lessonIdList, ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
-                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(lessonService.lessonListExists(lessonIdList)).thenReturn(true);
@@ -325,7 +325,7 @@ public class ExerciseServiceTest {
     void getExercise_shouldReturnExerciseResponse_whenExerciseExists() {
         ExerciseResponse expectedResponse = new ExerciseResponse(
                 exerciseId, List.of(lessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
-                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
@@ -357,7 +357,7 @@ public class ExerciseServiceTest {
                 .build();
         ExerciseResponse expectedResponse = new ExerciseResponse(
                 exerciseId, List.of(lessonId, secondLessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
-                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(multiLessonExercise));
@@ -442,7 +442,7 @@ public class ExerciseServiceTest {
 
         ExerciseResponse expectedResponse = new ExerciseResponse(
                 exerciseId, List.of(lessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
-                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
@@ -481,7 +481,7 @@ public class ExerciseServiceTest {
 
         ExerciseResponse expectedResponse = new ExerciseResponse(
                 exerciseId, List.of(lessonId, secondLessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
-                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(multiLessonExercise));
@@ -549,7 +549,7 @@ public class ExerciseServiceTest {
                 ExerciseType.MULTIPLE_CHOICE,
                 "Generated Title",
                 "Generated instructions",
-                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4"), "4"));
 
         when(lessonService.getCourseLessonInfoList(courseId))
@@ -595,7 +595,7 @@ public class ExerciseServiceTest {
                 ExerciseType.MULTIPLE_CHOICE,
                 "Generated Title",
                 "Generated instructions",
-                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent(
+                new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4"), "4"));
 
         when(lessonService.getLessonInfoList(lessonIdList))

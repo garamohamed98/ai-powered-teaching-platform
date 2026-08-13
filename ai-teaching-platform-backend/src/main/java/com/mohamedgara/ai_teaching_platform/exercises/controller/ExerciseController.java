@@ -1,4 +1,4 @@
-package com.mohamedgara.ai_teaching_platform.exercises;
+package com.mohamedgara.ai_teaching_platform.exercises.controller;
 
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.CreateExerciseRequest;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.GenerateExerciseRequest;
