@@ -13,10 +13,10 @@ import com.mohamedgara.ai_teaching_platform.exercises.dto.request.GenerateExerci
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.ExerciseContent;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.FillInBlankContent;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.FillInBlankSentence;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.content.MultipleChoiceContent;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.ExerciseContent;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.FillInBlankContent;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.FillInBlankSentence;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.LessonNotFoundException;

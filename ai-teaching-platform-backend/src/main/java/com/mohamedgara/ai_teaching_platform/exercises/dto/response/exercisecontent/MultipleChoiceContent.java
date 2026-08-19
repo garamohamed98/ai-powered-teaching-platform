@@ -1,4 +1,4 @@
-package com.mohamedgara.ai_teaching_platform.exercises.dto.response.content;
+package com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

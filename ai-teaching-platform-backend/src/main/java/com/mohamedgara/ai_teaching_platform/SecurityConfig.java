@@ -23,6 +23,7 @@ public class SecurityConfig {
                         .requestMatchers("/test/db").permitAll()
                         .requestMatchers("/api/course/**").permitAll()
                         .requestMatchers("/api/exercise/**").permitAll()
+                        .requestMatchers("/api/exercise-attempt/**").permitAll()
                         .requestMatchers("/api/lesson/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()

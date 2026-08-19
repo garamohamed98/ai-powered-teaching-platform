@@ -24,8 +24,7 @@ public class ExerciseAttempt {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne
-    private Exercise exercise;
+    private UUID exerciseId;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
@@ -37,6 +36,7 @@ public class ExerciseAttempt {
     private String aiFeedback;
 
     private LocalDateTime createdAt;
+    private LocalDateTime submittedAt;
     private LocalDateTime deletedAt;
 
     @PrePersist
