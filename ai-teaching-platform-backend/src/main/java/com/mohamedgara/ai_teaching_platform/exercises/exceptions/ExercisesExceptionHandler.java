@@ -42,4 +42,50 @@ public class ExercisesExceptionHandler {
                 .build();
         return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
     }
+
+    @ExceptionHandler(ExerciseGenerationException.class)
+    public ResponseEntity<ErrorResponse> handleExerciseGenerationException(ExerciseGenerationException exception){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error("EXERCISE_GENERATION_FAILED")
+                .message(exception.getMessage())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(ExerciseAttemptNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleExerciseAttemptNotFoundException(ExerciseAttemptNotFoundException exception){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error("EXERCISE_ATTEMPT_NOT_FOUND")
+                .message(exception.getMessage())
+                .status(HttpStatus.NOT_FOUND)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidAttemptTypeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidAttemptTypeException(InvalidAttemptTypeException exception){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error("INVALID_EXERCISE_TYPE")
+                .message("Invalid exercise type")
+                .status(HttpStatus.BAD_REQUEST)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidExerciseContentException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidExerciseContentException(InvalidExerciseContentException exception) {
+
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error("INVALID_EXERCISE_CONTENT")
+                .message("Something went wrong while loading this exercise. Please try again later.")
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
 }

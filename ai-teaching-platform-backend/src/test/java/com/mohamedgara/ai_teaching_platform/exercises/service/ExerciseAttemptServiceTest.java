@@ -7,7 +7,7 @@ import com.mohamedgara.ai_teaching_platform.exercises.dto.response.StartExercise
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisestartcontent.MultipleChoiceStartContent;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseAttempt;
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
+import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseType;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.ExerciseNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseResponseMapper;
 import com.mohamedgara.ai_teaching_platform.exercises.repositories.ExerciseAttemptRepository;
@@ -81,7 +81,7 @@ public class ExerciseAttemptServiceTest {
             attempt.setId(exerciseAttemptId);
             return attempt;
         });
-        when(exerciseResponseMapper.toExerciseAttemptResponse(exercise, exerciseAttemptId)).thenReturn(expectedResponse);
+        when(exerciseResponseMapper.toStartExerciseResponse(exercise, exerciseAttemptId)).thenReturn(expectedResponse);
 
         StartExerciseResponse response = exerciseAttemptService.startExerciseAttempt(exerciseId);
 
@@ -94,7 +94,7 @@ public class ExerciseAttemptServiceTest {
 
         verify(exerciseRepository).findById(exerciseId);
         verify(exerciseAttemptRepository).save(any(ExerciseAttempt.class));
-        verify(exerciseResponseMapper).toExerciseAttemptResponse(exercise, exerciseAttemptId);
+        verify(exerciseResponseMapper).toStartExerciseResponse(exercise, exerciseAttemptId);
     }
 
 
@@ -109,6 +109,6 @@ public class ExerciseAttemptServiceTest {
 
         verify(exerciseRepository).findById(exerciseId);
         verify(exerciseAttemptRepository, never()).save(any());
-        verify(exerciseResponseMapper, never()).toExerciseAttemptResponse(any(), any());
+        verify(exerciseResponseMapper, never()).toStartExerciseResponse(any(), any());
     }
 }

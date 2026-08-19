@@ -1,7 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.exercises.entities;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

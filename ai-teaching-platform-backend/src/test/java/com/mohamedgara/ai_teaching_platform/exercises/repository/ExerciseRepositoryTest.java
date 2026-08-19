@@ -3,7 +3,7 @@ package com.mohamedgara.ai_teaching_platform.exercises.repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mohamedgara.ai_teaching_platform.TestcontainersConfiguration;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
+import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseType;
 import com.mohamedgara.ai_teaching_platform.exercises.repositories.ExerciseRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;

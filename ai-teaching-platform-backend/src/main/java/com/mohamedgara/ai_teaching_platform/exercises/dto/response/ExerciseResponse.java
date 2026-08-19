@@ -2,7 +2,7 @@ package com.mohamedgara.ai_teaching_platform.exercises.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.ExerciseContent;
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
+import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseType;
 
 import java.util.List;
 import java.util.UUID;

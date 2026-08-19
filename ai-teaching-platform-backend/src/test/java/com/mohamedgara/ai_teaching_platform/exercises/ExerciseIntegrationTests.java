@@ -8,7 +8,7 @@ import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
 import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
+import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseType;
 import com.mohamedgara.ai_teaching_platform.exercises.repositories.ExerciseRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;

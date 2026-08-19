@@ -14,7 +14,7 @@ import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExercis
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
+import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseType;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.LessonNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.ExerciseNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.NoLessonReferenceException;
