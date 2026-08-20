@@ -10,9 +10,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.List;
-import java.util.Map;
-
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +24,7 @@ public class ExerciseGeneratorService {
         String prompt = promptBuilderService.generateExerciseAnswers(exercise);
         String aiGenerated = geminiClient.generateContent(prompt);
         try{
-            return geminiResponseParser.parse(aiGenerated);
+            return geminiResponseParser.parseToJsonNode(aiGenerated);
         }catch (Exception e){
             throw new GeminiParseFailException();
         }
@@ -37,12 +34,21 @@ public class ExerciseGeneratorService {
         String prompt = promptBuilderService.generateExercise(reference, exerciseExampleReference);
         String aiGenerated = geminiClient.generateContent(prompt);
         try{
-            JsonNode parsedResponse =  geminiResponseParser.parse(aiGenerated);
+            JsonNode parsedResponse =  geminiResponseParser.parseToJsonNode(aiGenerated);
             return objectMapper.convertValue(parsedResponse, GeneratedExercise.class);
         }catch (Exception e){
-            System.out.println("gemini response: " + aiGenerated);
             throw new GeminiParseFailException();
         }
 
+    }
+
+    public String generateAttemptFeedBack(JsonNode exercise, JsonNode lessons, JsonNode scoredComparedAnswer){
+        String prompt = promptBuilderService.generateAttemptFeedback(exercise, lessons, scoredComparedAnswer);
+        String aiGenerated = geminiClient.generateContent(prompt);
+        try {
+            return geminiResponseParser.parse(aiGenerated);
+        }catch (Exception e){
+            throw new GeminiParseFailException();
+        }
     }
 }

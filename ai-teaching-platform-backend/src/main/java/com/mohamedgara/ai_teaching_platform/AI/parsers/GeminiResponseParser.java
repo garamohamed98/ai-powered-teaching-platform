@@ -13,18 +13,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class GeminiResponseParser {
     private final ObjectMapper objectMapper;
 
-    public JsonNode parse(String response) throws JsonProcessingException {
-            JsonNode root = objectMapper.readTree(response);
+    public String parse(String response ) throws JsonProcessingException{
+        JsonNode root = objectMapper.readTree(response);
 
-            String generatedText = root.path("candidates")
-                    .get(0)
-                    .path("content")
-                    .path("parts")
-                    .get(0)
-                    .path("text")
-                    .asText();
+        return root.path("candidates")
+                .get(0)
+                .path("content")
+                .path("parts")
+                .get(0)
+                .path("text")
+                .asText();
+    }
 
-            return objectMapper.readTree(generatedText);
+    public JsonNode parseToJsonNode(String response) throws JsonProcessingException {
+
+            return objectMapper.readTree(parse(response));
 
     }
 }

@@ -1,6 +1,9 @@
 package com.mohamedgara.ai_teaching_platform.exercises.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mohamedgara.ai_teaching_platform.AI.services.ExerciseGeneratorService;
+import com.mohamedgara.ai_teaching_platform.courses.service.LessonService;
 import com.mohamedgara.ai_teaching_platform.exercises.domain.ExerciseContent;
 import com.mohamedgara.ai_teaching_platform.exercises.domain.FillInBlankContent;
 import com.mohamedgara.ai_teaching_platform.exercises.domain.MultipleChoiceContent;
@@ -42,6 +45,8 @@ public class ExerciseAttemptService {
     private final ExerciseAttemptRepository exerciseAttemptRepository;
     private final ObjectMapper objectMapper;
     private final ExerciseContentMapper exerciseContentMapper;
+    private final LessonService lessonService;
+    private final ExerciseGeneratorService exerciseGeneratorService;
 
     public StartExerciseResponse startExerciseAttempt(UUID exerciseId){
         Exercise exercise = exerciseRepository.findById(exerciseId).orElseThrow(()-> new ExerciseNotFoundException());
@@ -75,12 +80,15 @@ public class ExerciseAttemptService {
                 exercise.getContent(), exerciseType
         );
 
-        String aiFeedBack = "";
 
         ScoredComparedAnswer scoredComparedAnswer = switch (exerciseType){
             case MULTIPLE_CHOICE -> compareAnswerMultipleChoice(submitExerciseAttemptRequest.attempt(), exerciseContent);
             case FILL_IN_BLANK -> compareAnswerFillInBlank(submitExerciseAttemptRequest.attempt(), exerciseContent);
         };
+
+        String aiFeedBack = getAiComparedAnswersFeedBack(scoredComparedAnswer,exercise);
+
+        //TODO: Save ExerciseAttemtp entity
 
         return exerciseResponseMapper.toSubmitExerciseResponse(
                 exercise,
@@ -151,5 +159,35 @@ public class ExerciseAttemptService {
                 score,
                 new FillInBlankComparedAnswer(sentences)
         );
+    }
+
+    private String getAiComparedAnswersFeedBack(ScoredComparedAnswer scoredComparedAnswer, Exercise exercise){
+        JsonNode scoredComparedAnswerJson = objectMapper.valueToTree(scoredComparedAnswer);
+
+        record ExercisePromptInfo(String title, String instructions, JsonNode content){};
+
+        ExercisePromptInfo exercisePromptInfo = new ExercisePromptInfo(
+                exercise.getTitle(),
+                exercise.getInstructions(),
+                exercise.getContent()
+        );
+
+        JsonNode exerciseJson = objectMapper.valueToTree(exercisePromptInfo);
+
+        record LessonPromptInfo(String title, String content){};
+
+        List<LessonPromptInfo> lessonInfoList = lessonService.getLessonInfoList(exercise.getLessonIdList())
+                .stream()
+                .map(lessonInfo -> new LessonPromptInfo(
+                        lessonInfo.title(),
+                        lessonInfo.content()
+                ))
+                .toList();
+
+        JsonNode lessonInfoListJson = objectMapper.valueToTree(lessonInfoList);
+
+        return exerciseGeneratorService.generateAttemptFeedBack(exerciseJson, lessonInfoListJson,scoredComparedAnswerJson);
+
+
     }
 }
