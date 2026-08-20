@@ -28,6 +28,7 @@ import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseContentMap
 import com.mohamedgara.ai_teaching_platform.exercises.mappers.ExerciseResponseMapper;
 import com.mohamedgara.ai_teaching_platform.exercises.repositories.ExerciseAttemptRepository;
 import com.mohamedgara.ai_teaching_platform.exercises.repositories.ExerciseRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -61,16 +62,14 @@ public class ExerciseAttemptService {
         return exerciseResponseMapper.toStartExerciseResponse(exercise,savedExerciseAttempt.getId());
     }
 
+    @Transactional
     public SubmitExerciseResponse submitExerciseAttempt(UUID exerciseAttemptId, SubmitExerciseAttemptRequest submitExerciseAttemptRequest) {
+        LocalDateTime submittedTime = LocalDateTime.now();
         ExerciseAttempt exerciseAttempt = exerciseAttemptRepository.findById(exerciseAttemptId)
                 .orElseThrow(()-> new ExerciseAttemptNotFoundException());
 
         Exercise exercise = exerciseAttempt.getExercise();
 
-        long timeTaken = Duration.between(
-                exerciseAttempt.getCreatedAt(),
-                LocalDateTime.now()
-        ).toSeconds();
 
         ExerciseType exerciseType = exercise.getType();
 
@@ -88,12 +87,23 @@ public class ExerciseAttemptService {
 
         String aiFeedBack = getAiComparedAnswersFeedBack(scoredComparedAnswer,exercise);
 
-        //TODO: Save ExerciseAttemtp entity
+        ExerciseAttempt savedExerciseAttempt = saveExerciseAttemptSubmission(
+                exerciseAttempt,
+                scoredComparedAnswer.comparedAnswer,
+                scoredComparedAnswer.score,
+                aiFeedBack,
+                submittedTime
+        );
+
+        long timeTaken = Duration.between(
+                exerciseAttempt.getCreatedAt(),
+                savedExerciseAttempt.getSubmittedAt()
+        ).toSeconds();
 
         return exerciseResponseMapper.toSubmitExerciseResponse(
                 exercise,
                 exerciseAttempt.getId(),
-                scoredComparedAnswer.score,
+                savedExerciseAttempt.getScore(),
                 aiFeedBack,
                 timeTaken,
                 scoredComparedAnswer.comparedAnswer
@@ -189,5 +199,22 @@ public class ExerciseAttemptService {
         return exerciseGeneratorService.generateAttemptFeedBack(exerciseJson, lessonInfoListJson,scoredComparedAnswerJson);
 
 
+    }
+
+
+    private ExerciseAttempt saveExerciseAttemptSubmission(
+            ExerciseAttempt exerciseAttempt,
+            ComparedAnswer comparedAnswer,
+            Integer score,
+            String aiFeedBack,
+            LocalDateTime submittedTime
+    ){
+        JsonNode comparedAnswerNode = objectMapper.valueToTree(comparedAnswer);
+
+        exerciseAttempt.setUserAnswer(comparedAnswerNode);
+        exerciseAttempt.setScore(score);
+        exerciseAttempt.setAiFeedback(aiFeedBack);
+        exerciseAttempt.setSubmittedAt(submittedTime);
+        return exerciseAttemptRepository.save(exerciseAttempt);
     }
 }

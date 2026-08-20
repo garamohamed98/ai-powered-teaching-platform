@@ -78,6 +78,7 @@ public class ExerciseAttemptServiceTest {
         when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
         when(exerciseAttemptRepository.save(any(ExerciseAttempt.class))).thenAnswer(invocation -> {
             ExerciseAttempt attempt = invocation.getArgument(0);
+            assertSame(exercise, attempt.getExercise());
             attempt.setId(exerciseAttemptId);
             return attempt;
         });
@@ -91,6 +92,28 @@ public class ExerciseAttemptServiceTest {
         assertEquals(ExerciseType.MULTIPLE_CHOICE, response.type());
         assertEquals("Addition", response.title());
         assertEquals("Choose the correct answer", response.instructions());
+
+        verify(exerciseRepository).findById(exerciseId);
+        verify(exerciseAttemptRepository).save(any(ExerciseAttempt.class));
+        verify(exerciseResponseMapper).toStartExerciseResponse(exercise, exerciseAttemptId);
+    }
+
+    @Test
+    void startExerciseAttempt_shouldSaveAttemptWithExercise() {
+        StartExerciseResponse expectedResponse = new StartExerciseResponse(
+                exerciseId, exerciseAttemptId, ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
+                new MultipleChoiceStartContent("What is 2+2?", List.of("4", "5")));
+
+        when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
+        when(exerciseAttemptRepository.save(any(ExerciseAttempt.class))).thenAnswer(invocation -> {
+            ExerciseAttempt attempt = invocation.getArgument(0);
+            assertEquals(exercise.getId(), attempt.getExercise().getId());
+            attempt.setId(exerciseAttemptId);
+            return attempt;
+        });
+        when(exerciseResponseMapper.toStartExerciseResponse(exercise, exerciseAttemptId)).thenReturn(expectedResponse);
+
+        exerciseAttemptService.startExerciseAttempt(exerciseId);
 
         verify(exerciseRepository).findById(exerciseId);
         verify(exerciseAttemptRepository).save(any(ExerciseAttempt.class));

@@ -78,7 +78,39 @@ public class ExerciseAttemptIntegrationTests {
 
         assert exerciseAttemptRepository.count() == 1;
         ExerciseAttempt savedAttempt = exerciseAttemptRepository.findAll().get(0);
-        assert savedAttempt.getExerciseId().equals(savedExercise.getId());
+        assert savedAttempt.getExercise().getId().equals(savedExercise.getId());
+    }
+
+    @Test
+    void startExerciseAttempt_shouldCreateAttemptAndReturnFillInBlankContentWithSentenceIds_whenExerciseExists() throws Exception {
+        Course savedCourse = courseRepository.save(Course.builder().title("Course Title").build());
+        Lesson savedLesson = lessonRepository.save(Lesson.builder().title("Lesson Title").course(savedCourse).build());
+        Exercise savedExercise = exerciseRepository.save(Exercise.builder()
+                .lessonIdList(List.of(savedLesson.getId()))
+                .type(ExerciseType.FILL_IN_BLANK)
+                .title("Fill the blanks")
+                .instructions("Complete each sentence")
+                .content(objectMapper.valueToTree(Map.of(
+                        "sentences", List.of(
+                                Map.of(
+                                        "id", UUID.randomUUID().toString(),
+                                        "text", "2 plus 2 is ____",
+                                        "answers", List.of("4"))))))
+                .build());
+
+        mockMvc.perform(post("/api/exercise-attempt/{exerciseId}/attempt", savedExercise.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(savedExercise.getId().toString()))
+                .andExpect(jsonPath("$.exercise_attempt_id").isNotEmpty())
+                .andExpect(jsonPath("$.type").value("FILL_IN_BLANK"))
+                .andExpect(jsonPath("$.title").value("Fill the blanks"))
+                .andExpect(jsonPath("$.instructions").value("Complete each sentence"))
+                .andExpect(jsonPath("$.content.sentences[0].id").isNotEmpty())
+                .andExpect(jsonPath("$.content.sentences[0].text").value("2 plus 2 is ____"));
+
+        assert exerciseAttemptRepository.count() == 1;
+        ExerciseAttempt savedAttempt = exerciseAttemptRepository.findAll().get(0);
+        assert savedAttempt.getExercise().getId().equals(savedExercise.getId());
     }
 
     @Test
