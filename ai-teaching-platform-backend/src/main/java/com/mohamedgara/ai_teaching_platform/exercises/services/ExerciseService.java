@@ -1,6 +1,7 @@
 package com.mohamedgara.ai_teaching_platform.exercises.services;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -13,12 +14,9 @@ import com.mohamedgara.ai_teaching_platform.exercises.dto.request.GenerateExerci
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.ExerciseContent;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.FillInBlankContent;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.FillInBlankSentence;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
+import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseType;
+import com.mohamedgara.ai_teaching_platform.exercises.exceptions.ExerciseGenerationException;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.LessonNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.ExerciseNotFoundException;
 import com.mohamedgara.ai_teaching_platform.exercises.exceptions.NoLessonReferenceException;
@@ -54,13 +52,33 @@ public class ExerciseService {
 
         boolean correctAnswers = createExerciseRequest.correctAnswers();
 
+        JsonNode exerciseContent = exercise.getContent();
+
         if(correctAnswers){
-            JsonNode result = exerciseGeneratorService.generateExerciseAnswer(exercise.getContent());
-            exercise.setContent(result);
+            exerciseContent = exerciseGeneratorService.generateExerciseAnswer(exerciseContent);
+
         }
+        JsonNode exerciseContentWithId = assignSentenceIds(exercise.getType(),exerciseContent);
+
+        exercise.setContent(exerciseContentWithId);
         Exercise savedExercise = exerciseRepository.save(exercise);
 
         return exerciseResponseMapper.toCreateExerciseResponse(savedExercise);
+    }
+
+    private JsonNode assignSentenceIds(ExerciseType exerciseType, JsonNode content){
+
+        if(exerciseType == ExerciseType.FILL_IN_BLANK){
+            ArrayNode sentences = (ArrayNode) content.get("sentences");
+
+            for(JsonNode sentenceNode:  sentences){
+                ObjectNode sentence = (ObjectNode) sentenceNode;
+                sentence.put("id",UUID.randomUUID().toString());
+
+            }
+        }
+
+        return content;
     }
 
     public List<ExerciseSummaryResponse> getExercises(UUID courseId) {
@@ -119,11 +137,13 @@ public class ExerciseService {
                 lessonInfo -> lessonInfo.id()
         ).toList();
 
+        JsonNode exerciseContent = assignSentenceIds(exerciseType,generatedExercise.exercise());
+
         Exercise exercise = Exercise.builder()
                 .lessonIdList(lessonIdListToSave)
                 .type(exerciseType)
                 .instructions(generatedExercise.instruction())
-                .content(generatedExercise.exercise())
+                .content(exerciseContent)
                 .title(generatedExercise.title())
                 .build();
 
@@ -158,37 +178,28 @@ public class ExerciseService {
     }
 
     private JsonNode buildExerciseExampleReference(ExerciseType exerciseType){
-        ExerciseContent exerciseContent = switch (exerciseType) {
-            case MULTIPLE_CHOICE ->  new MultipleChoiceContent(
-                    "Example question here",
-                    List.of(
-                            "Example option 1",
-                            "Example option 2",
-                            "Example option 3"
-                    ),
-                    "Example option 1"
-            );
-
-            case FILL_IN_BLANK ->  new FillInBlankContent(
-                    List.of(
-                            new FillInBlankSentence(
-                                    "Example sentence with a ___",
-                                    List.of(
-                                            "Example answer 1",
-                                            "Example answer 2 if applicable"
-                                    )
-                            ),
-                            new FillInBlankSentence(
-                                    "Another example sentence with a ___",
-                                    List.of(
-                                            "Example answer 1",
-                                            "Example answer 2 if applicable"
-                                    )
-                            )
-                    )
-            );
+        String json = switch (exerciseType) {
+            case MULTIPLE_CHOICE -> """
+            {
+              "question": "Example question here",
+              "options": ["Example option 1", "Example option 2", "Example option 3"],
+              "correct_answer": "Example option 1"
+            }
+            """;
+            case FILL_IN_BLANK -> """
+            {
+              "sentences": [
+                { "text": "Example sentence with a ___", "answers": ["Example answer 1", "Example answer 2 if applicable"] },
+                { "text": "Another example sentence with a ___", "answers": ["Example answer 1", "Example answer 2 if applicable"] }
+              ]
+            }
+            """;
         };
-        return objectMapper.valueToTree(exerciseContent);
+        try {
+            return objectMapper.readTree(json);
+        } catch (JsonProcessingException e) {
+            throw new ExerciseGenerationException();
+        }
     }
 
     private JsonNode buildLessonReference(List<LessonInfo> lessonTitleAndContentList){

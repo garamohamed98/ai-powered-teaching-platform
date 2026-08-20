@@ -2,23 +2,23 @@ package com.mohamedgara.ai_teaching_platform.exercises.mappers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseResponse;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.ExerciseSummaryResponse;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.StartExerciseResponse;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.*;
+import com.mohamedgara.ai_teaching_platform.exercises.dto.response.comparedanswer.ComparedAnswer;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisestartcontent.ExerciseStartContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisestartcontent.FillInBlankStartContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisestartcontent.FillInBlankStartSentence;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisestartcontent.MultipleChoiceStartContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.ExerciseContent;
-import com.mohamedgara.ai_teaching_platform.exercises.dto.response.CreateExerciseResponse;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.FillInBlankContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent;
 import com.mohamedgara.ai_teaching_platform.exercises.entities.Exercise;
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
+import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseAttempt;
+import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,16 +63,7 @@ public abstract class ExerciseResponseMapper {
                 }).toList();
     };
 
-    @Mapping(target = "id", source = "exercise.id")
-    @Mapping(target = "exerciseAttemptId", source = "exerciseAttemptId")
-    @Mapping(target = "type", source = "exercise.type")
-    @Mapping(target = "title", source = "exercise.title")
-    @Mapping(target = "instructions", source = "exercise.instructions")
-    @Mapping(
-            target = "content",
-            expression = "java(toExerciseAttemptContentResponse(exercise.getType(), exercise.getContent()))"
-    )
-    public abstract StartExerciseResponse toExerciseAttemptResponse(Exercise exercise, UUID exerciseAttemptId);
+
 
     protected ExerciseContent toExerciseContentResponse(ExerciseType type, JsonNode content) {
         return switch (type) {
@@ -81,7 +72,18 @@ public abstract class ExerciseResponseMapper {
         };
     }
 
-    protected ExerciseStartContent toExerciseAttemptContentResponse(ExerciseType type, JsonNode content) {
+    @Mapping(target = "id", source = "exercise.id")
+    @Mapping(target = "exerciseAttemptId", source = "exerciseAttemptId")
+    @Mapping(target = "type", source = "exercise.type")
+    @Mapping(target = "title", source = "exercise.title")
+    @Mapping(target = "instructions", source = "exercise.instructions")
+    @Mapping(
+            target = "content",
+            expression = "java(toExerciseStartContentResponse(exercise.getType(), exercise.getContent()))"
+    )
+    public abstract StartExerciseResponse toStartExerciseResponse(Exercise exercise, UUID exerciseAttemptId);
+
+    protected ExerciseStartContent toExerciseStartContentResponse(ExerciseType type, JsonNode content) {
         return switch (type) {
             case MULTIPLE_CHOICE -> new MultipleChoiceStartContent(
                     content.get("question").asText(),
@@ -94,10 +96,22 @@ public abstract class ExerciseResponseMapper {
                 FillInBlankContent full = objectMapper.convertValue(content, FillInBlankContent.class);
                 yield new FillInBlankStartContent(
                         full.sentences().stream()
-                                .map(s -> new FillInBlankStartSentence(s.text()))
+                                .map(s -> new FillInBlankStartSentence(s.id(),s.text()))
                                 .toList()
                 );
             }
         };
     }
+
+    @Mapping(target = "attemptId", source = "exerciseAttemptId")
+    @Mapping(target = "exerciseId", source = "exercise.id")
+    public abstract SubmitExerciseResponse toSubmitExerciseResponse(
+            Exercise exercise,
+            UUID exerciseAttemptId,
+            Integer score,
+            String aiFeedBack,
+            Long timeTaken,
+            ComparedAnswer comparedAnswer
+    );
+
 }

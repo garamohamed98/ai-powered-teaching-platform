@@ -24,7 +24,9 @@ public class ExerciseAttempt {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private UUID exerciseId;
+    @ManyToOne
+    @JoinColumn(name = "exercise_id", nullable = false)
+    private Exercise exercise;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")

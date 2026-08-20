@@ -1,4 +1,4 @@
-package com.mohamedgara.ai_teaching_platform.exercises.enums;
+package com.mohamedgara.ai_teaching_platform.exercises.entities;
 
 public enum ExerciseType {
     MULTIPLE_CHOICE,

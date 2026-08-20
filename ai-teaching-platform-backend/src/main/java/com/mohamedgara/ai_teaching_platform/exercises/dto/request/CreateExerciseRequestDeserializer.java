@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.ExerciseContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.FillInBlankContent;
 import com.mohamedgara.ai_teaching_platform.exercises.dto.request.content.MultipleChoiceContent;
-import com.mohamedgara.ai_teaching_platform.exercises.enums.ExerciseType;
+import com.mohamedgara.ai_teaching_platform.exercises.entities.ExerciseType;
 
 
 import java.io.IOException;
