@@ -18,7 +18,7 @@
           } @else {
             <p>{{ course.title }}</p>
           }
-          <p-button [routerLink]="[course.id]" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
+          <p-button [routerLink]="[course.id,'lessons']" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
           <p-button [rounded]="true" icon="pi pi-trash" [text]="true" size="small" (onClick)="onDeleteCourse(course.id)" />
         </td>
       </tr>

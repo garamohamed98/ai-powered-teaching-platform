@@ -16,7 +16,6 @@ import {CoursesService} from '../../courses.service';
         Button,
         Card,
         Message,
-        NgIf,
         PrimeTemplate,
         RouterLink,
         Skeleton,

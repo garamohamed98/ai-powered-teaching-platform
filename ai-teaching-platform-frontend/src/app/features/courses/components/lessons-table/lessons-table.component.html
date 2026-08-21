@@ -1,0 +1,32 @@
+<p-card header="Lessons List">
+  <p-table
+    [value]="lessons"
+    [tableStyle]="{ 'min-height': '60vh' }"
+    [paginator]="true"
+    [rows]="maxRows"
+  >
+    <ng-template #header>
+      <tr>
+        <th>Title</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-lesson>
+      <tr>
+        <td class="title-row">
+          @if (loading){
+            <p-skeleton width="8rem" height="1rem"/>
+          } @else {
+            <p>{{lesson.title}}</p>
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td>
+          <p-message severity="info" text="No lessons found."/>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>
