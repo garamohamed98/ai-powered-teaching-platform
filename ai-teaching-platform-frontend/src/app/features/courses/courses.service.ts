@@ -2,6 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpResponse} from '@angular/common/http';
 import {Course} from './models/course.model';
 import {Observable} from 'rxjs';
+import {Lesson} from './models/lesson.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,11 @@ export class CoursesService {
   getCourseDetails(courseId: string) {
     console.log("fetching course details")
     return this.http.get<Course>(this.baseUrl +"/" +courseId);
+  }
+
+  getLessonsByCourseId(courseId: string) {
+    console.log("fetching lessons list for course id: " + courseId)
+    return this.http.get<Lesson[]>(this.baseUrl +"/" +courseId + "/lesson");
   }
 
   updateCourseContent(courseId: string, content: string) {

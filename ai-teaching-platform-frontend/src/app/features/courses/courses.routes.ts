@@ -1,6 +1,6 @@
 import {Routes} from '@angular/router';
 import {CoursesComponent} from './pages/courses/courses.component';
-import {CourseDetailsComponent} from './pages/course-details/course-details.component';
+import {LessonsComponent} from './pages/lessons/lessons.component';
 
 export const COURSES_ROUTES: Routes = [
   {
@@ -8,7 +8,7 @@ export const COURSES_ROUTES: Routes = [
     component: CoursesComponent
   },
   {
-    path:':id',
-    component: CourseDetailsComponent
+    path:':id/lessons',
+    component: LessonsComponent
   }
 ]
