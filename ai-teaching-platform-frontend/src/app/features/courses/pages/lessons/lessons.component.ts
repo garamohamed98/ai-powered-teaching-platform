@@ -3,11 +3,13 @@ import {ActivatedRoute} from '@angular/router';
 import {CoursesService} from '../../courses.service';
 import {Lesson} from '../../models/lesson.model';
 import {LessonsTableComponent} from '../../components/lessons-table/lessons-table.component';
+import {CourseExercisesListComponent} from '../../../exercises';
 
 @Component({
   selector: 'app-lessons',
   imports: [
-    LessonsTableComponent
+    LessonsTableComponent,
+    CourseExercisesListComponent
   ],
   providers: [CoursesService],
   templateUrl: './lessons.component.html',
@@ -20,12 +22,14 @@ export class LessonsComponent implements OnInit {
   lessons = signal<Lesson[]>([])
   maxRows:number = 6;
   loading = signal<boolean>(false);
+  courseId!: string;
 
   constructor(private route:ActivatedRoute) {
   }
 
   ngOnInit() {
     const courseId = this.route.snapshot.params['id'];
+    this.courseId = courseId;
     this.loadLessons(courseId);
   }
 
