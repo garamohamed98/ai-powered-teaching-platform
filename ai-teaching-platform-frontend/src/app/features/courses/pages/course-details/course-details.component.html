@@ -1,4 +1,22 @@
 <div class="page-container">
+  <div>
+    <p-button
+      label="New Lesson"
+      (onClick)="showCreateLessonModal()"
+      icon="pi pi-plus"
+    />
+  </div>
+  <app-lessons-form-modal
+    [isVisible]="isCreateLessonModalVisible()"
+    (isVisibleChange)="isCreateLessonModalVisible.set($event)"
+    (lessonCreated)="loadLessons()"
+    [courseId]="courseId"
+  ></app-lessons-form-modal>
+  @if(loading()){
+    
+  } @else {
+    <app-lessons-panel [lessons]="lessons()"></app-lessons-panel>
+  }
 
   <app-course-editor [course]="course()" (onCourseContentChanged)="handleCourseContentChanged($event)" [loading]="loading()"></app-course-editor>
 

@@ -34,7 +34,7 @@ export class CoursesTableComponent {
 
   @Output() courseDeleted = new EventEmitter<void>();
 
-  onDeleteCourse(id: number) {
+  onDeleteCourse(id: string) {
     this.courseService.deleteCourse(id).subscribe({
       next: (res) => {
         console.log("Deleted Course event triggered");

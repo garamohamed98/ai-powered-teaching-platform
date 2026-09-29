@@ -26,7 +26,7 @@ export class CoursesService {
 
   getLessonsByCourseId(courseId: string) {
     console.log("fetching lessons list for course id: " + courseId)
-    return this.http.get<Lesson[]>(this.baseUrl +"/" +courseId + "/lesson");
+    return this.http.get<Lesson[]>(`${this.baseUrl}/${courseId}/lesson`);
   }
 
   updateCourseContent(courseId: string, content: string) {
@@ -52,8 +52,18 @@ export class CoursesService {
     });
   }
 
-  deleteCourse(id: number) {
+  deleteCourse(id: string) {
     console.log("deleting course id: ",id);
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  createLesson(courseId:string, lessonTitle:string){
+    console.log("creating lesson: ",courseId," with lesson title: ",lessonTitle);
+    const body = {
+      title: lessonTitle
+    }
+    return this.http.post<Lesson>(`${this.baseUrl}/${courseId}/lesson`,body,{
+      observe: 'response'
+    })
   }
 }

@@ -24,8 +24,7 @@ export class LessonsComponent implements OnInit {
   loading = signal<boolean>(false);
   courseId!: string;
 
-  constructor(private route:ActivatedRoute) {
-  }
+  constructor(private route:ActivatedRoute) {}
 
   ngOnInit() {
     const courseId = this.route.snapshot.params['id'];

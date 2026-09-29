@@ -1,0 +1,8 @@
+<p-listbox
+  [options]="lessons"
+  [(ngModel)]="selectedLesson"
+  optionLabel="title"
+  [style]="{'width':'15rem'}"
+  [listStyle]="{'max-height': '220px'}"
+  (onChange)="onLessonSelected($event)"
+/>

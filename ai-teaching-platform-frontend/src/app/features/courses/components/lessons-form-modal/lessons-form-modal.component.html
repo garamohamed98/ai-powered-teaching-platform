@@ -1,0 +1,14 @@
+<p-dialog header="Create new Lesson" [modal]="true" [(visible)]="isVisible" (onHide)="close" [style]="{ width: '25rem' }">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="lessonDialogForm">
+    @if (form.get('title')?.touched && !form.get('title')?.valid) {
+      <div>
+        . More then 3 character in lesson title is required
+      </div>
+    }
+    <div class="formElementContainer">
+      <label>Lesson Title</label>
+      <input pInputText formControlName="title" placeholder="Enter Lesson Title">
+    </div>
+    <p-button type="submit" label="Create Lesson"/>
+  </form>
+</p-dialog>
