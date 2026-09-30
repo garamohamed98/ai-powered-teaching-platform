@@ -1,0 +1,33 @@
+<p-card >
+  <div class="card-content">
+    @if(!lesson && loading == false){
+      <div [style]="{ height: '435px' }" >
+        <p-message severity="info" text="Select a lesson" />
+      </div>
+
+    } @else {
+      <p-toolbar>
+        <ng-template #start>
+          @if(loading){
+            <p-skeleton height="20px" width="200px" />
+          }@else{
+            @if(lesson?.title === ""){
+              <p-message severity="info" text="No data available" />
+            } @else {
+              {{lesson?.title}}
+            }
+          }
+        </ng-template>
+        <ng-template #end>
+          <p-button type="button" (click)="handleSaveLesson()" [rounded]="true" text="true" icon="pi pi-check" size="small"/>
+        </ng-template>
+      </p-toolbar>
+      <p-editor
+        [ngModel]="lesson?.content"
+        [style]="{ height: '320px' }"
+        (onTextChange)="handleTextChange($event)"
+      />
+    }
+
+  </div>
+</p-card>

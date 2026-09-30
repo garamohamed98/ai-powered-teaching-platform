@@ -1,6 +1,6 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {TableModule} from 'primeng/table';
-import {CoursesService} from '../../courses.service';
+import {CoursesService} from '../../services/courses.service';
 import {Course} from '../../models/course.model';
 import {CardModule} from 'primeng/card';
 import {Button} from 'primeng/button';

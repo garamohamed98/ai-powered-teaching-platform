@@ -1,4 +1,4 @@
-<p-dialog header="Create new Lesson" [modal]="true" [(visible)]="isVisible" (onHide)="close" [style]="{ width: '25rem' }">
+<p-dialog header="Create new Lesson" [modal]="true" [(visible)]="isVisible" (onHide)="close()" [style]="{ width: '25rem' }">
   <form [formGroup]="form" (ngSubmit)="submit()" class="lessonDialogForm">
     @if (form.get('title')?.touched && !form.get('title')?.valid) {
       <div>

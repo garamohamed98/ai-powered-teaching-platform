@@ -1,22 +1,27 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
-import {CoursesService} from '../../courses.service';
+import {CoursesService} from '../../services/courses.service';
 import {Course} from '../../models/course.model';
-import {CourseEditorComponent} from '../../components/course-editor/course-editor.component';
+import {LessonEditorComponent} from '../../components/lesson-editor/lesson-editor.component';
 import {LessonsPanelComponent} from '../../components/lessons-panel/lessons-panel.component';
 import {Lesson} from '../../models/lesson.model';
 import {Button} from 'primeng/button';
 import {LessonsFormModalComponent} from '../../components/lessons-form-modal/lessons-form-modal.component';
+import {Skeleton} from 'primeng/skeleton';
+import {Card} from 'primeng/card';
+import {LessonsService} from '../../services/lessons.service';
 
 @Component({
   selector: 'app-course-details',
   imports: [
     FormsModule,
-    CourseEditorComponent,
+    LessonEditorComponent,
     LessonsPanelComponent,
     Button,
     LessonsFormModalComponent,
+    Skeleton,
+    Card,
   ],
   providers: [CoursesService],
   templateUrl: './course-details.component.html',
@@ -24,14 +29,19 @@ import {LessonsFormModalComponent} from '../../components/lessons-form-modal/les
 })
 export class CourseDetailsComponent implements OnInit {
   private coursesService = inject(CoursesService);
+  private lessonsService = inject(LessonsService);
   private router = inject(Router);
 
   course = signal<Course>({id:"",title:"",content:""});
   lessons = signal<Lesson[]>([])
+
   maxLessonsRow: number = 6;
   loading = signal<boolean>(false);
   isCreateLessonModalVisible = signal<boolean>(false);
   courseId!:string;
+
+  lessonIsLoading = signal<boolean>(false);
+  loadedLesson = signal<Lesson | null>(null);
 
   constructor(private route: ActivatedRoute) {}
 
@@ -45,22 +55,21 @@ export class CourseDetailsComponent implements OnInit {
     this.courseId = courseId;
     this.course.update(currentCourse => ({...currentCourse, id : courseId }));
     this.loadLessons();
-
   }
 
-  loadCourse(){
-    if (this.course().id == "") return;
-    this.loading.set(true);
-    this.coursesService.getCourseDetails(this.course().id)
+  loadLesson(lessonId:string){
+    if (lessonId == "") return;
+    this.lessonIsLoading.set(true);
+    this.lessonsService.getLesson(lessonId)
       .subscribe({
-      next: (data: Course) => {
-        console.log("Course details fetched successfully.");
-        this.course.set(data);
-        this.loading.set(false);
+      next: (data: Lesson) => {
+        console.log("lesson fetched successfully.");
+        this.loadedLesson.set(data);
+        this.lessonIsLoading.set(false);
       },
       error: (error) => {
-        console.log("An error appeared during fetching course details: ",error);
-        this.loading.set(false);
+        console.log("An error appeared during fetching lesson: ",error);
+        this.lessonIsLoading.set(false);
 
       }
     });
@@ -95,10 +104,19 @@ export class CourseDetailsComponent implements OnInit {
 
 
   handleCourseContentChanged(event:string){
-    this.course.update(currentCourse=>({...currentCourse, content: event}));
+    this.loadedLesson.update(currentLesson=>{
+      if(!currentLesson){
+        return currentLesson;
+      }
+      return ({...currentLesson, content: event});
+    });
   }
 
   showCreateLessonModal(){
     this.isCreateLessonModalVisible.set(true);
+  }
+
+  lessonSelected(event:Lesson){
+    this.loadLesson(event.id);
   }
 }

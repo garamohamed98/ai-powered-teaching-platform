@@ -8,7 +8,7 @@ import {RouterLink} from "@angular/router";
 import {Skeleton} from "primeng/skeleton";
 import {TableModule} from "primeng/table";
 import {Course} from '../../models/course.model';
-import {CoursesService} from '../../courses.service';
+import {CoursesService} from '../../services/courses.service';
 
 @Component({
   selector: 'app-courses-table',

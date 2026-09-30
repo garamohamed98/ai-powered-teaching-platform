@@ -3,7 +3,7 @@ import {Button} from "primeng/button";
 import {Dialog} from "primeng/dialog";
 import {InputText} from "primeng/inputtext";
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
-import {CoursesService} from '../../courses.service';
+import {CoursesService} from '../../services/courses.service';
 import {MessageService} from 'primeng/api';
 
 @Component({

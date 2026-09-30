@@ -1,6 +1,6 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {CoursesService} from '../../courses.service';
+import {CoursesService} from '../../services/courses.service';
 import {Lesson} from '../../models/lesson.model';
 import {LessonsTableComponent} from '../../components/lessons-table/lessons-table.component';
 import {CourseExercisesListComponent} from '../../../exercises';
