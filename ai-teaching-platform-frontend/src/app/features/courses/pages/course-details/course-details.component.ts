@@ -11,6 +11,7 @@ import {LessonsFormModalComponent} from '../../components/lessons-form-modal/les
 import {Skeleton} from 'primeng/skeleton';
 import {Card} from 'primeng/card';
 import {LessonsService} from '../../services/lessons.service';
+import {CourseExercisesListComponent} from '../../../exercises';
 
 @Component({
   selector: 'app-course-details',
@@ -22,6 +23,7 @@ import {LessonsService} from '../../services/lessons.service';
     LessonsFormModalComponent,
     Skeleton,
     Card,
+    CourseExercisesListComponent,
   ],
   providers: [CoursesService],
   templateUrl: './course-details.component.html',

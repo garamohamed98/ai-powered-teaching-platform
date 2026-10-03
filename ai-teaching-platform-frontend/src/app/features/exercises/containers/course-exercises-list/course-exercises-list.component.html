@@ -1,1 +1,21 @@
-<app-exercises-table [loading]="loading()" [exercises]="exercises()" [maxRows]="maxRows"></app-exercises-table>
+<div class="exercise-list-container">
+  <div class="exercise-list-controller">
+    <p-button
+      label ="Create Exercice"
+      (onClick)="showCreateExerciseModal()"
+      icon="pi pi-plus"
+    />
+    <app-create-exercise-form-modal
+      [isVisible]="isCreateExerciseModalVisible()"
+      (isVisibleChange)="isCreateExerciseModalVisible.set($event)"
+      [lessons]="lessons"
+    ></app-create-exercise-form-modal>
+  </div>
+  <app-exercises-table
+    [loading]="loading()"
+    [exercises]="exercises()"
+    [maxRows]="maxRows"
+    class="exercise-table"
+  ></app-exercises-table>
+
+</div>

@@ -1,0 +1,43 @@
+<div [formGroup]="form" class="form">
+  <div formArrayName="sentences" class="sentences">
+    <label>Sentences:</label>
+    @for (pair of sentences.controls; track pair; let i = $index) {
+      <p-card >
+        <div [formGroupName]="i" class="sentences-element">
+          <div class="sentence-header">
+            <p-button
+              type="button"
+              icon="pi pi-times"
+              severity="danger"
+              [rounded]="true"
+              (onClick)="removeSentences(i)"
+              size="small"
+              [text]="true"
+            />
+          </div>
+          <label>Question: </label>
+          <textarea
+            rows="3"
+            cols="30"
+            pInputTextarea
+            formControlName="question"
+            placeholder="Question"
+          ></textarea>
+          <label>Answers: </label>
+          <p-chips
+            formControlName="answers"
+            placeholder="Answers"
+            [allowDuplicate]="false"
+            [style]="{ width: '100%'}"
+          />
+
+        </div>
+      </p-card>
+
+    }
+  </div>
+
+  <div class="form-button">
+    <p-button type="button" icon="pi pi-plus" [rounded]="true" (onClick)="addSentences()" [text]="true"/>
+  </div>
+</div>

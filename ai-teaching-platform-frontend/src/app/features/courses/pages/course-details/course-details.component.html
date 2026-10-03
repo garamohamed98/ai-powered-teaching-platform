@@ -31,6 +31,13 @@
     ></app-lesson-editor>
   </div>
 
+  <div class="exercise-list-container">
+    <app-course-exercises-list
+      [courseId]="courseId"
+      [lessons]="lessons()"
+    ></app-course-exercises-list>
+  </div>
+
 </div>
 
 <app-lessons-form-modal

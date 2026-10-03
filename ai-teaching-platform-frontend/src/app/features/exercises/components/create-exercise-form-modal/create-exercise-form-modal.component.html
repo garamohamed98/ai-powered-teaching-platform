@@ -1,0 +1,58 @@
+<p-dialog header="Create New Exercise" [modal]="true" [(visible)]="isVisible" (onHide)="close()" [style]="{ width: '80vw', height:'100vh'}" >
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+    <div class="form-element">
+      <label>Exercise Title: </label>
+      <input pInputText formControlName="title" placeholder="Enter Exercise Title">
+    </div>
+    <div class="form-element">
+      <label>Related Lessons: </label>
+      <p-multiSelect
+        [options]="lessons"
+        formControlName="lessons"
+        optionLabel="title"
+        placeholder="Select lessons"
+      />
+    </div>
+    <div class="form-element">
+      <label>Exercise Instructions: </label>
+      <textarea
+        rows="5"
+        cols="30"
+        pInputTextarea
+        formControlName="instructions"
+        placeholder="Enter Exercise Instructions"
+      ></textarea>
+    </div>
+    <div class="form-element">
+      <label>Exercise Type: </label>
+      <p-select
+        [options]="exerciseTypes"
+        formControlName="exerciseType"
+        optionLabel="label"
+        [filter]="true"
+        filterBy="label"
+        [checkmark]="true"
+        placeholder="Select an exercise type"
+        class="w-full md:w-56"
+        (onChange)="onTypeChange($event.value.value)"
+      />
+    </div>
+    <div class="form-element">
+      @switch (exerciseType()){
+        @case ('MULTIPLE_CHOICE'){
+          <app-multiple-choice-form [form]="content"></app-multiple-choice-form>
+        }
+        @case ('FILL_IN_BLANK'){
+          <app-fill-in-blank-form [form]="content" [createSentence]="createSentence.bind(this)"></app-fill-in-blank-form>
+        }
+      }
+    </div>
+    <div class="form-element">
+      <label>Auto correction With Ai: </label>
+      <p-toggleswitch formControlName="correctAnswers"/>
+    </div>
+    <div class="submit-button">
+      <p-button type="submit" label="Create Exercise"/>
+    </div>
+  </form>
+</p-dialog>

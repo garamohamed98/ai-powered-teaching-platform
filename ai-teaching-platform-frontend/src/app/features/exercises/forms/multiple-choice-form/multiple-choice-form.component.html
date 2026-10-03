@@ -1,0 +1,33 @@
+<div [formGroup]="form" class="form">
+  <div class="form-element">
+    <label>Question: </label>
+    <textarea
+      rows="5"
+      cols="30"
+      pInputTextarea
+      formControlName="question"
+      placeholder="Enter Exercise Question"
+    ></textarea>
+  </div>
+  <div class="form-element">
+    <label>Options: </label>
+    <p-chips
+      formControlName="options"
+      [style]="{ width: '100%'}"
+      (onAdd)="onOptionAdd($event)"
+      (onRemove)="onOptionRemove($event)"
+      [allowDuplicate]="false"
+    />
+  </div>
+  <div class="form-element">
+    <label>Correct Answer: </label>
+    <p-select
+      [options]="options()"
+      formControlName="correctAnswer"
+      [filter]="true"
+      [checkmark]="true"
+      placeholder="Select the correct Answer"
+      class="w-full md:w-56"
+    />
+  </div>
+</div>

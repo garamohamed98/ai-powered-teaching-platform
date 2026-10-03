@@ -28,6 +28,11 @@
   height: 100%;
 }
 
+.exercise-list-container {
+  grid-column: span 4;
+}
+
+
 @media (min-width: 768px) {
   .page-container {
     grid-template-columns: repeat(12, 1fr);
@@ -44,4 +49,9 @@
   .lesson-content-container{
     grid-column: span 10;
   }
+
+  .exercise-list-container {
+    grid-column: span 12;
+  }
+
 }

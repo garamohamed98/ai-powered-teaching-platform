@@ -1,0 +1,28 @@
+.exercise-list-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.exercise-list-controller{
+  grid-column: span 4;
+}
+
+.exercise-table{
+  grid-column: span 4;
+}
+
+@media (min-width: 768px) {
+
+  .exercise-list-container {
+    grid-template-columns: repeat(12, 1fr);
+  }
+
+  .exercise-list-controller{
+    grid-column: span 12;
+  }
+
+  .exercise-table{
+    grid-column: span 12;
+  }
+}

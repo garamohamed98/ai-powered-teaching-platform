@@ -1,0 +1,12 @@
+.form{
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+.form-element{
+  grid-column: span 12;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

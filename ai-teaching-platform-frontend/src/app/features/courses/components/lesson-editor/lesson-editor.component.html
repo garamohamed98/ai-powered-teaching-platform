@@ -1,6 +1,6 @@
 <p-card >
   <div class="card-content">
-    @if(!lesson && loading == false){
+    @if(!lesson && !loading){
       <div [style]="{ height: '435px' }" >
         <p-message severity="info" text="Select a lesson" />
       </div>
