@@ -3,15 +3,18 @@ import {Dialog} from 'primeng/dialog';
 import {Form, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {InputText} from 'primeng/inputtext';
 import {Select} from 'primeng/select';
-import {ExerciseType} from '../../models/exercise.model';
+import {Exercise, ExerciseType} from '../../models/exercise.model';
 import {MultipleChoiceFormComponent} from '../../forms/multiple-choice-form/multiple-choice-form.component';
 import {FillInBlankFormComponent} from '../../forms/fill-in-blank-form/fill-in-blank-form.component';
 import {Button} from 'primeng/button';
 import {MultiSelect} from 'primeng/multiselect';
 import {Lesson} from '../../models/lesson.model';
-import {InputSwitch} from 'primeng/inputswitch';
 import {ToggleSwitch} from 'primeng/toggleswitch';
 import {Textarea} from 'primeng/textarea';
+import {CreateExerciseDto} from '../../models/create-exercise.dto';
+import {ExerciseContent} from '../../models/exercise-types/exercise-content.model';
+import {ExercisesService} from '../../exercises.service';
+import {MessageService} from 'primeng/api';
 
 @Component({
   selector: 'app-create-exercise-form-modal',
@@ -38,6 +41,8 @@ export class CreateExerciseFormModalComponent {
   @Output() isVisibleChange = new EventEmitter<boolean>();
 
   private formBuilder = inject(FormBuilder);
+  private exercisesService = inject(ExercisesService);
+  private messageService = inject(MessageService);
 
   exerciseType = signal<ExerciseType | null>(null);
 
@@ -125,6 +130,32 @@ export class CreateExerciseFormModalComponent {
   }
 
   submit(){
+    if(!this.form.valid) return;
+
+    const { title, instructions, exerciseType, lessons, correctAnswers } = this.form.value;
+
+    const createExerciseDto: CreateExerciseDto = {
+      title,
+      instructions,
+      type: exerciseType.value,
+      lessonIdList: lessons.map((lesson:Lesson) => lesson.id),
+      correctAnswers:correctAnswers,
+      content: this.content.value,
+    };
+
+    console.log("this is the create exercise dto: ",createExerciseDto);
+
+    this.exercisesService.createExercise(createExerciseDto).subscribe({
+      next: (res:Exercise)=>{
+        console.log("Exercise Created Successfully");
+        this.messageService.add({
+          severity: 'success',
+          summary: 'New Exercise is created successfully',
+          detail: `Exercise has been created successfully related to lesson $ lessons.`,
+        })
+        this.close();
+      }
+    })
 
   }
 }

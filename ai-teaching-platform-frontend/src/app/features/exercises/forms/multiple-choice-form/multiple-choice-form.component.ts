@@ -8,7 +8,6 @@ import {Textarea} from 'primeng/textarea';
 @Component({
   selector: 'app-multiple-choice-form',
   imports: [
-    InputText,
     ReactiveFormsModule,
     Chips,
     Select,

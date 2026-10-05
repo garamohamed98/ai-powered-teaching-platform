@@ -1,4 +1,4 @@
-import {APP_INITIALIZER, ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -8,6 +8,7 @@ import Aura from '@primeng/themes/aura';
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {MessageService} from 'primeng/api';
 import {errorInterceptor} from './error.interceptor';
+import {camelToSnakeInterceptor} from './camel-to-snake.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -22,7 +23,7 @@ export const appConfig: ApplicationConfig = {
       }
     }),
     provideHttpClient(
-      withInterceptors([errorInterceptor])
+      withInterceptors([errorInterceptor, camelToSnakeInterceptor])
     ),
     MessageService
   ]
