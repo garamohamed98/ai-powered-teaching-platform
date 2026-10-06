@@ -39,6 +39,7 @@ export class CreateExerciseFormModalComponent {
   @Input({required:true}) isVisible!:boolean;
   @Input({required: true}) lessons!: Lesson[];
   @Output() isVisibleChange = new EventEmitter<boolean>();
+  @Output() exerciseCreated = new EventEmitter<void>();
 
   private formBuilder = inject(FormBuilder);
   private exercisesService = inject(ExercisesService);
@@ -151,8 +152,9 @@ export class CreateExerciseFormModalComponent {
         this.messageService.add({
           severity: 'success',
           summary: 'New Exercise is created successfully',
-          detail: `Exercise has been created successfully related to lesson $ lessons.`,
+          detail: `Exercise has been created successfully related to lesson ${lessons.map((lesson:Lesson) => lesson.title).join(', ')}.`,
         })
+        this.exerciseCreated.emit();
         this.close();
       }
     })

@@ -7,13 +7,17 @@ import {
   CreateExerciseFormModalComponent
 } from '../../components/create-exercise-form-modal/create-exercise-form-modal.component';
 import {Lesson} from '../../models/lesson.model';
+import {
+  GenerateExerciseFormModalComponent
+} from '../../components/generate-exercise-form-modal/generate-exercise-form-modal.component';
 
 @Component({
   selector: 'app-course-exercises-list',
   imports: [
     ExercisesTableComponent,
     Button,
-    CreateExerciseFormModalComponent
+    CreateExerciseFormModalComponent,
+    GenerateExerciseFormModalComponent
   ],
   templateUrl: './course-exercises-list.component.html',
   styleUrl: './course-exercises-list.component.scss'
@@ -29,21 +33,24 @@ export class CourseExercisesListComponent implements OnInit {
   maxRows:number = 6;
   loading = signal<boolean>(false);
   isCreateExerciseModalVisible = signal<boolean>(false);
+  isGenerateExerciseModalVisible = signal<boolean>(false);
 
   ngOnInit() {
-    this.loadExercises(this.courseId);
+    this.loadExercises();
   }
 
-  loadExercises(courseId: string) {
-    if(courseId == "") return;
+  loadExercises() {
+    if(this.courseId == "") return;
     this.loading.set(true);
     this.exercises.set(Array(this.maxRows).fill({}));
     this.exerciseService
-      .getExercises(courseId)
+      .getExercises(this.courseId)
       .subscribe({
         next: (data:Exercise[])=>{
           console.log("Exercise list fetched successfully");
+          console.log("this is the exercise data",data);
           this.exercises.set(data);
+          console.log("this is the loaded exercise",this.exercises());
           this.loading.set(false);
         },
         error: (error:any)=>{
@@ -59,5 +66,9 @@ export class CourseExercisesListComponent implements OnInit {
 
   showCreateExerciseModal(){
     this.isCreateExerciseModalVisible.set(true);
+  }
+
+  showGenerateExerciseModal(){
+    this.isGenerateExerciseModalVisible.set(true);
   }
 }

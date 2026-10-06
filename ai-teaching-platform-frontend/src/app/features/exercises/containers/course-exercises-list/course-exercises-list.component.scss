@@ -20,6 +20,9 @@
 
   .exercise-list-controller{
     grid-column: span 12;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
   }
 
   .exercise-table{

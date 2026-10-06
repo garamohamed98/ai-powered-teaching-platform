@@ -1,22 +1,37 @@
-<p-card header="Exercise List">
+<p-card header="Exercise List" >
   <p-table
     [value]="exercises"
-    [tableStyle]="{ 'min-height': '60vh' }"
     [paginator]="true"
     [rows]="maxRows"
   >
     <ng-template #header>
       <tr>
         <th>Title</th>
+        <th>Type</th>
+        <th>lessons</th>
       </tr>
     </ng-template>
     <ng-template #body let-exercise>
       <tr>
-        <td class="title-row">
+        <td >
           @if (loading){
             <p-skeleton width="8rem" height="1rem"/>
           } @else {
             <p>{{exercise.title}}</p>
+          }
+        </td>
+        <td >
+          @if(loading){
+            <p-skeleton width="8rem" height="1rem"/>
+          } @else {
+            <p>{{getExerciseTypeLabel(exercise.type)}}</p>
+          }
+        </td>
+        <td >
+          @if(loading){
+            <p-skeleton width="8rem" height="1rem"/>
+          } @else {
+            <p>{{printLessons(exercise.lesson)}}</p>
           }
         </td>
       </tr>

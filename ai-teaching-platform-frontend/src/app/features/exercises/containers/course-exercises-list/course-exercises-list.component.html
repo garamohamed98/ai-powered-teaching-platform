@@ -9,7 +9,19 @@
       [isVisible]="isCreateExerciseModalVisible()"
       (isVisibleChange)="isCreateExerciseModalVisible.set($event)"
       [lessons]="lessons"
+      (exerciseCreated)="loadExercises()"
     ></app-create-exercise-form-modal>
+    <p-button
+      label = "Generate Exercise"
+      (onClick)="showGenerateExerciseModal()"
+      icon="pi pi-sparkles"
+    />
+    <app-generate-exercise-form-modal
+      [isVisible]="isGenerateExerciseModalVisible()"
+      (isVisibleChange)="isGenerateExerciseModalVisible.set($event)"
+      [lessons]="lessons"
+      (exerciseGenerated)="loadExercises()"
+    ></app-generate-exercise-form-modal>
   </div>
   <app-exercises-table
     [loading]="loading()"
