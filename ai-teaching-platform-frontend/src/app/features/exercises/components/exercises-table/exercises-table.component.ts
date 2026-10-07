@@ -3,8 +3,10 @@ import {Card} from 'primeng/card';
 import {TableModule} from 'primeng/table';
 import {Message} from 'primeng/message';
 import {Skeleton} from 'primeng/skeleton';
-import {Exercise, ExerciseType} from '../../models/exercise.model';
+import {Exercise, getExerciseTypeLabel} from '../../models/exercise.model';
 import {Lesson} from '../../models/lesson.model';
+import {Button} from 'primeng/button';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-exercises-table',
@@ -12,7 +14,9 @@ import {Lesson} from '../../models/lesson.model';
     Card,
     TableModule,
     Message,
-    Skeleton
+    Skeleton,
+    Button,
+    RouterLink
   ],
   templateUrl: './exercises-table.component.html',
   styleUrl: './exercises-table.component.scss'
@@ -24,14 +28,6 @@ export class ExercisesTableComponent {
   @Input({required: true}) loading!: boolean;
 
 
-  getExerciseTypeLabel(type: ExerciseType): string {
-    const labels: Record<ExerciseType, string> = {
-      MULTIPLE_CHOICE: 'Multiple Choice',
-      FILL_IN_BLANK: 'Fill in the Blank'
-    };
-
-    return labels[type];
-  }
 
   printLessons(lessons: Lesson[]) {
     let lessonsString = "";
@@ -43,4 +39,5 @@ export class ExercisesTableComponent {
     return lessonsString;
   }
 
+  protected readonly getExerciseTypeLabel = getExerciseTypeLabel;
 }

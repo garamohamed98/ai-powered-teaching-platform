@@ -9,6 +9,7 @@ import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {MessageService} from 'primeng/api';
 import {errorInterceptor} from './error.interceptor';
 import {camelToSnakeInterceptor} from './camel-to-snake.interceptor';
+import {snakeToCamelInterceptor} from './features/snake-to-camel.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -23,7 +24,7 @@ export const appConfig: ApplicationConfig = {
       }
     }),
     provideHttpClient(
-      withInterceptors([errorInterceptor, camelToSnakeInterceptor])
+      withInterceptors([errorInterceptor, camelToSnakeInterceptor, snakeToCamelInterceptor])
     ),
     MessageService
   ]

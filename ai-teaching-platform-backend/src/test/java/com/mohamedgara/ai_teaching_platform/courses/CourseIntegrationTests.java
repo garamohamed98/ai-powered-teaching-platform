@@ -132,7 +132,7 @@ public class CourseIntegrationTests {
         UUID randomId = UUID.randomUUID();
         CourseTitleUpdateRequest request = new CourseTitleUpdateRequest("Some title");
 
-        mockMvc.perform(patch("/api/course/{courseId}/content", randomId)
+        mockMvc.perform(patch("/api/course/{courseId}/title", randomId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());

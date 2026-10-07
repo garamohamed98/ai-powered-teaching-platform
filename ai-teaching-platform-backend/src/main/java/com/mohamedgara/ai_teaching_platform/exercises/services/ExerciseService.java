@@ -92,7 +92,8 @@ public class ExerciseService {
         Exercise exercise = exerciseRepository.findById(id).orElseThrow(
                 ()-> new ExerciseNotFoundException()
         );
-        return exerciseResponseMapper.toExerciseResponse(exercise);
+        Map<UUID,String> lessonsIdAndTitleList = getLessonIdAndTitleList(exercise);
+        return exerciseResponseMapper.toExerciseResponse(exercise, lessonsIdAndTitleList);
     }
 
     public void deleteExercise(UUID id) {
@@ -111,7 +112,9 @@ public class ExerciseService {
         exercise.setContent(result);
         Exercise savedExercise = exerciseRepository.save(exercise);
 
-        return exerciseResponseMapper.toExerciseResponse(savedExercise);
+        Map<UUID,String> lessonsIdAndTitleList = getLessonIdAndTitleList(exercise);
+
+        return exerciseResponseMapper.toExerciseResponse(savedExercise, lessonsIdAndTitleList);
     }
 
     public ExerciseResponse generateExercise(GenerateExerciseRequest generateExerciseRequest) {
@@ -149,7 +152,9 @@ public class ExerciseService {
 
         Exercise savedExercise = exerciseRepository.save(exercise);
 
-        return exerciseResponseMapper.toExerciseResponse(savedExercise);
+        Map<UUID,String> lessonsIdAndTitleList = getLessonIdAndTitleList(exercise);
+
+        return exerciseResponseMapper.toExerciseResponse(savedExercise,lessonsIdAndTitleList);
 
     }
 
@@ -215,6 +220,11 @@ public class ExerciseService {
                 }
         );
         return reference;
+    }
+
+    private Map<UUID, String> getLessonIdAndTitleList(Exercise exercise){
+        List<UUID> lessonIdList = exercise.getLessonIdList();
+        return lessonService.getLessonSummaryByLessonsId(lessonIdList);
     }
 
 }

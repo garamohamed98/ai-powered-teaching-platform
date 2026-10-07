@@ -39,6 +39,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -323,25 +324,32 @@ public class ExerciseServiceTest {
 
     @Test
     void getExercise_shouldReturnExerciseResponse_whenExerciseExists() {
+        Map<UUID, String> lessonTitlesById = Map.of(lessonId, "Lesson Title");
         ExerciseResponse expectedResponse = new ExerciseResponse(
-                exerciseId, List.of(lessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
+                exerciseId,
+                List.of(new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson Title")),
+                ExerciseType.MULTIPLE_CHOICE,
+                "Addition",
+                "Choose the correct answer",
                 new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
-        when(exerciseResponseMapper.toExerciseResponse(exercise)).thenReturn(expectedResponse);
+        when(lessonService.getLessonSummaryByLessonsId(List.of(lessonId))).thenReturn(lessonTitlesById);
+        when(exerciseResponseMapper.toExerciseResponse(exercise, lessonTitlesById)).thenReturn(expectedResponse);
 
         ExerciseResponse response = exerciseService.getExercise(exerciseId);
 
         assertNotNull(response);
         assertEquals(exerciseId, response.id());
-        assertEquals(List.of(lessonId), response.lessonIdList());
+        assertEquals(List.of(new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson Title")), response.lessonList());
         assertEquals(ExerciseType.MULTIPLE_CHOICE, response.type());
         assertEquals("Addition", response.title());
         assertEquals("Choose the correct answer", response.instructions());
 
         verify(exerciseRepository).findById(exerciseId);
-        verify(exerciseResponseMapper).toExerciseResponse(exercise);
+        verify(lessonService).getLessonSummaryByLessonsId(List.of(lessonId));
+        verify(exerciseResponseMapper).toExerciseResponse(exercise, lessonTitlesById);
     }
 
     @Test
@@ -355,24 +363,40 @@ public class ExerciseServiceTest {
                 .instructions("Choose the correct answer")
                 .content(contentJson)
                 .build();
+        Map<UUID, String> lessonTitlesById = Map.of(
+                lessonId, "Lesson Title",
+                secondLessonId, "Second Lesson Title"
+        );
         ExerciseResponse expectedResponse = new ExerciseResponse(
-                exerciseId, List.of(lessonId, secondLessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
+                exerciseId,
+                List.of(
+                        new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson Title"),
+                        new ExerciseResponse.LessonSummaryResponse(secondLessonId, "Second Lesson Title")
+                ),
+                ExerciseType.MULTIPLE_CHOICE,
+                "Addition",
+                "Choose the correct answer",
                 new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(multiLessonExercise));
-        when(exerciseResponseMapper.toExerciseResponse(multiLessonExercise)).thenReturn(expectedResponse);
+        when(lessonService.getLessonSummaryByLessonsId(List.of(lessonId, secondLessonId))).thenReturn(lessonTitlesById);
+        when(exerciseResponseMapper.toExerciseResponse(multiLessonExercise, lessonTitlesById)).thenReturn(expectedResponse);
 
         ExerciseResponse response = exerciseService.getExercise(exerciseId);
 
         assertNotNull(response);
         assertEquals(exerciseId, response.id());
-        assertEquals(List.of(lessonId, secondLessonId), response.lessonIdList());
+        assertEquals(List.of(
+                new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson Title"),
+                new ExerciseResponse.LessonSummaryResponse(secondLessonId, "Second Lesson Title")
+        ), response.lessonList());
         assertEquals(ExerciseType.MULTIPLE_CHOICE, response.type());
         assertEquals("Addition", response.title());
 
         verify(exerciseRepository).findById(exerciseId);
-        verify(exerciseResponseMapper).toExerciseResponse(multiLessonExercise);
+        verify(lessonService).getLessonSummaryByLessonsId(List.of(lessonId, secondLessonId));
+        verify(exerciseResponseMapper).toExerciseResponse(multiLessonExercise, lessonTitlesById);
     }
 
     @Test
@@ -385,7 +409,7 @@ public class ExerciseServiceTest {
         assertEquals("Exercise not Found", exception.getMessage());
 
         verify(exerciseRepository).findById(exerciseId);
-        verify(exerciseResponseMapper, never()).toExerciseResponse(any());
+        verify(exerciseResponseMapper, never()).toExerciseResponse(any(Exercise.class), anyMap());
     }
 
     @Test
@@ -439,28 +463,35 @@ public class ExerciseServiceTest {
         generatedContentNode.put("question", "What is 2+2?");
         generatedContentNode.put("correctAnswer", "4");
         JsonNode generatedContent = generatedContentNode;
+        Map<UUID, String> lessonTitlesById = Map.of(lessonId, "Lesson Title");
 
         ExerciseResponse expectedResponse = new ExerciseResponse(
-                exerciseId, List.of(lessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
+                exerciseId,
+                List.of(new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson Title")),
+                ExerciseType.MULTIPLE_CHOICE,
+                "Addition",
+                "Choose the correct answer",
                 new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(exercise));
+        when(lessonService.getLessonSummaryByLessonsId(List.of(lessonId))).thenReturn(lessonTitlesById);
         when(exerciseGeneratorService.generateExerciseAnswer(contentJson)).thenReturn(generatedContent);
         when(exerciseRepository.save(exercise)).thenReturn(exercise);
-        when(exerciseResponseMapper.toExerciseResponse(exercise)).thenReturn(expectedResponse);
+        when(exerciseResponseMapper.toExerciseResponse(exercise, lessonTitlesById)).thenReturn(expectedResponse);
 
         ExerciseResponse response = exerciseService.correctExercise(exerciseId);
 
         assertNotNull(response);
         assertEquals(exerciseId, response.id());
-        assertEquals(List.of(lessonId), response.lessonIdList());
+        assertEquals(List.of(new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson Title")), response.lessonList());
         assertEquals(generatedContent, exercise.getContent());
 
         verify(exerciseRepository).findById(exerciseId);
+        verify(lessonService).getLessonSummaryByLessonsId(List.of(lessonId));
         verify(exerciseGeneratorService).generateExerciseAnswer(contentJson);
         verify(exerciseRepository).save(exercise);
-        verify(exerciseResponseMapper).toExerciseResponse(exercise);
+        verify(exerciseResponseMapper).toExerciseResponse(exercise, lessonTitlesById);
     }
 
     @Test
@@ -478,28 +509,44 @@ public class ExerciseServiceTest {
         generatedContentNode.put("question", "What is 2+2?");
         generatedContentNode.put("correctAnswer", "4");
         JsonNode generatedContent = generatedContentNode;
+        Map<UUID, String> lessonTitlesById = Map.of(
+                lessonId, "Lesson Title",
+                secondLessonId, "Second Lesson Title"
+        );
 
         ExerciseResponse expectedResponse = new ExerciseResponse(
-                exerciseId, List.of(lessonId, secondLessonId), ExerciseType.MULTIPLE_CHOICE, "Addition", "Choose the correct answer",
+                exerciseId,
+                List.of(
+                        new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson Title"),
+                        new ExerciseResponse.LessonSummaryResponse(secondLessonId, "Second Lesson Title")
+                ),
+                ExerciseType.MULTIPLE_CHOICE,
+                "Addition",
+                "Choose the correct answer",
                 new com.mohamedgara.ai_teaching_platform.exercises.dto.response.exercisecontent.MultipleChoiceContent(
                         "What is 2+2?", List.of("4", "5"), "4"));
 
         when(exerciseRepository.findById(exerciseId)).thenReturn(Optional.of(multiLessonExercise));
+        when(lessonService.getLessonSummaryByLessonsId(List.of(lessonId, secondLessonId))).thenReturn(lessonTitlesById);
         when(exerciseGeneratorService.generateExerciseAnswer(contentJson)).thenReturn(generatedContent);
         when(exerciseRepository.save(multiLessonExercise)).thenReturn(multiLessonExercise);
-        when(exerciseResponseMapper.toExerciseResponse(multiLessonExercise)).thenReturn(expectedResponse);
+        when(exerciseResponseMapper.toExerciseResponse(multiLessonExercise, lessonTitlesById)).thenReturn(expectedResponse);
 
         ExerciseResponse response = exerciseService.correctExercise(exerciseId);
 
         assertNotNull(response);
         assertEquals(exerciseId, response.id());
-        assertEquals(List.of(lessonId, secondLessonId), response.lessonIdList());
+        assertEquals(List.of(
+                new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson Title"),
+                new ExerciseResponse.LessonSummaryResponse(secondLessonId, "Second Lesson Title")
+        ), response.lessonList());
         assertEquals(generatedContent, multiLessonExercise.getContent());
 
         verify(exerciseRepository).findById(exerciseId);
+        verify(lessonService).getLessonSummaryByLessonsId(List.of(lessonId, secondLessonId));
         verify(exerciseGeneratorService).generateExerciseAnswer(contentJson);
         verify(exerciseRepository).save(multiLessonExercise);
-        verify(exerciseResponseMapper).toExerciseResponse(multiLessonExercise);
+        verify(exerciseResponseMapper).toExerciseResponse(multiLessonExercise, lessonTitlesById);
     }
 
     @Test
@@ -514,7 +561,7 @@ public class ExerciseServiceTest {
         verify(exerciseRepository).findById(exerciseId);
         verify(exerciseGeneratorService, never()).generateExerciseAnswer(any());
         verify(exerciseRepository, never()).save(any());
-        verify(exerciseResponseMapper, never()).toExerciseResponse(any());
+        verify(exerciseResponseMapper, never()).toExerciseResponse(any(Exercise.class), anyMap());
     }
 
     @Test
@@ -536,6 +583,7 @@ public class ExerciseServiceTest {
                 ExerciseType.MULTIPLE_CHOICE
         );
         LessonInfo lessonInfo = new LessonInfo(lessonId, "Lesson One", "Content One");
+        Map<UUID, String> lessonTitlesById = Map.of(lessonId, "Lesson One");
         ObjectNode exerciseNode = objectMapper.createObjectNode();
         exerciseNode.put("question", "What is 2+2?");
         GeneratedExercise generatedExercise = new GeneratedExercise(
@@ -545,7 +593,7 @@ public class ExerciseServiceTest {
         );
         ExerciseResponse expectedResponse = new ExerciseResponse(
                 exerciseId,
-                List.of(lessonId),
+                List.of(new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson One")),
                 ExerciseType.MULTIPLE_CHOICE,
                 "Generated Title",
                 "Generated instructions",
@@ -554,23 +602,26 @@ public class ExerciseServiceTest {
 
         when(lessonService.getCourseLessonInfoList(courseId))
                 .thenReturn(Collections.singletonList(lessonInfo));
+        when(lessonService.getLessonSummaryByLessonsId(List.of(lessonId)))
+                .thenReturn(lessonTitlesById);
         when(exerciseGeneratorService.generateExercise(any(JsonNode.class), any(JsonNode.class)))
                 .thenReturn(generatedExercise);
         when(exerciseRepository.save(any(Exercise.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(exerciseResponseMapper.toExerciseResponse(any(Exercise.class))).thenReturn(expectedResponse);
+        when(exerciseResponseMapper.toExerciseResponse(any(Exercise.class), anyMap())).thenReturn(expectedResponse);
 
         ExerciseResponse response = exerciseService.generateExercise(request);
 
         assertNotNull(response);
         assertEquals(exerciseId, response.id());
-        assertEquals(List.of(lessonId), response.lessonIdList());
+        assertEquals(List.of(new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson One")), response.lessonList());
         assertEquals("Generated Title", response.title());
         assertEquals("Generated instructions", response.instructions());
 
         verify(lessonService).getCourseLessonInfoList(courseId);
+        verify(lessonService).getLessonSummaryByLessonsId(List.of(lessonId));
         verify(exerciseGeneratorService).generateExercise(any(JsonNode.class), any(JsonNode.class));
         verify(exerciseRepository).save(any(Exercise.class));
-        verify(exerciseResponseMapper).toExerciseResponse(any(Exercise.class));
+        verify(exerciseResponseMapper).toExerciseResponse(any(Exercise.class), anyMap());
     }
 
     @Test
@@ -582,6 +633,7 @@ public class ExerciseServiceTest {
                 ExerciseType.MULTIPLE_CHOICE
         );
         LessonInfo lessonInfo = new LessonInfo(lessonId, "Lesson One", "Content One");
+        Map<UUID, String> lessonTitlesById = Map.of(lessonId, "Lesson One");
         ObjectNode exerciseNode = objectMapper.createObjectNode();
         exerciseNode.put("question", "What is 2+2?");
         GeneratedExercise generatedExercise = new GeneratedExercise(
@@ -591,7 +643,7 @@ public class ExerciseServiceTest {
         );
         ExerciseResponse expectedResponse = new ExerciseResponse(
                 exerciseId,
-                lessonIdList,
+                List.of(new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson One")),
                 ExerciseType.MULTIPLE_CHOICE,
                 "Generated Title",
                 "Generated instructions",
@@ -600,23 +652,26 @@ public class ExerciseServiceTest {
 
         when(lessonService.getLessonInfoList(lessonIdList))
                 .thenReturn(Collections.singletonList(lessonInfo));
+        when(lessonService.getLessonSummaryByLessonsId(lessonIdList))
+                .thenReturn(lessonTitlesById);
         when(exerciseGeneratorService.generateExercise(any(JsonNode.class), any(JsonNode.class)))
                 .thenReturn(generatedExercise);
         when(exerciseRepository.save(any(Exercise.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(exerciseResponseMapper.toExerciseResponse(any(Exercise.class))).thenReturn(expectedResponse);
+        when(exerciseResponseMapper.toExerciseResponse(any(Exercise.class), anyMap())).thenReturn(expectedResponse);
 
         ExerciseResponse response = exerciseService.generateExercise(request);
 
         assertNotNull(response);
         assertEquals(exerciseId, response.id());
-        assertEquals(lessonIdList, response.lessonIdList());
+        assertEquals(List.of(new ExerciseResponse.LessonSummaryResponse(lessonId, "Lesson One")), response.lessonList());
         assertEquals("Generated Title", response.title());
         assertEquals("Generated instructions", response.instructions());
 
         verify(lessonService).getLessonInfoList(lessonIdList);
+        verify(lessonService).getLessonSummaryByLessonsId(lessonIdList);
         verify(exerciseGeneratorService).generateExercise(any(JsonNode.class), any(JsonNode.class));
         verify(exerciseRepository).save(any(Exercise.class));
-        verify(exerciseResponseMapper).toExerciseResponse(any(Exercise.class));
+        verify(exerciseResponseMapper).toExerciseResponse(any(Exercise.class), anyMap());
     }
 
     @Test
@@ -634,6 +689,6 @@ public class ExerciseServiceTest {
 
         verify(exerciseGeneratorService, never()).generateExercise(any(JsonNode.class), any(JsonNode.class));
         verify(exerciseRepository, never()).save(any());
-        verify(exerciseResponseMapper, never()).toExerciseResponse(any());
+        verify(exerciseResponseMapper, never()).toExerciseResponse(any(Exercise.class), anyMap());
     }
 }

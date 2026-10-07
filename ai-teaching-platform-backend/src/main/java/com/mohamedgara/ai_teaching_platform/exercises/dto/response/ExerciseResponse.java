@@ -9,10 +9,16 @@ import java.util.UUID;
 
 public record ExerciseResponse(
         UUID id,
-        @JsonProperty("lesson_id_list")
-        List<UUID> lessonIdList,
+        @JsonProperty("lesson_list")
+        List<LessonSummaryResponse> lessonList,
         ExerciseType type,
         String title,
         String instructions,
         ExerciseContent content
-) {}
+) {
+        public record LessonSummaryResponse(
+                UUID id,
+                String title
+        ) {
+        }
+}

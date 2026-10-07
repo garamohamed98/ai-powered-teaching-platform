@@ -10,6 +10,13 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'exercises',
+    loadChildren: () =>
+      import('./features/exercises/exercises.routes').then(
+        (m) => m.EXERCISES_ROUTES
+      )
+  },
+  {
     path: 'not-found',
     loadComponent: () =>
       import('./features/not-found/not-found.component').then(

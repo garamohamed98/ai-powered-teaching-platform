@@ -39,7 +39,11 @@ public abstract class ExerciseResponseMapper {
             target = "content",
             expression = "java(toExerciseContentResponse(exercise.getType(), exercise.getContent()))"
     )
-    public abstract ExerciseResponse toExerciseResponse(Exercise exercise);
+    @Mapping(
+            target = "lessonList",
+            expression = "java(toLessonSummaries(exercise.getLessonIdList(), lessonIdAndTitleList))"
+    )
+    public abstract ExerciseResponse toExerciseResponse(Exercise exercise,Map<UUID, String> lessonIdAndTitleList);
 
     public List<ExerciseSummaryResponse> toExerciseListResponse(
             List<Exercise> exercises,
@@ -113,5 +117,17 @@ public abstract class ExerciseResponseMapper {
             Long timeTaken,
             ComparedAnswer comparedAnswer
     );
+
+    protected List<ExerciseResponse.LessonSummaryResponse> toLessonSummaries(
+            List<UUID> lessonIds,
+            Map<UUID, String> titlesById
+    ) {
+        if (lessonIds == null) {
+            return List.of();
+        }
+        return lessonIds.stream()
+                .map(id -> new ExerciseResponse.LessonSummaryResponse(id, titlesById.get(id)))
+                .toList();
+    }
 
 }

@@ -41,4 +41,11 @@ public interface LessonRepository extends JpaRepository<Lesson, UUID> {
             WHERE l.id IN :lessonIdList
             """)
     List<LessonTitleAndContent> findLessonTitleAndContentByLessonIdList(@Param("lessonIdList") List<UUID> lessonIdList);
+
+    @Query("""
+            SELECT l.id, l.title
+            FROM Lesson l
+            WHERE l.id IN :lessonIdList
+            """)
+    List<LessonTitle> findLessonTitleByLessonIdList(@Param("lessonIdList") List<UUID> lessonIdList);
 }

@@ -98,4 +98,14 @@ public class LessonService {
                     );
                 }).toList();
     }
+
+    public Map<UUID, String> getLessonSummaryByLessonsId(List<UUID> lessonIdList) {
+        List<LessonTitle> result = lessonRepository.findLessonTitleByLessonIdList(lessonIdList);
+
+        return result.stream()
+                .collect(Collectors.toMap(
+                        lesson -> lesson.id(),
+                        lesson -> lesson.title()
+                ));
+    }
 }

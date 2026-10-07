@@ -1,3 +1,10 @@
+.title-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+}
+
 :host ::ng-deep .p-card {
   height: 60vh;
 }

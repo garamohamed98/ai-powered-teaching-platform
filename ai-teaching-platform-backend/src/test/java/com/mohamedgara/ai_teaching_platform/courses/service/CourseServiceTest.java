@@ -141,7 +141,7 @@ public class CourseServiceTest {
     }
 
     @Test
-    public void deleteCourse_shouldThrowServiceNotFoundException_whenCourseDoesNotExist(){
+    public void deleteCourse_shouldThrowCourseNotFoundException_whenCourseDoesNotExist(){
         //Arrange
         UUID courseId = UUID.randomUUID();
 

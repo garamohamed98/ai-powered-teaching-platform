@@ -1,9 +1,5 @@
 import {ExerciseContent} from './exercise-types/exercise-content.model';
-
-export interface Lesson {
-  id: number;
-  title: string;
-}
+import {Lesson} from './lesson.model';
 
 export type ExerciseType =
   'MULTIPLE_CHOICE' |
@@ -13,7 +9,16 @@ export interface Exercise {
   id: string;
   title: string;
   type: ExerciseType;
-  lesson: Lesson[];
+  lessonList: Lesson[];
   instructions: string;
   content: ExerciseContent;
+}
+
+export function getExerciseTypeLabel(type: ExerciseType): string {
+  const labels: Record<ExerciseType, string> = {
+    MULTIPLE_CHOICE: 'Multiple Choice',
+    FILL_IN_BLANK: 'Fill in the Blank'
+  };
+
+  return labels[type];
 }

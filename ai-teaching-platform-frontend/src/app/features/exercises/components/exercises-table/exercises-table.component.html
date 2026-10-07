@@ -13,12 +13,19 @@
     </ng-template>
     <ng-template #body let-exercise>
       <tr>
-        <td >
+        <td  class="title-row">
           @if (loading){
             <p-skeleton width="8rem" height="1rem"/>
           } @else {
             <p>{{exercise.title}}</p>
           }
+          <p-button
+            [routerLink]="['/','exercises',exercise.id,'exercise-details']"
+            [rounded]="true"
+            icon="pi pi-chevron-right"
+            [text]="true"
+            size="small"
+          />
         </td>
         <td >
           @if(loading){

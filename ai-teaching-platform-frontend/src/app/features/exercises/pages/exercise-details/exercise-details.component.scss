@@ -1,0 +1,29 @@
+.page-container {
+  margin: 1rem;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.exercise-infos-container{
+  grid-column: span 4;
+}
+
+
+@media (min-width: 768px) {
+  .page-container {
+    grid-template-columns: repeat(12, 1fr);
+  }
+
+  .exercise-infos-container{
+    grid-column: span 8;
+  }
+
+  .controllers-container{
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    grid-column: span 12;
+  }
+}

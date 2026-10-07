@@ -27,4 +27,9 @@ export class ExercisesService {
     return this.http.post<Exercise>(this.baseUrl+ "/generate", generateExerciseDto);
   }
 
+  getExerciseById(exerciseId: string) {
+    console.log("Fetch exercise by id: " + exerciseId);
+    return this.http.get<Exercise>(`${this.baseUrl}/${exerciseId}`);
+  }
+
 }
