@@ -13,7 +13,7 @@ import {ToggleSwitch} from 'primeng/toggleswitch';
 import {Textarea} from 'primeng/textarea';
 import {CreateExerciseDto} from '../../models/create-exercise.dto';
 import {ExerciseContent} from '../../models/exercise-types/exercise-content.model';
-import {ExercisesService} from '../../exercises.service';
+import {ExercisesService} from '../../services/exercises.service';
 import {MessageService} from 'primeng/api';
 
 @Component({

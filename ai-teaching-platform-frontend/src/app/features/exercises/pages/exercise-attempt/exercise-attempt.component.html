@@ -1,0 +1,69 @@
+<div class="page-container">
+  <p-card header="Exercise:" class="exercise-question-card" >
+    <div class="exercise-question-container">
+      <div class="exercise-infos-row">
+        <p>
+          <b>
+            Title:
+          </b>
+        </p>
+        <p>
+            {{attempt.title}}
+        </p>
+      </div>
+      <div class="exercise-infos-row">
+        <p>
+          <b>
+            Exercise type:
+          </b>
+        </p>
+        <p>
+          {{getExerciseTypeLabel(attempt.type)}}
+        </p>
+      </div>
+      <div class="exercise-infos-column">
+        <p>
+          <b>
+            Instructions:
+          </b>
+        </p>
+        <p>
+          {{attempt.instructions}}
+        </p>
+      </div>
+      @switch (attempt.type) {
+        @case ('MULTIPLE_CHOICE'){
+          <app-multiple-choice-content
+            [content]="attempt.content"
+          ></app-multiple-choice-content>
+        }
+        @case ('FILL_IN_BLANK'){
+          <app-fill-in-blank-content
+            [content]="attempt.content"
+          ></app-fill-in-blank-content>
+        }
+      }
+    </div>
+  </p-card>
+  <p-card header="Attempt" class="exercise-attempt-card">
+    <form [formGroup]="form" class="form" (ngSubmit)="submit()">
+      @switch (attempt.type){
+        @case ('MULTIPLE_CHOICE'){
+          <app-multiple-choice-attempt-form
+            [content] = "attempt.content"
+            [form] = 'attemptForm'
+          ></app-multiple-choice-attempt-form>
+        }
+        @case ('FILL_IN_BLANK'){
+          <app-fill-in-blank-attempt-form
+            [content]="attempt.content"
+            [form]="attemptForm"
+          ></app-fill-in-blank-attempt-form>
+        }
+      }
+      <div class="submit-button">
+        <p-button type="submit" label="Submit"></p-button>
+      </div>
+    </form>
+  </p-card>
+</div>

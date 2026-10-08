@@ -7,7 +7,7 @@ import {Exercise, ExerciseType} from '../../models/exercise.model';
 import {Select} from 'primeng/select';
 import {Button} from 'primeng/button';
 import {GenerateExerciseDto} from '../../models/generate-exercise.dto';
-import {ExercisesService} from '../../exercises.service';
+import {ExercisesService} from '../../services/exercises.service';
 import {MessageService} from 'primeng/api';
 
 @Component({

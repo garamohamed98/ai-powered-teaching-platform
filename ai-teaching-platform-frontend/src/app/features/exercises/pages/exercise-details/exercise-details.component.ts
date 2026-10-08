@@ -2,12 +2,16 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {ExerciseInfosComponent} from '../../components/exercise-infos/exercise-infos.component';
 import {Exercise} from '../../models/exercise.model';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ExercisesService} from '../../exercises.service';
+import {ExercisesService} from '../../services/exercises.service';
+import {Button} from 'primeng/button';
+import {ExercisesAttemptService} from '../../services/exercises-attempt.service';
+import {ExerciseAttempt} from '../../models/exercise-attempt.model';
 
 @Component({
   selector: 'app-exercise-details',
   imports: [
-    ExerciseInfosComponent
+    ExerciseInfosComponent,
+    Button
   ],
   templateUrl: './exercise-details.component.html',
   styleUrl: './exercise-details.component.scss'
@@ -16,6 +20,7 @@ export class ExerciseDetailsComponent implements OnInit {
 
   private router = inject(Router);
   private exercisesService = inject(ExercisesService);
+  private exercisesAttemptService = inject(ExercisesAttemptService);
 
   exerciseId!: string;
   exercise = signal<Exercise | null>(null);
@@ -41,7 +46,6 @@ export class ExerciseDetailsComponent implements OnInit {
     this.exercisesService.getExerciseById(this.exerciseId).subscribe({
       next:(data:Exercise) =>{
         console.log("Exercise fetched successfully");
-        console.log("the data of the exercise: ", data);
         this.exercise.set(data);
         this.exerciseIsLoading.set(false);
       },
@@ -51,6 +55,23 @@ export class ExerciseDetailsComponent implements OnInit {
       }
     })
 
+  }
+
+  startAttempt(){
+    if(!this.exerciseId) return;
+
+    this.exercisesAttemptService.startExerciseAttempt(this.exerciseId).subscribe({
+      next:(attempt:ExerciseAttempt)=>{
+        console.log("Exercise attempt Started successfully");
+        void this.router.navigate(
+          ['/','exercises',attempt.exerciseAttemptId,'attempt'],
+          {state: {attempt}}
+          )
+      },
+      error:(error)=>{
+        console.log('An error appeared during exercise attempt started',error.message);
+      }
+    })
   }
 
 

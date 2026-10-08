@@ -1,6 +1,6 @@
 import {Component, inject, Input, OnInit, signal} from '@angular/core';
 import {ExercisesTableComponent} from '../../components/exercises-table/exercises-table.component';
-import {ExercisesService} from '../../exercises.service';
+import {ExercisesService} from '../../services/exercises.service';
 import {Exercise} from '../../models/exercise.model';
 import {Button} from 'primeng/button';
 import {

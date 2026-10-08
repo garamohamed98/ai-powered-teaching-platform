@@ -1,8 +1,8 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Exercise} from './models/exercise.model';
-import {CreateExerciseDto} from './models/create-exercise.dto';
-import {GenerateExerciseDto} from './models/generate-exercise.dto';
+import {Exercise} from '../models/exercise.model';
+import {CreateExerciseDto} from '../models/create-exercise.dto';
+import {GenerateExerciseDto} from '../models/generate-exercise.dto';
 
 @Injectable({
   providedIn: 'root'

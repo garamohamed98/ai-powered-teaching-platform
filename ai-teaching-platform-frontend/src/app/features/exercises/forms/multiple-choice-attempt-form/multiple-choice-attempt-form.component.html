@@ -1,0 +1,20 @@
+<div  class="form">
+  <p class="title">
+    <b>Options</b>
+  </p>
+  <div class="input" [formGroup]="form">
+    @for (option of multipleChoiceContent.options; track option; let i = $index) {
+      <div class="input-element-row">
+        <p-radio-button
+          [inputId]="'option-' + i"
+          name="answer"
+          [value]="option"
+          formControlName="answer"
+        />
+        <label [for]="'option-' + i">
+          {{option}}
+        </label>
+      </div>
+    }
+  </div>
+</div>

@@ -1,6 +1,10 @@
 <div class="page-container">
   <div class="controllers-container">
-
+    <p-button
+      label="Start attempt"
+      (onClick)="startAttempt()"
+      icon="pi pi-play"
+    />
   </div>
   <div class="exercise-infos-container">
     <app-exercise-infos [exercise]="exercise()"></app-exercise-infos>

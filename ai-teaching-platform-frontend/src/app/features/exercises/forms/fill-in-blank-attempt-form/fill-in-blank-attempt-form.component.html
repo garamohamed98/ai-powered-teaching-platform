@@ -1,0 +1,16 @@
+<div [formGroup]="form" class="form">
+  <p>
+    <b>Sentences: </b>
+  </p>
+    <div formArrayName="sentences" class="form-array">
+      @for (sentence of fillInBlankContent.sentences; track sentence.id;
+        let i = $index) {
+        <div class="sentence-element" [formGroupName]="i">
+          <p>
+            {{sentence.text}}
+          </p>
+          <input pInputText formControlName="answer" type="text" />
+        </div>
+      }
+    </div>
+</div>

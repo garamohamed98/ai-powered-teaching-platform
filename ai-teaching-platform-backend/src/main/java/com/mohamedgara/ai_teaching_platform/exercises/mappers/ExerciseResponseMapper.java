@@ -68,7 +68,6 @@ public abstract class ExerciseResponseMapper {
     };
 
 
-
     protected ExerciseContent toExerciseContentResponse(ExerciseType type, JsonNode content) {
         return switch (type) {
             case MULTIPLE_CHOICE -> objectMapper.convertValue(content, MultipleChoiceContent.class);
