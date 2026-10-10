@@ -141,7 +141,7 @@ public class ExerciseAttemptIntegrationTests {
                 .content(objectMapper.valueToTree(Map.of(
                         "question", "What is 2+2?",
                         "options", List.of("4", "5"),
-                        "correctAnswer", "4")))
+                        "correct_answer", "4")))
                 .build());
         ExerciseAttempt savedAttempt = exerciseAttemptRepository.save(ExerciseAttempt.builder()
                 .exercise(savedExercise)
@@ -190,7 +190,7 @@ public class ExerciseAttemptIntegrationTests {
                 .content(objectMapper.valueToTree(Map.of(
                         "question", "What is 2+2?",
                         "options", List.of("4", "5"),
-                        "correctAnswer", "4")))
+                        "correct_answer", "4")))
                 .build());
         ExerciseAttempt savedAttempt = exerciseAttemptRepository.save(ExerciseAttempt.builder()
                 .exercise(savedExercise)
