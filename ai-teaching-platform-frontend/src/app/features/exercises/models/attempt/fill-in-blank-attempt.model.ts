@@ -5,6 +5,6 @@ export interface FillInBlankSentenceAttempt{
   answer: String;
 }
 
-export interface FillInBlankAttemptModel extends Attempt{
-  sentence: FillInBlankSentenceAttempt[];
+export interface FillInBlankAttempt extends Attempt{
+  sentences: FillInBlankSentenceAttempt[];
 }

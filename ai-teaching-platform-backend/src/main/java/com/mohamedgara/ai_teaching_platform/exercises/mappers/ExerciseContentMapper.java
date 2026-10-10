@@ -33,6 +33,12 @@ public class ExerciseContentMapper {
                         );
             };
         }catch (IllegalArgumentException e){
+            System.out.print(
+                    "Failed to map exercise content. Type: {}, Content: {}"+
+                    exerciseType+
+                    content+
+                    e
+            );
             throw new InvalidExerciseContentException();
         }
     }
