@@ -19,6 +19,9 @@ import {
 import {Button} from 'primeng/button';
 import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FillInBlankContent} from '../../models/exercise-types/fill-in-blank.model';
+import {SubmitExerciseAttemptDto} from '../../models/submit-exercise-attempt.dto';
+import {MessageService} from 'primeng/api';
+import {ExerciseAttemptResult} from '../../models/exercise-attempt-result.model';
 
 @Component({
   selector: 'app-exercise-attempt',
@@ -39,6 +42,7 @@ export class ExerciseAttemptComponent {
   private router = inject(Router);
   private exerciseAttemptService = inject(ExercisesAttemptService);
   private formBuilder = inject(FormBuilder);
+  private messageService = inject(MessageService);
 
   attempt!: ExerciseAttempt;
 
@@ -106,7 +110,23 @@ export class ExerciseAttemptComponent {
 
     const {attempt} = this.form.value;
 
-    console.log("this is the attempt submited",attempt)
+    const submitExerciseAttempt: SubmitExerciseAttemptDto = {
+      exerciseType: this.attempt.type,
+      attempt: attempt,
+    }
+
+    this.exerciseAttemptService.submitExerciseAttempt(this.attempt.exerciseAttemptId, submitExerciseAttempt).subscribe({
+      next:(res:ExerciseAttemptResult) => {
+        console.log("Exercise Attempt Submitted");
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Successfully Submitted',
+          detail:`attempt has been submitted successfully.`
+        })
+      }
+    })
+
+    console.log("this is the attempt submitted",submitExerciseAttempt)
 
   }
 }
