@@ -1,0 +1,29 @@
+.page-container {
+  margin: 1rem;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.exercise-summary-card{
+  grid-column: span 4;
+}
+
+.attempt-result-card{
+  grid-column: span 4;
+}
+
+@media (min-width: 768px){
+  .page-container {
+    grid-template-columns: repeat(12, 1fr);;
+  }
+
+  .exercise-summary-card{
+    grid-column: span 6;
+  }
+
+  .attempt-result-card{
+    grid-column: span 6;
+  }
+}

@@ -1,5 +1,5 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
-import {ExerciseInfosComponent} from '../../components/exercise-infos/exercise-infos.component';
+import {ExerciseSummaryComponent} from '../../components/exercise-summary/exercise-summary.component';
 import {Exercise} from '../../models/exercise.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ExercisesService} from '../../services/exercises.service';
@@ -10,7 +10,7 @@ import {ExerciseAttempt} from '../../models/exercise-attempt.model';
 @Component({
   selector: 'app-exercise-details',
   imports: [
-    ExerciseInfosComponent,
+    ExerciseSummaryComponent,
     Button
   ],
   templateUrl: './exercise-details.component.html',

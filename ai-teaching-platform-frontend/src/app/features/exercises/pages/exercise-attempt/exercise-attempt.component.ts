@@ -1,9 +1,9 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {Card} from 'primeng/card';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ExerciseAttempt} from '../../models/exercise-attempt.model';
 import {ExercisesAttemptService} from '../../services/exercises-attempt.service';
-import {getExerciseTypeLabel} from '../../models/exercise.model';
+import {Exercise, getExerciseTypeLabel} from '../../models/exercise.model';
 import {
   MultipleChoiceContentComponent
 } from '../../components/content/multiple-choice-content/multiple-choice-content.component';
@@ -22,22 +22,22 @@ import {FillInBlankContent} from '../../models/exercise-types/fill-in-blank.mode
 import {SubmitExerciseAttemptDto} from '../../models/submit-exercise-attempt.dto';
 import {MessageService} from 'primeng/api';
 import {ExerciseAttemptResult} from '../../models/exercise-attempt-result.model';
+import {ExerciseInfosComponent} from '../../components/exercise-infos/exercise-infos.component';
 
 @Component({
   selector: 'app-exercise-attempt',
   imports: [
     Card,
-    MultipleChoiceContentComponent,
-    FillInBlankContentComponent,
     MultipleChoiceAttemptFormComponent,
     FillInBlankAttemptFormComponent,
     Button,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ExerciseInfosComponent
   ],
   templateUrl: './exercise-attempt.component.html',
   styleUrl: './exercise-attempt.component.scss'
 })
-export class ExerciseAttemptComponent {
+export class ExerciseAttemptComponent implements OnInit {
 
   private router = inject(Router);
   private exerciseAttemptService = inject(ExercisesAttemptService);
@@ -45,6 +45,7 @@ export class ExerciseAttemptComponent {
   private messageService = inject(MessageService);
 
   attempt!: ExerciseAttempt;
+  exercise!: Exercise;
 
   form!: FormGroup ;
 
@@ -64,6 +65,14 @@ export class ExerciseAttemptComponent {
       //TODO: fetch the exercise attempt by id
     }else{
       this.attempt = passedAttempt;
+      this.exercise = {
+        id: this.attempt.id,
+        title: this.attempt.title,
+        type: this.attempt.type,
+        instructions: this.attempt.instructions,
+        content: this.attempt.content,
+        lessonList:[]
+      }
     }
 
     this.buildForm()
@@ -115,18 +124,24 @@ export class ExerciseAttemptComponent {
       attempt: attempt,
     }
 
+
+
     this.exerciseAttemptService.submitExerciseAttempt(this.attempt.exerciseAttemptId, submitExerciseAttempt).subscribe({
-      next:(res:ExerciseAttemptResult) => {
+      next:(exerciseAttemptResult:ExerciseAttemptResult) => {
         console.log("Exercise Attempt Submitted");
         this.messageService.add({
           severity: 'success',
           summary: 'Successfully Submitted',
           detail:`attempt has been submitted successfully.`
         })
+        void this.router.navigate(
+          ['/','exercises',exerciseAttemptResult.attemptId,'attempt-result'],
+          {state:{exerciseAttemptResult}}
+        )
       }
     })
 
-    console.log("this is the attempt submitted",submitExerciseAttempt)
+
 
   }
 }

@@ -1,0 +1,23 @@
+<p-card >
+  <div class="card">
+    @if(exercise){
+      <div class="info-row">
+        <p><b>Title: </b></p>
+        <h3>{{exercise.title}}</h3>
+      </div>
+      <div class="info-row">
+        <p><b>Type: </b></p>
+        <p>{{getExerciseTypeLabel(exercise.type)}}</p>
+      </div>
+      <div class="info-column">
+        <p><b>Instructions: </b></p>
+        <p>{{exercise.instructions}}</p>
+      </div>
+      <div class="info-row">
+        <p><b>Related Lessons: </b></p>
+        <p>{{getLessonListAsString(exercise.lessonList)}}</p>
+      </div>
+    }
+  </div>
+
+</p-card>

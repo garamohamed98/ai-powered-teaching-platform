@@ -1,0 +1,19 @@
+<div class="container">
+  @for (sentence of comparedAttempt.sentences; track sentence.text) {
+    <div class="sentence">
+      <div>
+        <p><b>Sentence:</b></p>
+        <p>{{sentence.text}}</p>
+      </div>
+      <div>
+        <p><b>Attempt:</b></p>
+        <p>{{sentence.submittedAnswer}}</p>
+      </div>
+      <div>
+        <p><b>Correct Answer:</b></p>
+        <p>{{sentence.answers.join(", ")}}</p>
+      </div>
+      <p-divider />
+    </div>
+  }
+</div>

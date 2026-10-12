@@ -1,7 +1,7 @@
 export interface MultipleChoiceComparedAttempt{
   question: string;
   options: string[];
-  correctAnswer: string;
-  submittedAnswers: string;
+  correctAnswers: string;
+  submittedAnswer: string;
   isCorrect: boolean;
 }

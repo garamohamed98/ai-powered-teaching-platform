@@ -1,0 +1,46 @@
+<p-card >
+  <div class="container">
+    @switch (attemptResult.type){
+      @case ('FILL_IN_BLANK'){
+        <app-fill-in-blank-attempt-result
+          [attemptResult]="attemptResult"
+        ></app-fill-in-blank-attempt-result>
+      }
+      @case ('MULTIPLE_CHOICE'){
+        <app-multiple-choice-attempt-result
+          [attemptResult]="attemptResult"
+        ></app-multiple-choice-attempt-result>
+      }
+    }
+    <div class="exercise-infos-row">
+      <p>
+        <b>
+          Score:
+        </b>
+      </p>
+      <p>
+        {{attemptResult.score}}
+      </p>
+    </div>
+    <div class="exercise-infos-column">
+      <p>
+        <b>
+          AI feedback:
+        </b>
+      </p>
+      <p>
+        {{attemptResult.aiFeedback}}
+      </p>
+    </div>
+    <div class="exercise-infos-row">
+      <p>
+        <b>
+          Time taken:
+        </b>
+      </p>
+      <p>
+        {{toTimeStringFormat(attemptResult.timeTaken)}}
+      </p>
+    </div>
+  </div>
+</p-card>

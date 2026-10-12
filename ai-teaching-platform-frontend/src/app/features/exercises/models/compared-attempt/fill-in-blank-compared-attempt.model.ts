@@ -4,7 +4,7 @@ import {ComparedAttempt} from './compared-attempt.model';
 export interface FillInBlankSentenceComparedAttempt{
   text:string;
   answers: string[];
-  submittedAnswers: string;
+  submittedAnswer: string;
   isCorrect: boolean;
 }
 

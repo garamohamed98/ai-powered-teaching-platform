@@ -1,0 +1,18 @@
+.info-row{
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+}
+
+.info-column{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+}
+
+.card{
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
