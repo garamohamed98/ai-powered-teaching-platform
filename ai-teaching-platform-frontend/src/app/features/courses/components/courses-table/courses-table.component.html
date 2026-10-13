@@ -19,7 +19,7 @@
             <p>{{ course.title }}</p>
           }
           <p-button [routerLink]="[course.id,'course-details']" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
-          <p-button [rounded]="true" icon="pi pi-trash" [text]="true" size="small" (onClick)="onDeleteCourse(course.id)" />
+          <p-button data-testid="delete-course" [rounded]="true" icon="pi pi-trash" [text]="true" size="small" (onClick)="onDeleteCourse(course.id)" />
         </td>
       </tr>
     </ng-template>
