@@ -42,14 +42,12 @@ export class CoursesService {
     return this.http.patch<Course>(url,body);
   }
 
-  createCourse(title:string) : Observable<HttpResponse<Course>>{
+  createCourse(title:string) {
     const body = {
       title: title,
     }
     console.log("creating course: ",body);
-    return this.http.post<Course>(this.baseUrl, body,{
-      observe: 'response'
-    });
+    return this.http.post<Course>(this.baseUrl, body);
   }
 
   deleteCourse(id: string) {

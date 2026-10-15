@@ -14,9 +14,6 @@ import {MessageService} from 'primeng/api';
         InputText,
         ReactiveFormsModule
     ],
-  providers: [
-    CoursesService,
-  ],
   templateUrl: './courses-form-modal.component.html',
   styleUrl: './courses-form-modal.component.scss'
 })
@@ -56,7 +53,7 @@ export class CoursesFormModalComponent {
         this.messageService.add({
           severity: 'success',
           summary: 'New course is created successfully.',
-          detail: `New Course is created with title ${res.body?.title}`,
+          detail: `New Course is created with title ${res?.title}`,
           sticky: false,
         });
         this.courseCreated.emit();
