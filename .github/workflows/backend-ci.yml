@@ -3,16 +3,37 @@ name: Backend CI
 on:
   push:
     branches: [main, develop]
-    paths:
-      - 'ai-teaching-platform-backend/**'
-      - '.github/workflows/backend-ci.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'ai-teaching-platform-backend/**'
+
+permissions:
+  content: read
+
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: ${{github.event_name == "pull_request"}}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{steps.filter.outputs.backend}}
+    steps:
+      - name: Checkout respository
+        uses: actions/checkout@v4
+
+      - name: Detect backend changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'ai-teaching-platform-backend/**'
+              - '.github/workflows/backend-ci.yml'
+
   backend-test:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
 
     defaults:
@@ -36,3 +57,4 @@ jobs:
 
       - name: Run tests
         run: ./mvnw clean verify
+      
