@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { ActivatedRoute } from '@angular/router';
+import { MessageService } from 'primeng/api';
 
 import { LessonsComponent } from './lessons.component';
 
@@ -8,7 +12,16 @@ describe('LessonsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LessonsComponent]
+      imports: [LessonsComponent],
+      providers: [
+        provideHttpClient(),
+        provideNoopAnimations(),
+        MessageService,
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { params: { id: '' } } }
+        }
+      ]
     })
     .compileComponents();
 

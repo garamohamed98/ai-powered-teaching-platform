@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 
 import { ExerciseDetailsComponent } from './exercise-details.component';
 
@@ -8,7 +10,15 @@ describe('ExerciseDetailsComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ExerciseDetailsComponent]
+      imports: [ExerciseDetailsComponent],
+      providers: [
+        provideHttpClient(),
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { paramMap: { get: () => null } } }
+        }
+      ]
     })
     .compileComponents();
 

@@ -14,6 +14,18 @@ describe('ExerciseInfosComponent', () => {
 
     fixture = TestBed.createComponent(ExerciseInfosComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('exercise', {
+      id: 'exercise-1',
+      title: 'Java basics',
+      type: 'MULTIPLE_CHOICE',
+      lessonList: [],
+      instructions: 'Choose the correct answer.',
+      content: {
+        question: 'What is Java?',
+        options: ['A language', 'A database'],
+        correctAnswer: 'A language'
+      }
+    });
     fixture.detectChanges();
   });
 

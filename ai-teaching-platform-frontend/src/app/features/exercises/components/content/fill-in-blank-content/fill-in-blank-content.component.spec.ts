@@ -14,6 +14,12 @@ describe('FillInBlankContentComponent', () => {
 
     fixture = TestBed.createComponent(FillInBlankContentComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('content', {
+      sentences: [
+        { id: 1, text: 'Java is a programming language.' }
+      ],
+      answer: 'Java'
+    });
     fixture.detectChanges();
   });
 
