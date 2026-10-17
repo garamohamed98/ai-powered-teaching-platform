@@ -33,3 +33,7 @@ gemini:
   api-key: ${AI_API_KEY}
   model: ${AI_MODEL}
   base-url: ${AI_BASE_URL}
+
+auth0:
+  issuer: https://${AUTH0_ISSUER_URI}/
+  audience: ${AUTH0_AUDIENCE}

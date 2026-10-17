@@ -1,9 +1,17 @@
 import { Routes } from '@angular/router';
-import {NotFoundComponent} from './features/not-found/not-found.component';
+import { authGuardFn} from '@auth0/auth0-angular';
 
 export const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'courses' },
+  {
+    path: 'login',
+    loadComponent: ()=>
+      import("./features/users/pages/login/login.component")
+        .then(m => m.LoginComponent),
+  },
   {
     path: 'courses',
+    canActivate: [authGuardFn],
     loadChildren: () =>
       import('./features/courses/courses.routes').then(
         (m) => m.COURSES_ROUTES

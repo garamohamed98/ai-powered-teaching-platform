@@ -1,9 +1,19 @@
 package com.mohamedgara.ai_teaching_platform;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -28,7 +38,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form.permitAll());
+                .oauth2ResourceServer(oauth-> oauth.jwt(Customizer.withDefaults()));
         return http.build();
     }
 
@@ -45,6 +55,24 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
+    }
+
+    @Bean
+    JwtDecoder jwtDecoder(
+            @Value("${auth0.issuer}") String issuer,
+            @Value("${auth0.audience}") String audience
+            ){
+        NimbusJwtDecoder decoder =
+                NimbusJwtDecoder.withJwkSetUri(issuer + ".well-known/jwks.json").build();
+
+        OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuer);
+        OAuth2TokenValidator<Jwt> withAudience = jwt ->
+                jwt.getAudience().contains(audience)
+                        ? OAuth2TokenValidatorResult.success()
+                        : OAuth2TokenValidatorResult.failure(
+                                new OAuth2Error("invalid_token","Wrong audience",null));
+        decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(withIssuer,withAudience));
+        return decoder;
     }
 }
 

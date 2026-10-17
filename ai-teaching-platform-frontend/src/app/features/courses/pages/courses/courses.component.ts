@@ -9,10 +9,11 @@ import { ReactiveFormsModule} from '@angular/forms';
 import {CoursesTableComponent} from '../../components/courses-table/courses-table.component';
 import {CoursesFormModalComponent} from '../../components/courses-form-modal/courses-form-modal.component';
 import {delay} from 'rxjs';
+import {UserInfosComponent} from '../../../users/containers/user-infos/user-infos.component';
 
 @Component({
   selector: 'app-courses',
-  imports: [TableModule, CardModule, Button, SkeletonModule, ReactiveFormsModule, CoursesTableComponent, CoursesFormModalComponent],
+  imports: [TableModule, CardModule, Button, SkeletonModule, ReactiveFormsModule, CoursesTableComponent, CoursesFormModalComponent, UserInfosComponent],
   providers: [CoursesService,],
   templateUrl: './courses.component.html',
   styleUrl: './courses.component.scss'
