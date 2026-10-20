@@ -7,12 +7,11 @@ export const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'courses' },
       {
-        path: 'login',
-        loadComponent: ()=>
-          import("./features/users/pages/login/login.component")
-            .then(m => m.LoginComponent),
+        path: '',
+        pathMatch: 'full', loadComponent:()=>
+          import("./pages/home/home.component")
+            .then(m=>m.HomeComponent)
       },
       {
         path: 'courses',
@@ -32,14 +31,14 @@ export const routes: Routes = [
       {
         path: 'not-found',
         loadComponent: () =>
-          import('./features/not-found/not-found.component').then(
+          import('./pages/not-found/not-found.component').then(
             (m) => m.NotFoundComponent
           )
       },
       {
         path: '**',
         loadComponent: () =>
-          import('./features/not-found/not-found.component').then(
+          import('./pages/not-found/not-found.component').then(
             (m) => m.NotFoundComponent
           )
       }

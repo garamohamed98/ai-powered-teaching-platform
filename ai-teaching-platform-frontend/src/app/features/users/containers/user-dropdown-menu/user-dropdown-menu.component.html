@@ -1,0 +1,28 @@
+<div class="container">
+  @if (isAuthenticated$ | async) {
+    <div class="menu-button">
+
+      <p-menu #userMenu [model]="userItems" [popup]="true"/>
+      <p>{{userName}}</p>
+      <p-button
+        icon="pi pi-user"
+        [rounded]="true"
+        [text]="true"
+        (onClick)="userMenu.toggle($event)"
+      />
+
+    </div>
+  } @else {
+    <div class="auth-buttons">
+      <p-button
+        label="Login"
+        (onClick)="login()"
+      />
+      <p-button
+        label="Sign up"
+        (onClick)="signup()"
+        outlined="true"
+      />
+    </div>
+  }
+</div>
