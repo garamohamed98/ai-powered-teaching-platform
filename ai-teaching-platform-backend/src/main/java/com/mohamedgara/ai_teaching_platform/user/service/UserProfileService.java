@@ -24,8 +24,8 @@ public class UserProfileService {
             return userProfileRepository.save(
                     UserProfile.builder()
                             .auth0Id(jwt.getSubject())
-                            .email(jwt.getClaimAsString("email"))
-                            .name(jwt.getClaimAsString("name"))
+                            .email(jwt.getClaimAsString("https://api.ai-teaching-platform/email"))
+                            .name(jwt.getClaimAsString("https://api.ai-teaching-platform/name"))
                             .build()
             );
         }catch (DataIntegrityViolationException e){

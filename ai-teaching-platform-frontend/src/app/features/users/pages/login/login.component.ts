@@ -15,21 +15,32 @@ export class LoginComponent {
 
   login(){
     this.auth.loginWithRedirect(
-      {appState: {target:'/courses'}}
+      {
+        appState: {target:'/courses'},
+        authorizationParams:{
+          prompt:'select_account'
+        }
+      }
     );
   }
 
   signup(){
     this.auth.loginWithRedirect({
       appState: {target:'/courses'},
-      authorizationParams: {screen_hint: 'signup'}
+      authorizationParams: {
+        screen_hint: 'signup',
+        prompt: 'select_account'
+      }
     });
   }
 
   loginWithGoogle(){
     this.auth.loginWithRedirect({
       appState: {target:'/courses'},
-      authorizationParams: {connection: 'google-oauth2'}
+      authorizationParams: {
+        connection: 'google-oauth2',
+        prompt:'select_account'
+      }
     })
   }
 }
