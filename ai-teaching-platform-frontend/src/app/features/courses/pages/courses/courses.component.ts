@@ -8,7 +8,6 @@ import {SkeletonModule} from 'primeng/skeleton';
 import { ReactiveFormsModule} from '@angular/forms';
 import {CoursesTableComponent} from '../../components/courses-table/courses-table.component';
 import {CoursesFormModalComponent} from '../../components/courses-form-modal/courses-form-modal.component';
-import {delay} from 'rxjs';
 
 @Component({
   selector: 'app-courses',

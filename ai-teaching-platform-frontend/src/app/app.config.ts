@@ -7,9 +7,10 @@ import {providePrimeNG} from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {MessageService} from 'primeng/api';
-import {errorInterceptor} from './error.interceptor';
-import {camelToSnakeInterceptor} from './camel-to-snake.interceptor';
-import {snakeToCamelInterceptor} from './features/snake-to-camel.interceptor';
+import {errorInterceptor} from './interceptor/error.interceptor';
+import {camelToSnakeInterceptor} from './interceptor/camel-to-snake.interceptor';
+import {snakeToCamelInterceptor} from './interceptor/snake-to-camel.interceptor';
+import {authHttpInterceptorFn, provideAuth0} from '@auth0/auth0-angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,8 +25,25 @@ export const appConfig: ApplicationConfig = {
       }
     }),
     provideHttpClient(
-      withInterceptors([errorInterceptor, camelToSnakeInterceptor, snakeToCamelInterceptor])
+      withInterceptors([
+        errorInterceptor,
+        camelToSnakeInterceptor,
+        snakeToCamelInterceptor,
+        authHttpInterceptorFn
+      ])
     ),
-    MessageService
+    MessageService,
+    provideAuth0({
+      domain: 'dev-hejg6sfq4n8zjfwh.eu.auth0.com',
+      clientId: 'mAvtuCIWjIVshlbmMVMwG9vzFmdonJh3',
+      useRefreshTokens: true,
+      authorizationParams:{
+        redirect_uri: window.location.origin,
+        audience: 'https://api.ai-teaching-platform'
+      },
+      httpInterceptor:{
+        allowedList:['http://localhost:8080/api/*'],
+      }
+    })
   ]
 };
