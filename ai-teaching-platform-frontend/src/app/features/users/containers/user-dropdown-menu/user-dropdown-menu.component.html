@@ -1,11 +1,26 @@
 <div class="container">
-  @if (isAuthenticated$ | async) {
+  @if(isLoading$ | async){
+    <div class="placeholder">
+      <p-skeleton width="12rem" height="2rem" styleClass="mb-2" />
+    </div>
+  } @else if(isAuthenticated$ | async) {
     <div class="menu-button">
 
-      <p-menu #userMenu [model]="userItems" [popup]="true"/>
-      <p>{{userName}}</p>
+      <p-menu
+        #userMenu
+        data-testid="user-menu"
+        [model]="userItems"
+        [popup]="true"/>
+      <p data-testid="user-name">
+        @if (user$ | async; as user) {
+          {{user.name ?? "Account name"}}
+        } @else {
+          {{ "Account name" }}
+        }
+      </p>
       <p-button
         icon="pi pi-user"
+        data-testid = "user-menu-button"
         [rounded]="true"
         [text]="true"
         (onClick)="userMenu.toggle($event)"
@@ -15,10 +30,12 @@
   } @else {
     <div class="auth-buttons">
       <p-button
+        data-testid="login-button"
         label="Login"
         (onClick)="login()"
       />
       <p-button
+        data-testid="signup-button"
         label="Sign up"
         (onClick)="signup()"
         outlined="true"

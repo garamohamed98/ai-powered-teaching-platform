@@ -10,16 +10,10 @@ import {UserDropdownMenuComponent} from '../../features/users';
   imports: [
     Menubar,
     PrimeTemplate,
-    Menu,
-    Button,
     UserDropdownMenuComponent
   ],
   templateUrl: './top-bar.component.html',
   styleUrl: './top-bar.component.scss'
 })
 export class TopBarComponent {
-  userItems: MenuItem[] = [
-    { label: 'Login', icon: 'pi pi-user' },
-    { label: 'Signup', icon: 'pi pi-cog' },
-  ];
 }
