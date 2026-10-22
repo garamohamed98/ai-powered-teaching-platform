@@ -35,5 +35,5 @@ gemini:
   base-url: ${AI_BASE_URL}
 
 auth0:
-  issuer: https://${AUTH0_ISSUER_URI}/
-  audience: ${AUTH0_AUDIENCE}
+  issuer: https://dev-hejg6sfq4n8zjfwh.eu.auth0.com/
+  audience: https://api.ai-teaching-platform
