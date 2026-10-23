@@ -7,10 +7,14 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
+import com.mohamedgara.ai_teaching_platform.courses.entity.CourseCategory;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
+import com.mohamedgara.ai_teaching_platform.courses.exception.CourseCategoryNotFoundException;
 import com.mohamedgara.ai_teaching_platform.courses.exception.CourseNotFoundException;
+import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseRequestMapper;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapper;
 import com.mohamedgara.ai_teaching_platform.courses.mappers.LessonResponseMapper;
+import com.mohamedgara.ai_teaching_platform.courses.repository.CourseCategoryRepository;
 import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
 import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import jakarta.transaction.Transactional;
@@ -27,11 +31,20 @@ public class CourseService {
     private final CourseResponseMapper courseResponseMapper;
     private final LessonRepository lessonRepository;
     private final LessonResponseMapper lessonResponseMapper;
+    private final CourseRequestMapper courseRequestMapper;
+    private final CourseCategoryRepository courseCategoryRepository;
 
-    public CourseResponse createCourse(CreateCourseRequest createCourseRequest){
-        String courseTitle = createCourseRequest.title();
-        Course course = Course.builder().title(courseTitle).build();
+    public CourseResponse createCourse(String authenticatedUserId,CreateCourseRequest createCourseRequest){
+
+        Course course = courseRequestMapper.toCourse(createCourseRequest);
+
+        CourseCategory category = courseCategoryRepository.findById(createCourseRequest.category_id())
+                .orElseThrow(()-> new CourseCategoryNotFoundException());
+
+        course.setOwnerId(authenticatedUserId);
+        course.setCategory(category);
         Course savedCourse = courseRepository.save(course);
+
         return courseResponseMapper.toCourseResponse(savedCourse);
     }
 

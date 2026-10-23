@@ -31,4 +31,15 @@ public class CoursesExceptionHandler {
                 .build();
         return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
     }
+
+    @ExceptionHandler(CourseCategoryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCourseCategoryNotFound(CourseCategoryNotFoundException exception){
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .error("COURSE_CATEGORY_NOT_FOUND")
+                .message(exception.getMessage())
+                .status(HttpStatus.NOT_FOUND)
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(errorResponse.getStatus()).body(errorResponse);
+    }
 }
