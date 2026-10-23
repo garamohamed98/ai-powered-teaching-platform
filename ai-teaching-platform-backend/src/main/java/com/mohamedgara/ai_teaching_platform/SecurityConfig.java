@@ -30,7 +30,6 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/test/db").permitAll()
                         .requestMatchers("/api/course/**").permitAll()
                         .requestMatchers("/api/exercise/**").permitAll()
                         .requestMatchers("/api/exercise-attempt/**").permitAll()
