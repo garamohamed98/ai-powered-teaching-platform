@@ -3,10 +3,14 @@ package com.mohamedgara.ai_teaching_platform.courses;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
+import com.mohamedgara.ai_teaching_platform.courses.entity.CourseCategory;
+import com.mohamedgara.ai_teaching_platform.courses.entity.CourseVisibility;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
+import com.mohamedgara.ai_teaching_platform.courses.repository.CourseCategoryRepository;
 import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
 import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,11 +21,14 @@ import com.mohamedgara.ai_teaching_platform.TestcontainersConfiguration;
 import org.springframework.http.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -32,6 +39,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class CourseIntegrationTests {
 
+    private static final String OWNER_SUB = "auth0|owner-1";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -39,31 +48,90 @@ public class CourseIntegrationTests {
     private CourseRepository courseRepository;
 
     @Autowired
+    private CourseCategoryRepository courseCategoryRepository;
+
+    @Autowired
     private LessonRepository lessonRepository;
+
+
 
     @Autowired
     private ObjectMapper objectMapper;
 
+
+    private RequestPostProcessor asOwner() {
+        return jwt().jwt(j -> j.subject(OWNER_SUB));
+    }
+
+    CourseCategory courseCategory;
+
+    @BeforeEach
+    void setUp(){
+        courseCategory = courseCategoryRepository.save(CourseCategory.builder()
+                .name("Programming")
+                .slug("programming")
+                .displayOrder(1)
+                .build());
+    }
+
     @Test
-    void createCourse_shouldReturn201AndPersistCourse() throws Exception{
-        CreateCourseRequest request = new CreateCourseRequest("Intro to Spring Boot");
+    void createCourse_shouldReturn401_whenNoTokenProvided() throws Exception{
+
+        CreateCourseRequest request = new CreateCourseRequest(
+                "Intro to Spring Boot",
+                courseCategory.getId(),
+                CourseVisibility.PUBLIC
+        );
 
         mockMvc.perform(post("/api/course")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void createCourse_shouldReturn201AndPersistCourse() throws Exception{
+
+        CreateCourseRequest request = new CreateCourseRequest(
+                "Intro to Spring Boot",
+                courseCategory.getId(),
+                CourseVisibility.PUBLIC
+        );
+
+        mockMvc.perform(post("/api/course")
+                        .with(asOwner())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("location"))
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.title").value("Intro to Spring Boot"));
+                .andExpect(jsonPath("$.title").value("Intro to Spring Boot"))
+                .andExpect(jsonPath("$.category.id").value(courseCategory.getId().toString()))
+                .andExpect(jsonPath("$.category.name").value("Programming"))
+                .andExpect(jsonPath("$.category.slug").value("programming"))
+                .andExpect(jsonPath("$.visibility").value("PUBLIC"))
+                .andExpect(jsonPath("$.created_at").exists());
 
         assert courseRepository.count() == 1;
+
+        Course savedCourse = courseRepository.findAll().get(0);
+
+        assert (savedCourse.getTitle()).equals("Intro to Spring Boot");
+        assert (savedCourse.getVisibility()).equals(CourseVisibility.PUBLIC);
+        assert (savedCourse.getCategory().getId()).equals(courseCategory.getId());
+
+        // Most importantly: Verify the relationship/owner came from the JWT token, not the request body!
+        assert (savedCourse.getOwnerId()).equals(OWNER_SUB);
 
     }
 
     @Test
-    void createCourse_shouldReturn400WhenTitleIsBlank() throws Exception {
-        CreateCourseRequest request = new CreateCourseRequest("");
-        System.out.println(objectMapper.writeValueAsString(request));
+    void createCourse_shouldReturn400_whenTitleIsBlank() throws Exception {
+        CreateCourseRequest request = new CreateCourseRequest(
+                "",
+                UUID.randomUUID(),
+                CourseVisibility.PUBLIC
+        );
 
         mockMvc.perform(post("/api/course")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -74,21 +142,53 @@ public class CourseIntegrationTests {
     }
 
     @Test
-    void createCourse_shouldReturn400WhenTitleTooShort() throws Exception {
-        CreateCourseRequest request = new CreateCourseRequest("ab");
+    void createCourse_shouldReturn400_whenTitleTooShort() throws Exception {
+        CreateCourseRequest request = new CreateCourseRequest(
+                "ab",
+                UUID.randomUUID(),
+                CourseVisibility.PUBLIC
+        );
 
         mockMvc.perform(post("/api/course")
+                        .with(asOwner())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void getCourseList_shouldReturnAllCourses() throws Exception {
-        courseRepository.save(Course.builder().title("Course A").build());
-        courseRepository.save(Course.builder().title("Course B").build());
+    void createCourse_shouldReturn404_whenCategoryNotFound() throws Exception {
+        CreateCourseRequest request = new CreateCourseRequest(
+                "JAVA",
+                UUID.randomUUID(),
+                CourseVisibility.PUBLIC
+        );
 
-        mockMvc.perform(get("/api/course"))
+        mockMvc.perform(post("/api/course")
+                        .with(asOwner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCourseList_shouldReturnAllCourses() throws Exception {
+        courseRepository.save(Course.builder()
+                .title("Course A")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+        courseRepository.save(Course.builder()
+                .title("Course B")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+
+        mockMvc.perform(get("/api/course")
+                        .with(asOwner())
+                )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].title", containsInAnyOrder("Course A", "Course B")));

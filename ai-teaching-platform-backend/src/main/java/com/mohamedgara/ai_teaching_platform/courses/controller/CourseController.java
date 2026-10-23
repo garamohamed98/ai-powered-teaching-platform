@@ -10,6 +10,8 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -24,8 +26,12 @@ public class CourseController {
     private final CourseService courseService;
 
     @PostMapping
-    public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CreateCourseRequest createCourseRequest){
-        CourseResponse courseResponse = courseService.createCourse(createCourseRequest);
+    public ResponseEntity<CourseResponse> createCourse(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody CreateCourseRequest createCourseRequest
+    ){
+        String auth0Id = jwt.getSubject();
+        CourseResponse courseResponse = courseService.createCourse(auth0Id,createCourseRequest);
         URI location  = URI.create("/api/course/"+ courseResponse.id());
         return ResponseEntity.created(location).body(courseResponse);
     }
