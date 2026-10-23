@@ -18,7 +18,7 @@ public record CourseResponse (
         String title,
 
         @JsonProperty("category")
-        String category,
+        Category category,
 
         @JsonProperty("visibility")
         CourseVisibility visibility,
@@ -29,4 +29,14 @@ public record CourseResponse (
         LocalDateTime createdAt
 
 ){
+        public record Category(
+                @JsonProperty("id")
+                UUID id,
+
+                @JsonProperty("name")
+                String name,
+
+                @JsonProperty("slug")
+                String slug
+        ){}
 }

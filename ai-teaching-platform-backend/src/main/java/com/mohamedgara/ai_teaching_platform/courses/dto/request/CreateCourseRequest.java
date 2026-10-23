@@ -17,7 +17,7 @@ public record CreateCourseRequest(
 
         @NotNull
         @JsonProperty("category_id")
-        UUID category_id,
+        UUID categoryId,
 
         @NotNull
         @JsonProperty("visibility")

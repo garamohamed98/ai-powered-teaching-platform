@@ -6,13 +6,15 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
+import com.mohamedgara.ai_teaching_platform.courses.entity.CourseCategory;
+import com.mohamedgara.ai_teaching_platform.courses.entity.CourseVisibility;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
-import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapper;
-import com.mohamedgara.ai_teaching_platform.courses.mappers.CourseResponseMapperImpl;
-import com.mohamedgara.ai_teaching_platform.courses.mappers.LessonResponseMapper;
-import com.mohamedgara.ai_teaching_platform.courses.mappers.LessonResponseMapperImpl;
+import com.mohamedgara.ai_teaching_platform.courses.exception.CourseCategoryNotFoundException;
+import com.mohamedgara.ai_teaching_platform.courses.mappers.*;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.mohamedgara.ai_teaching_platform.courses.repository.CourseCategoryRepository;
 import com.mohamedgara.ai_teaching_platform.courses.repository.CourseRepository;
 import com.mohamedgara.ai_teaching_platform.courses.repository.LessonRepository;
 import org.assertj.core.api.Assertions;
@@ -38,18 +40,29 @@ public class CourseServiceTest {
     private CourseRepository courseRepository;
     @Mock
     private LessonRepository lessonRepository;
+    @Mock
+    private CourseCategoryRepository courseCategoryRepository;
     @Spy
     private final CourseResponseMapper courseResponseMapper = new CourseResponseMapperImpl();
+    @Spy
+    private final CourseRequestMapper courseRequestMapper = new CourseRequestMapperImpl();
     @Spy
     private final LessonResponseMapper lessonResponseMapper = new LessonResponseMapperImpl();
     @InjectMocks
     private CourseService courseService;
 
     @Test
-    public void createCourse_shouldReturnCourseResponse_whenCourseRequestTitleFieldExists(){
+    public void createCourse_shouldReturnCourseResponse_whenCourseRequestAllFieldsExists(){
 
         //Arrange
         UUID courseId = UUID.randomUUID();
+        UUID categoryId = UUID.randomUUID();
+        String authenticatedUserId = "1";
+        CourseCategory category = CourseCategory.builder()
+                .id(categoryId)
+                .name("java")
+                .slug("java")
+                .build();
 
         Mockito.when(courseRepository.save(Mockito.any(Course.class)))
                 .thenAnswer(invocationOnMock -> {
@@ -57,23 +70,62 @@ public class CourseServiceTest {
                     course.setId(courseId);
                     return course;
                 });
+        Mockito.when(courseCategoryRepository.findById(categoryId))
+                        .thenReturn(Optional.of(category));
+
 
         CreateCourseRequest createCourseRequest = new CreateCourseRequest(
-                "title example"
+                "title example",
+                categoryId,
+                CourseVisibility.PUBLIC
         );
 
         //Act
-        CourseResponse result = courseService.createCourse(createCourseRequest);
+        CourseResponse result = courseService.createCourse(authenticatedUserId,createCourseRequest);
 
         //Assert
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result.id()).isEqualTo(courseId);
         Assertions.assertThat(result.title()).isEqualTo(createCourseRequest.title());
 
+        Assertions.assertThat(result.category().id()).isEqualTo(category.getId());
+        Assertions.assertThat(result.category().name()).isEqualTo(category.getName());
+        Assertions.assertThat(result.category().slug()).isEqualTo(category.getSlug());
+
+        Assertions.assertThat(result.visibility()).isEqualTo(CourseVisibility.PUBLIC);
 
         Mockito.verify(courseRepository).save(Mockito.any(Course.class));
         Mockito.verify(courseResponseMapper).toCourseResponse(Mockito.any(Course.class));
+        Mockito.verify(courseRequestMapper).toCourse(createCourseRequest);
+        Mockito.verify(courseCategoryRepository).findById(categoryId);
 
+    }
+
+    @Test
+    public void createCourse_shouldReturnException_whenCategoryNotFound(){
+        //Arrange
+        UUID categoryId = UUID.randomUUID();
+        String authenticatedUserId = "1";
+        CreateCourseRequest createCourseRequest = new CreateCourseRequest(
+                "title example",
+                categoryId,
+                CourseVisibility.PUBLIC
+        );
+
+        Mockito.when(courseCategoryRepository.findById(categoryId))
+                .thenReturn(Optional.empty());
+
+        //Act & Assert
+        CourseCategoryNotFoundException exception = assertThrows(
+                CourseCategoryNotFoundException.class,
+                () -> courseService.createCourse(authenticatedUserId, createCourseRequest)
+        );
+
+        Assertions.assertThat(exception.getMessage()).isEqualTo("Course category not found");
+
+        Mockito.verify(courseCategoryRepository).findById(categoryId);
+        Mockito.verify(courseRepository, Mockito.never()).save(Mockito.any(Course.class));
+        Mockito.verify(courseResponseMapper, Mockito.never()).toCourseResponse(Mockito.any(Course.class));
     }
 
     @Test

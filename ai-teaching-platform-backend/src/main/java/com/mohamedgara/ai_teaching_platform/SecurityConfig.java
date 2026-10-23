@@ -30,11 +30,11 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/course/**").permitAll()
-                        .requestMatchers("/api/exercise/**").permitAll()
-                        .requestMatchers("/api/exercise-attempt/**").permitAll()
-                        .requestMatchers("/api/lesson/**").permitAll()
-                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/api/course/**").authenticated()
+                        .requestMatchers("/api/exercise/**").authenticated()
+                        .requestMatchers("/api/exercise-attempt/**").authenticated()
+                        .requestMatchers("/api/lesson/**").authenticated()
+                        .requestMatchers("/error").authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth-> oauth.jwt(Customizer.withDefaults()));

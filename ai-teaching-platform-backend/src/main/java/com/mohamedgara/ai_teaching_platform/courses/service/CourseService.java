@@ -34,11 +34,12 @@ public class CourseService {
     private final CourseRequestMapper courseRequestMapper;
     private final CourseCategoryRepository courseCategoryRepository;
 
+    @Transactional
     public CourseResponse createCourse(String authenticatedUserId,CreateCourseRequest createCourseRequest){
 
         Course course = courseRequestMapper.toCourse(createCourseRequest);
 
-        CourseCategory category = courseCategoryRepository.findById(createCourseRequest.category_id())
+        CourseCategory category = courseCategoryRepository.findById(createCourseRequest.categoryId())
                 .orElseThrow(()-> new CourseCategoryNotFoundException());
 
         course.setOwnerId(authenticatedUserId);
