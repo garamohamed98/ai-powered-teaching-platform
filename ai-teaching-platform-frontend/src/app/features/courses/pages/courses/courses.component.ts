@@ -29,6 +29,7 @@ export class CoursesComponent implements OnInit {
     this.loadCourses();
   };
 
+
   loadCourses(){
     this.loading.set(true);
     this.courses.set(Array(this.maxRows).fill({}));

@@ -1,12 +1,18 @@
-.courseDialogForm {
-  display: flex;
-  flex-direction: column;
+.modal-form{
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
   gap: 1rem;
 }
 
-.formElementContainer {
+.modal-form-element{
+  grid-column: span 12;
   display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-submit-button-container{
+  grid-column: span 12;
+  display: flex;
+  justify-content: end;
 }

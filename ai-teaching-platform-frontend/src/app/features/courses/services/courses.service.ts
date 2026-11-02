@@ -3,6 +3,7 @@ import {HttpClient, HttpResponse} from '@angular/common/http';
 import {Course} from '../models/course.model';
 import {Observable} from 'rxjs';
 import {Lesson} from '../models/lesson.model';
+import {CreateCourseDto} from '../models/create-course.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -42,12 +43,9 @@ export class CoursesService {
     return this.http.patch<Course>(url,body);
   }
 
-  createCourse(title:string) {
-    const body = {
-      title: title,
-    }
-    console.log("creating course: ",body);
-    return this.http.post<Course>(this.baseUrl, body);
+  createCourse(createCourseDto: CreateCourseDto) {
+    console.log("creating course: ",createCourseDto);
+    return this.http.post<Course>(this.baseUrl, createCourseDto);
   }
 
   deleteCourse(id: string) {
