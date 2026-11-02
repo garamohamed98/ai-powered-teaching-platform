@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
