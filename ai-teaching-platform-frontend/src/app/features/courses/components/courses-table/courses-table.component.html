@@ -1,5 +1,6 @@
 <p-card header="Courses List">
   <p-table
+    responsiveLayout="stack"
     [value]="courses"
     [paginator]="true"
     [rows]="maxRows"
@@ -14,13 +15,13 @@
     </ng-template>
     <ng-template #body let-course>
       <tr>
-        <td class="title-row">
-          @if (loading){
-            <p-skeleton  width="8rem" height="1rem"/>
-          } @else {
-            <p>{{ course.title }}</p>
-          }
-          <div>
+        <td >
+          <div class="title-row">
+            @if (loading){
+              <p-skeleton  width="8rem" height="1rem"/>
+            } @else {
+              <p>{{ course.title }}</p>
+            }
             <p-button [routerLink]="[course.id,'course-details']" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
             <p-button data-testid="delete-course" [rounded]="true" icon="pi pi-trash" [text]="true" size="small" (onClick)="onDeleteCourse(course.id)" />
           </div>

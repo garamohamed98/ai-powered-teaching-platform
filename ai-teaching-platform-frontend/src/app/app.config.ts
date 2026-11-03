@@ -37,6 +37,8 @@ export const appConfig: ApplicationConfig = {
       domain: 'dev-hejg6sfq4n8zjfwh.eu.auth0.com',
       clientId: 'mAvtuCIWjIVshlbmMVMwG9vzFmdonJh3',
       useRefreshTokens: true,
+      useRefreshTokensFallback: true,
+      cacheLocation: 'localstorage',
       authorizationParams:{
         redirect_uri: window.location.origin,
         audience: 'https://api.ai-teaching-platform'
