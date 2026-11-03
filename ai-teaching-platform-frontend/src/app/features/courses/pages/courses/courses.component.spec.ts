@@ -32,11 +32,29 @@ describe('CoursesComponent', () => {
   let fixture: ComponentFixture<CoursesComponent>;
   let coursesService: jasmine.SpyObj<CoursesService>;
 
-  const mockCourses: Course[] = [
-    {id:"1", title:'Angular', content:"Angular"},
-    {id:"2", title:'Spring Boot', content:"Angular"},
-    {id:"3", title:'Java', content:"Java"},
-  ]
+  const mockCourses = [
+    {
+      id: '1',
+      title: 'Angular Basics',
+      category: {name: 'Frontend'},
+      visibility: 'PUBLIC',
+      createdAt: new Date(2025, 0, 15, 10, 30),
+    },
+    {
+      id: '2',
+      title: 'Spring Boot Deep Dive',
+      category: {name: 'Backend'},
+      visibility: 'PRIVATE',
+      createdAt: new Date(2025, 1, 20, 14, 5),
+    },
+    {
+      id: '3',
+      title: 'Docker for Beginners',
+      category: {name: 'DevOps'},
+      visibility: 'PUBLIC',
+      createdAt: new Date(2025, 2, 3, 9, 0),
+    },
+  ] as unknown as Course[];
 
   beforeEach(async () => {
 

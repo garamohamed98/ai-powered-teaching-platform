@@ -42,7 +42,9 @@ describe('CoursesFormModalComponent', () => {
     coursesService.createCourse.and.returnValue(of({
       id:"1",
       title:"Ai",
-      content:"AI"
+      category: {id:"1",name:"Software Engineering",slug:"software-engineering",displayOrder:1},
+      visibility:"PUBLIC",
+      createdAt: (new Date()).toISOString(),
     }))
 
     courseCategoryService.getCourseCategoryList.and.returnValue(of(mockCategories))

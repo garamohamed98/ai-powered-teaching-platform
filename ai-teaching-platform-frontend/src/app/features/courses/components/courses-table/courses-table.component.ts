@@ -2,7 +2,7 @@ import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
 import {Button} from "primeng/button";
 import {Card} from "primeng/card";
 import {Message} from "primeng/message";
-import {NgIf} from "@angular/common";
+import {DatePipe, NgIf} from "@angular/common";
 import {MessageService, PrimeTemplate} from "primeng/api";
 import {RouterLink} from "@angular/router";
 import {Skeleton} from "primeng/skeleton";
@@ -12,15 +12,16 @@ import {CoursesService} from '../../services/courses.service';
 
 @Component({
   selector: 'app-courses-table',
-    imports: [
-        Button,
-        Card,
-        Message,
-        PrimeTemplate,
-        RouterLink,
-        Skeleton,
-        TableModule
-    ],
+  imports: [
+    Button,
+    Card,
+    Message,
+    PrimeTemplate,
+    RouterLink,
+    Skeleton,
+    TableModule,
+    DatePipe
+  ],
   templateUrl: './courses-table.component.html',
   styleUrl: './courses-table.component.scss'
 })

@@ -1,13 +1,15 @@
 <p-card header="Courses List">
   <p-table
     [value]="courses"
-    [tableStyle]="{ 'min-height': '60vh' }"
     [paginator]="true"
     [rows]="maxRows"
   >
     <ng-template #header>
       <tr>
         <th>Title</th>
+        <th>Category</th>
+        <th>Visibility</th>
+        <th>Create At</th>
       </tr>
     </ng-template>
     <ng-template #body let-course>
@@ -18,8 +20,31 @@
           } @else {
             <p>{{ course.title }}</p>
           }
-          <p-button [routerLink]="[course.id,'course-details']" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
-          <p-button data-testid="delete-course" [rounded]="true" icon="pi pi-trash" [text]="true" size="small" (onClick)="onDeleteCourse(course.id)" />
+          <div>
+            <p-button [routerLink]="[course.id,'course-details']" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
+            <p-button data-testid="delete-course" [rounded]="true" icon="pi pi-trash" [text]="true" size="small" (onClick)="onDeleteCourse(course.id)" />
+          </div>
+        </td>
+        <td>
+          @if (loading){
+            <p-skeleton  width="8rem" height="1rem"/>
+          } @else {
+            <p>{{ course.category.name }}</p>
+          }
+        </td>
+        <td>
+          @if (loading){
+            <p-skeleton  width="8rem" height="1rem"/>
+          } @else {
+            <p>{{ course.visibility }}</p>
+          }
+        </td>
+        <td>
+          @if (loading){
+            <p-skeleton  width="8rem" height="1rem"/>
+          } @else {
+            <p>{{ course.createdAt | date:'dd MMM yyyy, HH:mm' }}</p>
+          }
         </td>
       </tr>
     </ng-template>
