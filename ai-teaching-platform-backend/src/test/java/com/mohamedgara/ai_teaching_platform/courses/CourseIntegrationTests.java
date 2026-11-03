@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -39,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class CourseIntegrationTests {
 
     private static final String OWNER_SUB = "auth0|owner-1";
+    private static final String OWNER_SUB2 = "auth0|owner-2";
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,6 +62,10 @@ public class CourseIntegrationTests {
 
     private RequestPostProcessor asOwner() {
         return jwt().jwt(j -> j.subject(OWNER_SUB));
+    }
+
+    private RequestPostProcessor asOwner2(){
+        return jwt().jwt(j-> j.subject(OWNER_SUB2));
     }
 
     CourseCategory courseCategory;
@@ -191,6 +197,30 @@ public class CourseIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].title", containsInAnyOrder("Course A", "Course B")));
+    }
+
+    @Test
+    void getCourseList_shouldReturnOnlyCorrectOwnerCourses() throws Exception{
+        courseRepository.save(Course.builder()
+                .title("Course A")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+
+        courseRepository.save(Course.builder()
+                .title("Course B")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB2)
+                .build());
+
+        mockMvc.perform(get("/api/course")
+                        .with(asOwner())
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].title", is("Course A")));
     }
 
     @Test

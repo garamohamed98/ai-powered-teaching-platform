@@ -131,6 +131,7 @@ public class CourseServiceTest {
     @Test
     public void getCourseList_shouldReturnCourseResponseList_whenCoursesExist(){
         //Arrange
+        String userId = "id1";
         UUID courseId1 = UUID.randomUUID();
         UUID courseId2 = UUID.randomUUID();
 
@@ -139,10 +140,10 @@ public class CourseServiceTest {
 
         List<Course> courseList = List.of(course1, course2);
 
-        Mockito.when(courseRepository.findAll()).thenReturn(courseList);
+        Mockito.when(courseRepository.findCourseByOwnerId(userId)).thenReturn(courseList);
 
         //Act
-        List<CourseResponse> result = courseService.getCourseList();
+        List<CourseResponse> result = courseService.getCourseList(userId);
 
         //Assert
         Assertions.assertThat(result).isNotNull();
@@ -152,25 +153,26 @@ public class CourseServiceTest {
         Assertions.assertThat(result.get(1).id()).isEqualTo(courseId2);
         Assertions.assertThat(result.get(1).title()).isEqualTo("Course 2");
 
-        Mockito.verify(courseRepository).findAll();
+        Mockito.verify(courseRepository).findCourseByOwnerId(userId);
         Mockito.verify(courseResponseMapper).toCourseListResponse(courseList);
     }
 
     @Test
     public void getCourseList_shouldReturnEmptyList_whenNoCoursesExist(){
         //Arrange
+        String userId = "id1";
         List<Course> emptyList = List.of();
 
-        Mockito.when(courseRepository.findAll()).thenReturn(emptyList);
+        Mockito.when(courseRepository.findCourseByOwnerId(userId)).thenReturn(emptyList);
 
         //Act
-        List<CourseResponse> result = courseService.getCourseList();
+        List<CourseResponse> result = courseService.getCourseList(userId);
 
         //Assert
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result).isEmpty();
 
-        Mockito.verify(courseRepository).findAll();
+        Mockito.verify(courseRepository).findCourseByOwnerId(userId);
         Mockito.verify(courseResponseMapper).toCourseListResponse(emptyList);
     }
 

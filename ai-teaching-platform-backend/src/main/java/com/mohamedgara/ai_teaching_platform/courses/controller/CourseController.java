@@ -37,8 +37,12 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseResponse>> getCourseList(){
-        List<CourseResponse> courseResponseList = courseService.getCourseList();
+    public ResponseEntity<List<CourseResponse>> getCourseList(
+            @AuthenticationPrincipal Jwt jwt
+    ){
+        String auth0Id = jwt.getSubject();
+        System.out.print(auth0Id);
+        List<CourseResponse> courseResponseList = courseService.getCourseList(auth0Id);
         return ResponseEntity.ok(courseResponseList);
     }
 

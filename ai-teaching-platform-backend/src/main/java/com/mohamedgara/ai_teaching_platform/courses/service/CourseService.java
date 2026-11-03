@@ -49,8 +49,8 @@ public class CourseService {
         return courseResponseMapper.toCourseResponse(savedCourse);
     }
 
-    public List<CourseResponse> getCourseList(){
-        List<Course> courseList = courseRepository.findAll();
+    public List<CourseResponse> getCourseList(String authenticatedUserId){
+        List<Course> courseList = courseRepository.findCourseByOwnerId(authenticatedUserId);
         return courseResponseMapper.toCourseListResponse(courseList);
     }
 
