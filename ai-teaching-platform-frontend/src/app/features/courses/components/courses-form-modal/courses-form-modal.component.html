@@ -1,9 +1,20 @@
 <p-dialog header="Create New Course" [modal]="true" [(visible)]="isVisible" (onHide)="close()" [style]="{ width: '80vw', height:'100vh'}">
   <form [formGroup]="form" (ngSubmit)="submit()" class="modal-form" >
-    @if(form.get('title')?.touched && !form.get('title')?.valid){
-      <div>
-        . More then 3 character in course title is required
-      </div>
+    @if (form.get('title')?.touched && form.get('title')?.errors; as errors) {
+      <small class="modal-error-container">
+        @if (errors['required']) {
+          Course title is required.
+        } @else if (errors['minlength']) {
+          Course title must contain at least 3 characters.
+        }
+      </small>
+    }
+    @if (form.get('categoryId')?.touched && form.get('categoryId')?.errors; as errors) {
+      <small class="modal-error-container">
+        @if (errors['required']) {
+          Category is required.
+        }
+      </small>
     }
     <div class="modal-form-element">
       <label>Course Title</label>
