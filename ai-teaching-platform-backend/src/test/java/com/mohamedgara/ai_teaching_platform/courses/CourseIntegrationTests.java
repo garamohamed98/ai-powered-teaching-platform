@@ -139,8 +139,10 @@ public class CourseIntegrationTests {
         );
 
         mockMvc.perform(post("/api/course")
+                        .with(asOwner())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request))
+                )
                 .andExpect(status().isBadRequest());
 
         assert courseRepository.count() == 0;
@@ -174,6 +176,26 @@ public class CourseIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCourseList_shouldReturn401_whenNoTokenProvided() throws Exception{
+
+        courseRepository.save(Course.builder()
+                .title("Course A")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+        courseRepository.save(Course.builder()
+                .title("Course B")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+
+        mockMvc.perform(get("/api/course"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -221,6 +243,19 @@ public class CourseIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].title", is("Course A")));
+    }
+
+    @Test
+    void deleteCourse_shouldReturn401_whenNoTokenProvided() throws Exception{
+
+        Course saved = courseRepository.save(Course.builder()
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .title("To Delete")
+                .ownerId(OWNER_SUB).build());
+
+        mockMvc.perform(delete("/api/course/{id}", saved.getId()))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
