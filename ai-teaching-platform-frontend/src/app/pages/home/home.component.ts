@@ -1,5 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {AuthService} from '@auth0/auth0-angular';
+import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -7,19 +6,5 @@ import {AuthService} from '@auth0/auth0-angular';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit {
-  auth = inject(AuthService);
-  ngOnInit() {
-    this.auth.isLoading$.subscribe(loading => {
-      console.log('Auth loading:', loading);
-    });
-
-    this.auth.isAuthenticated$.subscribe(authenticated => {
-      console.log('Authenticated:', authenticated);
-    });
-
-    this.auth.user$.subscribe(user => {
-      console.log('User:', user);
-    });
-  }
+export class HomeComponent {
 }
