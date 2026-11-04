@@ -181,16 +181,17 @@ public class CourseServiceTest {
     @Test
     public void deleteCourse_shouldDeleteCourse_whenCourseExists(){
         //Arrange
+        String ownerId = "id";
         UUID courseId = UUID.randomUUID();
-        Course course = Course.builder().id(courseId).title("title example").build();
+        Course course = Course.builder().id(courseId).title("title example").ownerId(ownerId).build();
 
-        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        Mockito.when(courseRepository.findCourseByOwnerIdAndCourseId(ownerId,courseId)).thenReturn(Optional.of(course));
 
         //Act
-        courseService.deleteCourse(courseId);
+        courseService.deleteCourse(ownerId,courseId);
 
         //Assert
-        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(courseRepository).findCourseByOwnerIdAndCourseId(ownerId,courseId);
         Mockito.verify(courseRepository).delete(course);
     }
 
@@ -198,14 +199,15 @@ public class CourseServiceTest {
     public void deleteCourse_shouldThrowCourseNotFoundException_whenCourseDoesNotExist(){
         //Arrange
         UUID courseId = UUID.randomUUID();
+        String ownerId = "id";
 
-        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
+        Mockito.when(courseRepository.findCourseByOwnerIdAndCourseId(ownerId,courseId)).thenReturn(Optional.empty());
 
         //Act & Assert
         assertThrows(CourseNotFoundException.class,
-                () -> courseService.deleteCourse(courseId));
+                () -> courseService.deleteCourse(ownerId,courseId));
 
-        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(courseRepository).findCourseByOwnerIdAndCourseId(ownerId, courseId);
     }
 
     @Test

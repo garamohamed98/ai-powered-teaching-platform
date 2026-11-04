@@ -225,9 +225,15 @@ public class CourseIntegrationTests {
 
     @Test
     void deleteCourse_shouldRemoveCourseWhenFound() throws Exception {
-        Course saved = courseRepository.save(Course.builder().title("To Delete").build());
+        Course saved = courseRepository.save(Course.builder()
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .title("To Delete")
+                .ownerId(OWNER_SUB).build());
 
-        mockMvc.perform(delete("/api/course/{id}", saved.getId()))
+        mockMvc.perform(delete("/api/course/{id}", saved.getId())
+                        .with(asOwner())
+                )
                 .andExpect(status().isNoContent());
 
         assert courseRepository.count() == 0;
@@ -237,7 +243,85 @@ public class CourseIntegrationTests {
     void deleteCourse_shouldReturn404WhenNotFound() throws Exception {
         UUID randomId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/course/{id}", randomId))
+        mockMvc.perform(delete("/api/course/{id}", randomId)
+                        .with(asOwner())
+                )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteCourse_shouldRemoveCourse_whenOwnerOwnsIt() throws Exception {
+        Course saved = courseRepository.save(
+                Course.builder().title("To Delete")
+                        .category(courseCategory)
+                        .visibility(CourseVisibility.PUBLIC)
+                        .ownerId(OWNER_SUB).build());
+
+        mockMvc.perform(delete("/api/course/{id}", saved.getId())
+                        .with(asOwner()))
+                .andExpect(status().isNoContent());
+
+        assert courseRepository.findById(saved.getId()).isEmpty();
+    }
+
+    @Test
+    void deleteCourse_shouldReturn404_whenCourseBelongsToAnotherOwner() throws Exception {
+        Course saved = courseRepository.save(
+                Course.builder().title("Not yours")
+                        .category(courseCategory)
+                        .visibility(CourseVisibility.PUBLIC)
+                        .ownerId(OWNER_SUB2).build());
+
+        mockMvc.perform(delete("/api/course/{id}", saved.getId())
+                        .with(asOwner()))
+                .andExpect(status().isNotFound());   // or isForbidden(), whichever your API returns
+
+        assert courseRepository.findById(saved.getId()).isPresent();
+    }
+
+    @Test
+    void deleteCourse_shouldOnlyDeleteTheRequestedCourse() throws Exception {
+        Course toDelete = courseRepository.save(
+                Course.builder()
+                        .category(courseCategory)
+                        .visibility(CourseVisibility.PUBLIC)
+                        .title("To Delete")
+                        .ownerId(OWNER_SUB).build());
+        Course toKeep = courseRepository.save(
+                Course.builder()
+                        .title("To Keep")
+                        .category(courseCategory)
+                        .visibility(CourseVisibility.PUBLIC)
+                        .ownerId(OWNER_SUB).build());
+
+        mockMvc.perform(delete("/api/course/{id}", toDelete.getId())
+                        .with(asOwner()))
+                .andExpect(status().isNoContent());
+
+        assert courseRepository.findById(toDelete.getId()).isEmpty();
+        assert courseRepository.findById(toKeep.getId()).isPresent();
+    }
+
+    @Test
+    void deleteCourse_shouldReturn400_whenIdIsNotAValidUuid() throws Exception {
+        mockMvc.perform(delete("/api/course/{id}", "not-a-uuid")
+                        .with(asOwner()))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deleteCourse_shouldReturn404_whenDeletedTwice() throws Exception {
+        Course saved = courseRepository.save(
+                Course.builder()
+                        .title("Delete me twice")
+                        .category(courseCategory)
+                        .visibility(CourseVisibility.PUBLIC)
+                        .ownerId(OWNER_SUB).build());
+
+        mockMvc.perform(delete("/api/course/{id}", saved.getId()).with(asOwner()))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(delete("/api/course/{id}", saved.getId()).with(asOwner()))
                 .andExpect(status().isNotFound());
     }
 

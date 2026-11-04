@@ -55,8 +55,8 @@ public class CourseService {
     }
 
     @Transactional
-    public void deleteCourse(UUID id){
-        Course course = courseRepository.findById(id).orElseThrow(()-> new CourseNotFoundException());
+    public void deleteCourse(String authenticatedUserId, UUID id){
+        Course course = courseRepository.findCourseByOwnerIdAndCourseId(authenticatedUserId,id).orElseThrow(()-> new CourseNotFoundException());
         courseRepository.delete(course);
     }
 

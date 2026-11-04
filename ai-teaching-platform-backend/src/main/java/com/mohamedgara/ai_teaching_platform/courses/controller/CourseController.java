@@ -47,8 +47,12 @@ public class CourseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable UUID id){
-        courseService.deleteCourse(id);
+    public ResponseEntity<Void> deleteCourse(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id
+    ){
+        String auth0Id = jwt.getSubject();
+        courseService.deleteCourse(auth0Id,id);
         return ResponseEntity.noContent().build();
     }
 

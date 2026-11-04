@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CourseRepository extends JpaRepository<Course, UUID> {
@@ -17,5 +18,15 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
             WHERE c.ownerId =:ownerId
             """)
     List<Course> findCourseByOwnerId(@Param("ownerId") String ownerId);
+
+    @Query("""
+            SELECT c
+            FROM Course c
+            WHERE c.ownerId =:ownerId AND c.id =:courseId
+            """)
+    Optional<Course> findCourseByOwnerIdAndCourseId(
+            @Param("ownerId") String ownerId,
+            @Param("courseId") UUID courseId
+    );
 
 }
