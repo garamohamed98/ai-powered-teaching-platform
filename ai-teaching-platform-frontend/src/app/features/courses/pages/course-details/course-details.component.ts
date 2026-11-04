@@ -38,7 +38,7 @@ export class CourseDetailsComponent implements OnInit {
     id:"",
     title:"",
     category:{name:"",slug:"",id:"",displayOrder:0},
-    visibility:"",
+    visibility:"PRIVATE",
     createdAt:""
   });
   lessons = signal<Lesson[]>([])

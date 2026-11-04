@@ -1,14 +1,18 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {Component} from '@angular/core';
 
 import {CoursesTableComponent} from './courses-table.component';
 import {CoursesService} from '../../services/courses.service';
 import {MessageService} from 'primeng/api';
-import {provideRouter, RouterLink} from '@angular/router';
+import {provideRouter, Router} from '@angular/router';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {By} from '@angular/platform-browser';
-import {of, throwError} from 'rxjs';
 import {Course} from '../../models/course.model';
+import {of, throwError} from 'rxjs';
 
+@Component({template: ''})
+class DummyComponent {
+}
 
 const MAX_ROWS = 2;
 const SKELETONS_PER_ROW = 4;
@@ -59,7 +63,6 @@ describe('CoursesTableComponent', () => {
   const getCells = () => fixture.debugElement.queryAll(By.css('tbody td'));
 
   beforeEach(async () => {
-
     coursesService = jasmine.createSpyObj('CoursesService', ['deleteCourse']);
     messageService = jasmine.createSpyObj('MessageService', ['add']);
 
@@ -68,11 +71,10 @@ describe('CoursesTableComponent', () => {
       providers: [
         {provide: CoursesService, useValue: coursesService},
         {provide: MessageService, useValue: messageService},
-        provideRouter([]),
+        provideRouter([{path: ':id/course-details', component: DummyComponent}]),
         provideNoopAnimations()
       ]
-    })
-      .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CoursesTableComponent);
     component = fixture.componentInstance;
@@ -102,58 +104,50 @@ describe('CoursesTableComponent', () => {
 
     beforeEach(() => {
       setInputs({courses: MOCK_COURSES, loading: false});
-    })
+    });
 
     it('should show course title', () => {
-      const firstRow = getRows()[0];
-
-      expect(firstRow.nativeElement.textContent).toContain(MOCK_COURSES[0].title);
-    })
+      expect(getRows()[0].nativeElement.textContent).toContain(MOCK_COURSES[0].title);
+    });
 
     it('should show course category name', () => {
       const cells = getCells().map(c => c.nativeElement.textContent.trim());
 
       expect(cells).toContain('Frontend');
-    })
+    });
 
     it('should show course visibility', () => {
       const cells = getCells().map(c => c.nativeElement.textContent.trim());
 
-      expect(cells).toContain('PUBLIC');
-    })
+      expect(cells).toContain('Public');
+    });
 
     it('should show the creation date formatted as dd MMM yyyy, HH:mm', () => {
       const cells = getCells().map(c => c.nativeElement.textContent.trim());
 
       expect(cells).toContain('15 Jan 2025, 10:30');
-    })
+    });
 
-    it('should show a navigation button and a delete button for each row', () => {
+    it('should show the desktop and mobile menu buttons in each row', () => {
       const rows = getRows();
 
       expect(rows.length).toBe(MAX_ROWS);
       rows.forEach(row => {
         expect(row.queryAll(By.css('p-button')).length).toBe(2);
-        expect(row.query(By.css('[data-testid="delete-course"]'))).not.toBeNull();
+        expect(row.query(By.css('[data-testid="menu-button"]'))).not.toBeNull();
+        expect(row.query(By.css('[data-testid="mobile-menu-button"]'))).not.toBeNull();
       });
-    })
-
-    it('should link the navigation button to the course details', () => {
-      const navButton = getRows()[0].queryAll(By.css('p-button'))[0];
-      const routerLink = navButton.injector.get(RouterLink);
-
-      expect(routerLink.urlTree?.toString()).toBe(`/${MOCK_COURSES[0].id}/course-details`);
-    })
+    });
 
     it('should not show the empty message', () => {
       expect(getEmptyMessage()).toBeNull();
-    })
+    });
 
     it('should not show skeleton', () => {
       expect(getSkeletons().length).toBe(0);
-    })
+    });
 
-  })
+  });
 
   describe('when the list is paginated', () => {
 
@@ -161,19 +155,19 @@ describe('CoursesTableComponent', () => {
       setInputs({courses: MOCK_COURSES, maxRows: MAX_ROWS});
 
       expect(getRows().length).toBe(MAX_ROWS);
-    })
+    });
 
     it('should render all rows when maxRows is bigger than the list', () => {
       setInputs({courses: MOCK_COURSES, maxRows: 10});
 
       expect(getRows().length).toBe(MOCK_COURSES.length);
-    })
+    });
 
     it('should show the paginator', () => {
       setInputs({courses: MOCK_COURSES});
 
       expect(getPaginator()).not.toBeNull();
-    })
+    });
 
     it('should show the second page when next page is clicked', () => {
       setInputs({courses: MOCK_COURSES, maxRows: MAX_ROWS});
@@ -184,140 +178,60 @@ describe('CoursesTableComponent', () => {
       const rows = getRows();
       expect(rows.length).toBe(1);
       expect(rows[0].nativeElement.textContent).toContain(MOCK_COURSES[2].title);
-    })
+    });
 
-  })
+  });
 
   describe('when there are no courses', () => {
 
     beforeEach(() => {
       setInputs({courses: [], loading: false});
-    })
+    });
 
     it('should show the empty message', () => {
       const message = getEmptyMessage();
 
       expect(message).not.toBeNull();
       expect(message.nativeElement.textContent).toContain('No courses found.');
-    })
+    });
 
     it('should not show any course rows', () => {
       expect(getRows().length).toBe(0);
-    })
+    });
 
     it('should not show skeleton', () => {
       expect(getSkeletons().length).toBe(0);
-    })
+    });
 
-  })
+  });
 
   describe('when courses are loading', () => {
 
     beforeEach(() => {
       setInputs({courses: MOCK_COURSES, loading: true});
-    })
+    });
 
     it('should show skeletons for every cell of every row', () => {
       expect(getSkeletons().length).toBe(MAX_ROWS * SKELETONS_PER_ROW);
-    })
+    });
 
     it('should not show course title', () => {
-      const text = fixture.nativeElement.textContent;
-
-      expect(text).not.toContain(MOCK_COURSES[0].title);
-    })
+      expect(fixture.nativeElement.textContent).not.toContain(MOCK_COURSES[0].title);
+    });
 
     it('should not show course category, visibility or creation date', () => {
       const text = fixture.nativeElement.textContent;
 
       expect(text).not.toContain('Frontend');
-      expect(text).not.toContain('PUBLIC');
+      expect(text).not.toContain('Public');
       expect(text).not.toContain('15 Jan 2025, 10:30');
-    })
+    });
 
     it('should not show the empty message', () => {
       expect(getEmptyMessage()).toBeNull();
-    })
+    });
 
-  })
-
-  describe('delete button', () => {
-
-    const clickDeleteButton = (rowIndex = 0) => {
-      fixture.detectChanges();
-
-      getRows()[rowIndex].query(
-        By.css('[data-testid="delete-course"] button')
-      )
-        .nativeElement.click();
-
-      fixture.detectChanges();
-    }
-
-    beforeEach(() => {
-      setInputs({courses: MOCK_COURSES, loading: false});
-    })
-
-    describe('when deletion succeeds', () => {
-
-      beforeEach(() => {
-        coursesService.deleteCourse.and.returnValue(of(void 0) as any);
-      })
-
-      it('should call deleteCourse with the course id', () => {
-        clickDeleteButton(0);
-
-        expect(coursesService.deleteCourse).toHaveBeenCalledOnceWith(MOCK_COURSES[0].id);
-      })
-
-      it('should call deleteCourse with the id of the clicked row', () => {
-        clickDeleteButton(1);
-
-        expect(coursesService.deleteCourse).toHaveBeenCalledOnceWith(MOCK_COURSES[1].id);
-      })
-
-      it('should show a success message', () => {
-        clickDeleteButton();
-
-        expect(messageService.add).toHaveBeenCalledOnceWith({
-          severity: 'success',
-          summary: 'Course deleted successfully',
-        });
-      })
-
-      it('should emit courseDeleted', () => {
-        const emitSpy = spyOn(component.courseDeleted, 'emit');
-
-        clickDeleteButton();
-
-        expect(emitSpy).toHaveBeenCalledTimes(1);
-      })
-
-    })
-
-    describe('when deletion fails', () => {
-
-      beforeEach(() => {
-        coursesService.deleteCourse.and.returnValue(throwError(() => new Error('Server error')));
-      })
-
-      it('should not show a success message', () => {
-        clickDeleteButton();
-
-        expect(messageService.add).not.toHaveBeenCalled();
-      })
-
-      it('should not emit courseDeleted', () => {
-        const emitSpy = spyOn(component.courseDeleted, 'emit');
-
-        clickDeleteButton();
-
-        expect(emitSpy).not.toHaveBeenCalled();
-      })
-
-    })
-
-  })
+  });
 
   describe('state transitions', () => {
 
@@ -349,6 +263,119 @@ describe('CoursesTableComponent', () => {
 
       expect(getRows().length).toBe(0);
       expect(getEmptyMessage()).not.toBeNull();
+    });
+
+  });
+
+  describe('row menu', () => {
+
+    const getMenuButton = (rowIndex = 0) =>
+      getRows()[rowIndex].query(By.css('[data-testid="menu-button"] button'))
+        .nativeElement as HTMLButtonElement;
+
+    // the menu uses appendTo="body", so it lives in document.body, not in the fixture
+    const getOverlay = () => document.body.querySelector('.p-menu-overlay');
+
+    const getMenuItem = (label: string) =>
+      Array.from(document.body.querySelectorAll<HTMLElement>('.p-menu-overlay .p-menu-item-link'))
+        .find(el => el.textContent?.trim() === label);
+
+    const settle = async () => {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+
+    const clickMenuButton = async (rowIndex = 0) => {
+      getMenuButton(rowIndex).click();
+      await settle();
+    };
+
+    beforeEach(() => {
+      setInputs({courses: MOCK_COURSES, loading: false});
+    });
+
+    afterEach(() => {
+      document.body.querySelectorAll('.p-menu-overlay').forEach(el => el.remove());
+    });
+
+    it('should not show the menu initially', () => {
+      expect(getOverlay()).toBeNull();
+    });
+
+    it('should show the menu when the menu button is clicked', async () => {
+      await clickMenuButton();
+
+      expect(getOverlay()).not.toBeNull();
+      expect(getMenuItem('View')).toBeTruthy();
+      expect(getMenuItem('Delete')).toBeTruthy();
+    });
+
+    it('should hide the menu when the menu button is clicked again', async () => {
+      await clickMenuButton();
+      expect(getOverlay()).not.toBeNull();
+
+      await clickMenuButton();
+
+      expect(getOverlay()).toBeNull();
+    });
+
+    it('should not navigate when only the menu button is clicked', async () => {
+      const router = TestBed.inject(Router);
+
+      await clickMenuButton(0);
+
+      expect(router.url).toBe('/');
+    });
+
+    it('should navigate to the course details when View is clicked', async () => {
+      const router = TestBed.inject(Router);
+      await clickMenuButton(1);
+
+      getMenuItem('View')!.click();
+      await settle();
+
+      expect(router.url).toBe(`/${MOCK_COURSES[1].id}/course-details`);
+    });
+
+    describe('when Delete is clicked', () => {
+
+      beforeEach(() => {
+        coursesService.deleteCourse.and.returnValue(of(void 0) as any);
+      });
+
+      it('should delete the course of the row whose menu was opened', async () => {
+        await clickMenuButton(1);
+
+        getMenuItem('Delete')!.click();
+        await settle();
+
+        expect(coursesService.deleteCourse).toHaveBeenCalledOnceWith(MOCK_COURSES[1].id);
+      });
+
+      it('should show a success message and emit courseDeleted', async () => {
+        const emitSpy = spyOn(component.courseDeleted, 'emit');
+        await clickMenuButton(0);
+
+        getMenuItem('Delete')!.click();
+        await settle();
+
+        expect(messageService.add).toHaveBeenCalledOnceWith({
+          severity: 'success',
+          summary: 'Course deleted successfully',
+        });
+        expect(emitSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should close the menu after the item is clicked', async () => {
+        await clickMenuButton(0);
+
+        getMenuItem('Delete')!.click();
+        await settle();
+
+        expect(getOverlay()).toBeNull();
+      });
+
     });
 
   });

@@ -9,3 +9,44 @@
 :host ::ng-deep .p-card {
   min-height: 60vh;
 }
+
+.mobile-button-menu {
+  display: none;
+}
+
+.button-menu{
+  display: block;
+}
+
+.table-row{
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.table-row:hover{
+  background-color: var(--p-content-hover-background);
+}
+
+@media screen and (max-width: 768px) {
+  .mobile-button-menu {
+    display: block;
+  }
+  .button-menu{
+    display: none;
+  }
+  .title-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: -webkit-fill-available;
+    justify-content: space-between;
+  }
+  .table-row {
+    cursor: default;
+    transition: none;
+  }
+
+  .table-row:hover {
+    background-color: transparent;
+  }
+}

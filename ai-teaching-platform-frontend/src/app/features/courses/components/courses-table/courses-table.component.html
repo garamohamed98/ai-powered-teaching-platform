@@ -13,17 +13,17 @@
         <th>Create At</th>
       </tr>
     </ng-template>
-    <ng-template #body let-course>
-      <tr>
+    <ng-template #body let-course >
+      <tr [routerLink]="[course.id,'course-details']" class="table-row">
         <td >
           <div class="title-row">
+            <p-button class="button-menu" data-testid="menu-button"] (onClick)="openMenu($event, course)" [text]="true" icon="pi pi-ellipsis-v"/>
             @if (loading){
               <p-skeleton  width="8rem" height="1rem"/>
             } @else {
               <p>{{ course.title }}</p>
             }
-            <p-button [routerLink]="[course.id,'course-details']" [rounded]="true" icon="pi pi-chevron-right" [text]="true" size="small"/>
-            <p-button data-testid="delete-course" [rounded]="true" icon="pi pi-trash" [text]="true" size="small" (onClick)="onDeleteCourse(course.id)" />
+            <p-button class="mobile-button-menu" data-testid="mobile-menu-button"] (onClick)="openMenu($event, course)" [text]="true" icon="pi pi-ellipsis-v"/>
           </div>
         </td>
         <td>
@@ -37,7 +37,7 @@
           @if (loading){
             <p-skeleton  width="8rem" height="1rem"/>
           } @else {
-            <p>{{ course.visibility }}</p>
+            <p-tag [icon]="getVisibilityIcon(course.visibility)" [value]="getVisibilityLabel(course.visibility)" />
           }
         </td>
         <td>
@@ -59,3 +59,4 @@
     </ng-template>
   </p-table>
 </p-card>
+<p-menu #menu [model]="menuItems" [popup]="true" appendTo="body" />
