@@ -20,27 +20,9 @@ export class CoursesService {
     return this.http.get<Course[]>(this.baseUrl);
   }
 
-  getCourseDetails(courseId: string) {
-    console.log("fetching course details")
-    return this.http.get<Course>(this.baseUrl +"/" +courseId);
-  }
-
   getLessonsByCourseId(courseId: string) {
     console.log("fetching lessons list for course id: " + courseId)
     return this.http.get<Lesson[]>(`${this.baseUrl}/${courseId}/lesson`);
-  }
-
-  updateCourseContent(courseId: string, content: string) {
-    const url = `${this.baseUrl}/${courseId}/content`;
-    const body = {
-      content: content
-    };
-    console.log("updating course content course id: ", courseId,
-      " content: ",content,
-      " in url: ",url,
-      " with body: ",body
-      );
-    return this.http.patch<Course>(url,body);
   }
 
   createCourse(createCourseDto: CreateCourseDto) {
