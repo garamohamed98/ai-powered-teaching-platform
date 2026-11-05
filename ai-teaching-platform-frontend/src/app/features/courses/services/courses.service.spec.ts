@@ -216,4 +216,54 @@ describe('CoursesService', () => {
 
   });
 
+  describe('getLessonsByCourseId', () => {
+
+    const MOCK_LESSONS = [
+      {id: 'l1', title: 'Lesson 1', courseId: '42'},
+      {id: 'l2', title: 'Lesson 2', courseId: '42'},
+    ];
+
+    it('should send a GET request to the course lessons endpoint', () => {
+      service.getLessonsByCourseId('42').subscribe();
+
+      const req = httpMock.expectOne(`${BASE_URL}/42/lesson`);
+      expect(req.request.method).toBe('GET');
+
+      req.flush([]);
+    });
+
+    it('should return the lessons sent by the server', () => {
+      let result: any[] | undefined;
+
+      service.getLessonsByCourseId('42').subscribe(lessons => result = lessons);
+
+      httpMock.expectOne(`${BASE_URL}/42/lesson`).flush(MOCK_LESSONS);
+
+      expect(result).toEqual(MOCK_LESSONS);
+    });
+
+    it('should return an empty list when the course has no lessons', () => {
+      let result: any[] | undefined;
+
+      service.getLessonsByCourseId('42').subscribe(lessons => result = lessons);
+
+      httpMock.expectOne(`${BASE_URL}/42/lesson`).flush([]);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should propagate the error when the course is not found', () => {
+      let status: number | undefined;
+
+      service.getLessonsByCourseId('42').subscribe({
+        error: err => status = err.status
+      });
+
+      httpMock.expectOne(`${BASE_URL}/42/lesson`).flush('Not found', {status: 404, statusText: 'Not Found'});
+
+      expect(status).toBe(404);
+    });
+
+  });
+
 });
