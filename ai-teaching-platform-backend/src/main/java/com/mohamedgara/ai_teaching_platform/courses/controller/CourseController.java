@@ -4,7 +4,7 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequ
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.UpdateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import jakarta.validation.Valid;
@@ -56,9 +56,13 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{courseId}/title")
-    public ResponseEntity<CourseResponse> updateCourseTitle(@PathVariable UUID courseId, @Valid @RequestBody CourseTitleUpdateRequest courseTitleUpdateRequest){
-        CourseResponse courseResponse = courseService.updateCourseTitle(courseId,courseTitleUpdateRequest);
+    @PatchMapping("/{courseId}")
+    public ResponseEntity<CourseResponse> updateCourse(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID courseId,
+            @Valid @RequestBody UpdateCourseRequest updateCourseRequest){
+        String auth0id = jwt.getSubject();
+        CourseResponse courseResponse = courseService.updateCourse(auth0id,courseId, updateCourseRequest);
         return ResponseEntity.ok(courseResponse);
     }
 

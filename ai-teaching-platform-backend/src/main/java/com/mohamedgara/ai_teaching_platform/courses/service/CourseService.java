@@ -1,6 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.courses.service;
 
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.UpdateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
@@ -8,6 +8,7 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Course;
 import com.mohamedgara.ai_teaching_platform.courses.entity.CourseCategory;
+import com.mohamedgara.ai_teaching_platform.courses.entity.CourseVisibility;
 import com.mohamedgara.ai_teaching_platform.courses.entity.Lesson;
 import com.mohamedgara.ai_teaching_platform.courses.exception.CourseCategoryNotFoundException;
 import com.mohamedgara.ai_teaching_platform.courses.exception.CourseNotFoundException;
@@ -61,11 +62,27 @@ public class CourseService {
     }
 
     @Transactional
-    public CourseResponse updateCourseTitle (UUID courseId, CourseTitleUpdateRequest courseTitleUpdateRequest){
-        Course course = courseRepository.findById(courseId).orElseThrow(()-> new CourseNotFoundException());
-        String courseTitle = courseTitleUpdateRequest.title();
+    public CourseResponse updateCourse(String authenticatedUserId, UUID courseId, UpdateCourseRequest updateCourseRequest){
+        Course course = courseRepository.findCourseByOwnerIdAndCourseId(
+                authenticatedUserId,
+                courseId
+        ).orElseThrow(()-> new CourseNotFoundException());
 
-        course.setTitle(courseTitle);
+        String courseTitle = updateCourseRequest.title();
+        if(courseTitle != null){
+            course.setTitle(courseTitle);
+        }
+        UUID courseCategoryId = updateCourseRequest.categoryId();
+        if(courseCategoryId != null){
+            CourseCategory courseCategory = courseCategoryRepository.findById(courseCategoryId)
+                    .orElseThrow(()->new CourseCategoryNotFoundException());
+            course.setCategory(courseCategory);
+        }
+        CourseVisibility courseVisibility = updateCourseRequest.visibility();
+        if(courseVisibility != null){
+            course.setVisibility(courseVisibility);
+        }
+
         Course updatedCourse = courseRepository.save(course);
         return courseResponseMapper.toCourseResponse(updatedCourse);
     }

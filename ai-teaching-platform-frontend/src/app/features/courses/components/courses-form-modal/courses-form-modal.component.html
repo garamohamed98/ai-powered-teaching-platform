@@ -1,4 +1,4 @@
-<p-dialog header="Create New Course" [modal]="true" [(visible)]="isVisible" (onHide)="close()" [style]="{ width: '80vw', height:'100vh'}">
+<p-dialog [header]="selectedCourse != null?'Edit Course':'Create New Course'" [modal]="true" [(visible)]="isVisible" (onHide)="close()" [style]="{ width: '80vw', height:'100vh'}">
   <form [formGroup]="form" (ngSubmit)="submit()" class="modal-form" >
     @if (form.get('title')?.touched && form.get('title')?.errors; as errors) {
       <small class="modal-error-container">
@@ -44,7 +44,7 @@
       />
     </div>
     <div class="modal-submit-button-container">
-      <p-button type="submit" label="Create Course" />
+      <p-button type="submit" [label]="selectedCourse?'Update Course':'Create Course'" />
     </div>
   </form>
 </p-dialog>

@@ -338,6 +338,20 @@ describe('CoursesTableComponent', () => {
       expect(router.url).toBe(`/${MOCK_COURSES[1].id}/course-details`);
     });
 
+    describe('when Edit is clicked', () => {
+      it('should emit editCourseClicked with the correct course and close the menu', async () => {
+        const emitSpy = spyOn(component.editCourseClicked, 'emit');
+        await clickMenuButton(1);
+
+        expect(getMenuItem('Edit')).toBeTruthy();
+        getMenuItem('Edit')!.click();
+        await settle();
+
+        expect(emitSpy).toHaveBeenCalledOnceWith(MOCK_COURSES[1]);
+        expect(getOverlay()).toBeNull();
+      });
+    });
+
     describe('when Delete is clicked', () => {
 
       beforeEach(() => {

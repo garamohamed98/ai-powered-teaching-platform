@@ -1,7 +1,6 @@
 package com.mohamedgara.ai_teaching_platform.courses.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.mohamedgara.ai_teaching_platform.courses.entity.CourseCategory;
 import com.mohamedgara.ai_teaching_platform.courses.entity.CourseVisibility;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

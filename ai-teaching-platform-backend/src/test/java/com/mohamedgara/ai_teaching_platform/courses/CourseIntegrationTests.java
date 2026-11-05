@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.mohamedgara.ai_teaching_platform.TestcontainersConfiguration;
 import org.springframework.http.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.UpdateCourseRequest;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.UUID;
@@ -360,38 +360,211 @@ public class CourseIntegrationTests {
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    void updateCourseTitle_shouldUpdateContentWhenFound() throws Exception {
-        Course saved = courseRepository.save(Course.builder().title("Spring Data JPA").build());
-        CourseTitleUpdateRequest request = new CourseTitleUpdateRequest("New course title here");
 
-        mockMvc.perform(patch("/api/course/{courseId}/title", saved.getId())
+    @Test
+    void updateCourse_shouldReturn401_whenNoTokenProvided() throws Exception {
+        Course saved = courseRepository.save(Course.builder()
+                .title("Original Title")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+
+        UpdateCourseRequest request = new UpdateCourseRequest(
+                "Updated Title",
+                null,
+                null
+        );
+
+        mockMvc.perform(patch("/api/course/{courseId}", saved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("New course title here"));
-
-        Course updated = courseRepository.findById(saved.getId()).orElseThrow();
-        assert updated.getTitle().equals("New course title here");
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void updateCourseTitle_shouldReturn404WhenNotFound() throws Exception {
-        UUID randomId = UUID.randomUUID();
-        CourseTitleUpdateRequest request = new CourseTitleUpdateRequest("Some title");
+    void updateCourse_shouldReturn200AndPersistUpdatedCourse() throws Exception {
+        Course saved = courseRepository.save(Course.builder()
+                .title("Original Title")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
 
-        mockMvc.perform(patch("/api/course/{courseId}/title", randomId)
+        CourseCategory newCategory = courseCategoryRepository.save(CourseCategory.builder()
+                .name("Advanced Programming")
+                .slug("advanced-programming")
+                .displayOrder(2)
+                .build());
+
+        UpdateCourseRequest request = new UpdateCourseRequest(
+                "Updated Title",
+                newCategory.getId(),
+                CourseVisibility.PRIVATE
+        );
+
+        mockMvc.perform(patch("/api/course/{courseId}", saved.getId())
+                        .with(asOwner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(saved.getId().toString()))
+                .andExpect(jsonPath("$.title").value("Updated Title"))
+                .andExpect(jsonPath("$.category.id").value(newCategory.getId().toString()))
+                .andExpect(jsonPath("$.category.name").value("Advanced Programming"))
+                .andExpect(jsonPath("$.category.slug").value("advanced-programming"))
+                .andExpect(jsonPath("$.visibility").value("PRIVATE"));
+
+        Course updatedCourse = courseRepository.findById(saved.getId()).get();
+        assert updatedCourse.getTitle().equals("Updated Title");
+        assert updatedCourse.getVisibility().equals(CourseVisibility.PRIVATE);
+        assert updatedCourse.getCategory().getId().equals(newCategory.getId());
+    }
+
+    @Test
+    void updateCourse_shouldPartiallyUpdateCourse_whenSomeFieldsAreNull() throws Exception {
+        Course saved = courseRepository.save(Course.builder()
+                .title("Original Title")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+
+        // Only updating the title, leaving category and visibility null
+        UpdateCourseRequest request = new UpdateCourseRequest(
+                "New Title Only",
+                null,
+                null
+        );
+
+        mockMvc.perform(patch("/api/course/{courseId}", saved.getId())
+                        .with(asOwner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("New Title Only"))
+                .andExpect(jsonPath("$.category.name").value("Programming"))
+                .andExpect(jsonPath("$.visibility").value("PUBLIC"));
+
+        Course updatedCourse = courseRepository.findById(saved.getId()).get();
+        assert updatedCourse.getTitle().equals("New Title Only");
+        assert updatedCourse.getVisibility().equals(CourseVisibility.PUBLIC);
+        assert updatedCourse.getCategory().getId().equals(courseCategory.getId());
+    }
+
+    @Test
+    void updateCourse_shouldReturn400_whenTitleIsTooShort() throws Exception {
+        Course saved = courseRepository.save(Course.builder()
+                .title("Original Title")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+
+        UpdateCourseRequest request = new UpdateCourseRequest(
+                "ab",
+                null,
+                null
+        );
+
+        mockMvc.perform(patch("/api/course/{courseId}", saved.getId())
+                        .with(asOwner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateCourse_shouldReturn404_whenCourseNotFound() throws Exception {
+        UUID randomId = UUID.randomUUID();
+        UpdateCourseRequest request = new UpdateCourseRequest(
+                "Updated Title",
+                null,
+                null
+        );
+
+        mockMvc.perform(patch("/api/course/{courseId}", randomId)
+                        .with(asOwner())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
+    void updateCourse_shouldReturn404_whenCourseBelongsToAnotherOwner() throws Exception {
+        Course saved = courseRepository.save(Course.builder()
+                .title("Someone Else's Course")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB2)
+                .build());
+
+        UpdateCourseRequest request = new UpdateCourseRequest(
+                "Hacked Title",
+                null,
+                null
+        );
+
+        mockMvc.perform(patch("/api/course/{courseId}", saved.getId())
+                        .with(asOwner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+
+        // Verify the title wasn't modified
+        Course unmodified = courseRepository.findById(saved.getId()).get();
+        assert unmodified.getTitle().equals("Someone Else's Course");
+    }
+
+    @Test
+    void updateCourse_shouldReturn404_whenCategoryNotFound() throws Exception {
+        Course saved = courseRepository.save(Course.builder()
+                .title("Original Title")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+
+        UpdateCourseRequest request = new UpdateCourseRequest(
+                null,
+                UUID.randomUUID(),
+                null
+        );
+
+        mockMvc.perform(patch("/api/course/{courseId}", saved.getId())
+                        .with(asOwner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateCourse_shouldReturn400_whenCourseIdIsNotAValidUuid() throws Exception {
+        UpdateCourseRequest request = new UpdateCourseRequest(
+                "Updated Title",
+                null,
+                null
+        );
+
+        mockMvc.perform(patch("/api/course/{courseId}", "not-a-uuid")
+                        .with(asOwner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void createLesson_shouldReturn201AndPersistLesson() throws Exception {
-        Course saved = courseRepository.save(Course.builder().title("Spring Boot Course").build());
+        Course saved = courseRepository.save(Course.builder()
+                .title("Spring Boot Course")
+                        .category(courseCategory)
+                        .visibility(CourseVisibility.PUBLIC)
+                        .ownerId(OWNER_SUB)
+                .build());
         CreateLessonRequest request = new CreateLessonRequest("Introduction to Controllers");
 
         mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
+                        .with(asOwner())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -409,6 +582,7 @@ public class CourseIntegrationTests {
         CreateLessonRequest request = new CreateLessonRequest("");
 
         mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
+                        .with(asOwner())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -422,6 +596,7 @@ public class CourseIntegrationTests {
         CreateLessonRequest request = new CreateLessonRequest("ab");
 
         mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
+                        .with(asOwner())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -433,6 +608,7 @@ public class CourseIntegrationTests {
         CreateLessonRequest request = new CreateLessonRequest("Introduction to Controllers");
 
         mockMvc.perform(post("/api/course/{courseId}/lesson", randomId)
+                        .with(asOwner())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -440,11 +616,16 @@ public class CourseIntegrationTests {
 
     @Test
     void getCourseLessonList_shouldReturnAllLessonsForCourse() throws Exception {
-        Course saved = courseRepository.save(Course.builder().title("Spring Boot Course").build());
+        Course saved = courseRepository.save(Course.builder()
+                .title("Spring Boot Course")
+                        .category(courseCategory)
+                        .visibility(CourseVisibility.PUBLIC)
+                        .ownerId(OWNER_SUB)
+                .build());
         lessonRepository.save(Lesson.builder().title("Lesson 1").course(saved).build());
         lessonRepository.save(Lesson.builder().title("Lesson 2").course(saved).build());
 
-        mockMvc.perform(get("/api/course/{courseId}/lesson", saved.getId()))
+        mockMvc.perform(get("/api/course/{courseId}/lesson", saved.getId()).with(asOwner()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].title", containsInAnyOrder("Lesson 1", "Lesson 2")))
@@ -455,7 +636,7 @@ public class CourseIntegrationTests {
     void getCourseLessonList_shouldReturnEmptyListWhenNoLessonsExist() throws Exception {
         Course saved = courseRepository.save(Course.builder().title("Empty Course").build());
 
-        mockMvc.perform(get("/api/course/{courseId}/lesson", saved.getId()))
+        mockMvc.perform(get("/api/course/{courseId}/lesson", saved.getId()).with(asOwner()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
     }
@@ -464,7 +645,7 @@ public class CourseIntegrationTests {
     void getCourseLessonList_shouldReturn404WhenCourseNotFound() throws Exception {
         UUID randomId = UUID.randomUUID();
 
-        mockMvc.perform(get("/api/course/{courseId}/lesson", randomId))
+        mockMvc.perform(get("/api/course/{courseId}/lesson", randomId).with(asOwner()))
                 .andExpect(status().isNotFound());
     }
 }

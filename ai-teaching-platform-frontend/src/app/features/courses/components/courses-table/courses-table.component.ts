@@ -9,7 +9,6 @@ import {Skeleton} from "primeng/skeleton";
 import {TableModule} from "primeng/table";
 import {Course} from '../../models/course.model';
 import {CoursesService} from '../../services/courses.service';
-import {Toast} from 'primeng/toast';
 import {Menu} from 'primeng/menu';
 import {Tag} from 'primeng/tag';
 import {getVisibilityIcon, getVisibilityLabel} from '../../utils/course-visibility.util';
@@ -25,7 +24,6 @@ import {getVisibilityIcon, getVisibilityLabel} from '../../utils/course-visibili
     Skeleton,
     TableModule,
     DatePipe,
-    Toast,
     Menu,
     Tag
   ],
@@ -41,6 +39,7 @@ export class CoursesTableComponent {
   @Input({required:true}) loading!: boolean;
 
   @Output() courseDeleted = new EventEmitter<void>();
+  @Output() editCourseClicked = new EventEmitter<Course>();
 
   menu = viewChild.required<Menu>('menu');
   menuItems: MenuItem[] | undefined;
@@ -57,25 +56,12 @@ export class CoursesTableComponent {
             routerLink: [course.id, 'course-details']
           },
           {
-            label: 'Delete',
-            icon: 'pi pi-trash',
-            command: () => this.onDeleteCourse(course.id)
-          }
-        ]
-      }
-    ];
-    this.menu().toggle(event);
-  }
-
-  getMenuItems(course: Course): MenuItem[] {
-    return [
-      {
-        label: 'Options',
-        items: [
+            label: 'Edit',
+            icon: 'pi pi-pencil',
+            command: () => this.editCourseClicked.emit(course),
+          },
           {
-            label: 'View',
-            icon: 'pi pi-file',
-            routerLink: [course.id, 'course-details']
+            separator: true
           },
           {
             label: 'Delete',
@@ -85,6 +71,7 @@ export class CoursesTableComponent {
         ]
       }
     ];
+    this.menu().toggle(event);
   }
 
   onDeleteCourse(id: string) {

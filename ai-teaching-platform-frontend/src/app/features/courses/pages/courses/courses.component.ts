@@ -22,7 +22,8 @@ export class CoursesComponent implements OnInit {
   loading = signal<boolean>(false);
   maxRows:number = 6;
   courses = signal<Course[]>([]);
-  isCreateModalVisible= signal<boolean>(false);
+  isCourseModalVisible= signal<boolean>(false);
+  selectedCourse: Course | null = null;
 
 
   ngOnInit() {
@@ -48,6 +49,12 @@ export class CoursesComponent implements OnInit {
   }
 
   showCreateCourseModal(){
-    this.isCreateModalVisible.set(true);
+    this.selectedCourse = null;
+    this.isCourseModalVisible.set(true);
+  }
+
+  showEditCourseModal(course : Course){
+    this.selectedCourse = course;
+    this.isCourseModalVisible.set(true);
   }
 }

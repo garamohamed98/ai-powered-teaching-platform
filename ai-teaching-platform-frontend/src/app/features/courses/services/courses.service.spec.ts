@@ -5,6 +5,7 @@ import {HttpTestingController, provideHttpClientTesting} from '@angular/common/h
 import {CoursesService} from './courses.service';
 import {Course} from '../models/course.model';
 import {CreateCourseDto} from '../models/create-course.dto';
+import {UpdateCourseDto} from '../models/update-course.dto';
 
 describe('CoursesService', () => {
   let service: CoursesService;
@@ -20,6 +21,10 @@ describe('CoursesService', () => {
   const MOCK_CREATE_DTO = {
     title: 'Docker for Beginners',
   } as unknown as CreateCourseDto;
+
+  const MOCK_UPDATE_DTO = {
+    title: 'Updated Angular Title',
+  } as unknown as UpdateCourseDto;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -157,6 +162,50 @@ describe('CoursesService', () => {
       let status: number | undefined;
 
       service.deleteCourse('42').subscribe({
+        error: err => status = err.status
+      });
+
+      httpMock.expectOne(`${BASE_URL}/42`).flush('Not found', {status: 404, statusText: 'Not Found'});
+
+      expect(status).toBe(404);
+    });
+
+  });
+
+  describe('updateCourse', () => {
+
+    it('should send a PATCH request to the course id endpoint', () => {
+      service.updateCourse('42', MOCK_UPDATE_DTO).subscribe();
+
+      const req = httpMock.expectOne(`${BASE_URL}/42`);
+      expect(req.request.method).toBe('PATCH');
+
+      req.flush(MOCK_COURSES[0]);
+    });
+
+    it('should send the update dto as the request body', () => {
+      service.updateCourse('42', MOCK_UPDATE_DTO).subscribe();
+
+      const req = httpMock.expectOne(`${BASE_URL}/42`);
+      expect(req.request.body).toEqual(MOCK_UPDATE_DTO);
+
+      req.flush(MOCK_COURSES[0]);
+    });
+
+    it('should return the updated course sent by the server', () => {
+      let result: Course | undefined;
+
+      service.updateCourse('42', MOCK_UPDATE_DTO).subscribe(course => result = course as Course);
+
+      httpMock.expectOne(`${BASE_URL}/42`).flush(MOCK_COURSES[0]);
+
+      expect(result).toEqual(MOCK_COURSES[0]);
+    });
+
+    it('should propagate the error when the server fails during update', () => {
+      let status: number | undefined;
+
+      service.updateCourse('42', MOCK_UPDATE_DTO).subscribe({
         error: err => status = err.status
       });
 

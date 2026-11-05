@@ -4,6 +4,7 @@ import {Course} from '../models/course.model';
 import {Observable} from 'rxjs';
 import {Lesson} from '../models/lesson.model';
 import {CreateCourseDto} from '../models/create-course.dto';
+import {UpdateCourseDto} from '../models/update-course.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +29,11 @@ export class CoursesService {
   createCourse(createCourseDto: CreateCourseDto) {
     console.log("creating course: ",createCourseDto);
     return this.http.post<Course>(this.baseUrl, createCourseDto);
+  }
+
+  updateCourse(courseId: string, updateCourseDto: UpdateCourseDto) {
+    console.log("update course: ",updateCourseDto);
+    return this.http.patch(`${this.baseUrl}/${courseId}`, updateCourseDto);
   }
 
   deleteCourse(id: string) {
