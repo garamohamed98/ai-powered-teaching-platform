@@ -536,20 +536,21 @@ public class CourseServiceTest {
     @Test
     public void getCourseLessonList_shouldReturnLessonResponseSummaryList_whenCourseExistsAndLessonsExist(){
         //Arrange
+        String ownerId = "id";
         UUID courseId = UUID.randomUUID();
         UUID lessonId1 = UUID.randomUUID();
         UUID lessonId2 = UUID.randomUUID();
-        Course course = Course.builder().id(courseId).title("Course Title").build();
+        Course course = Course.builder().id(courseId).title("Course Title").ownerId(ownerId).build();
 
         Lesson lesson1 = Lesson.builder().id(lessonId1).title("Lesson 1").course(course).build();
         Lesson lesson2 = Lesson.builder().id(lessonId2).title("Lesson 2").course(course).build();
         List<Lesson> lessonList = List.of(lesson1, lesson2);
 
-        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        Mockito.when(courseRepository.findCourseByOwnerIdAndCourseId(ownerId, courseId)).thenReturn(Optional.of(course));
         Mockito.when(lessonRepository.findByCourseId(courseId)).thenReturn(lessonList);
 
         //Act
-        List<LessonSummaryResponse> result = courseService.getCourseLessonList(courseId);
+        List<LessonSummaryResponse> result = courseService.getCourseLessonList(ownerId, courseId);
 
         //Assert
         Assertions.assertThat(result).isNotNull();
@@ -561,7 +562,7 @@ public class CourseServiceTest {
         Assertions.assertThat(result.get(1).title()).isEqualTo("Lesson 2");
         Assertions.assertThat(result.get(1).courseId()).isEqualTo(courseId);
 
-        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(courseRepository).findCourseByOwnerIdAndCourseId(ownerId, courseId);
         Mockito.verify(lessonRepository).findByCourseId(courseId);
         Mockito.verify(lessonResponseMapper).toLessonResponseSummaryList(lessonList);
     }
@@ -569,37 +570,39 @@ public class CourseServiceTest {
     @Test
     public void getCourseLessonList_shouldReturnEmptyList_whenCourseExistsButNoLessonsExist(){
         //Arrange
+        String ownerId = "id";
         UUID courseId = UUID.randomUUID();
-        Course course = Course.builder().id(courseId).title("Course Title").build();
+        Course course = Course.builder().id(courseId).title("Course Title").ownerId(ownerId).build();
         List<Lesson> emptyList = List.of();
 
-        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        Mockito.when(courseRepository.findCourseByOwnerIdAndCourseId(ownerId, courseId)).thenReturn(Optional.of(course));
         Mockito.when(lessonRepository.findByCourseId(courseId)).thenReturn(emptyList);
 
         //Act
-        List<LessonSummaryResponse> result = courseService.getCourseLessonList(courseId);
+        List<LessonSummaryResponse> result = courseService.getCourseLessonList(ownerId, courseId);
 
         //Assert
         Assertions.assertThat(result).isNotNull();
         Assertions.assertThat(result).isEmpty();
 
-        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(courseRepository).findCourseByOwnerIdAndCourseId(ownerId, courseId);
         Mockito.verify(lessonRepository).findByCourseId(courseId);
         Mockito.verify(lessonResponseMapper).toLessonResponseSummaryList(emptyList);
     }
 
     @Test
-    public void getCourseLessonList_shouldThrowCourseNotFoundException_whenCourseDoesNotExist(){
+    public void getCourseLessonList_shouldThrowCourseNotFoundException_whenCourseDoesNotExistOrBelongsToAnotherOwner(){
         //Arrange
+        String ownerId = "id";
         UUID courseId = UUID.randomUUID();
 
-        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
+        Mockito.when(courseRepository.findCourseByOwnerIdAndCourseId(ownerId, courseId)).thenReturn(Optional.empty());
 
         //Act & Assert
         assertThrows(CourseNotFoundException.class,
-                () -> courseService.getCourseLessonList(courseId));
+                () -> courseService.getCourseLessonList(ownerId, courseId));
 
-        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(courseRepository).findCourseByOwnerIdAndCourseId(ownerId, courseId);
         Mockito.verify(lessonRepository, Mockito.never()).findByCourseId(Mockito.any());
     }
 

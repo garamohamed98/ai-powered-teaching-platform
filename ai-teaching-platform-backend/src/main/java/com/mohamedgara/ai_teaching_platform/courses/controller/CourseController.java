@@ -74,8 +74,12 @@ public class CourseController {
     }
 
     @GetMapping("/{courseId}/lesson")
-    public ResponseEntity<List<LessonSummaryResponse>> getCourseLessonList(@PathVariable UUID courseId){
-        List<LessonSummaryResponse> lessonResponseList = courseService.getCourseLessonList(courseId);
+    public ResponseEntity<List<LessonSummaryResponse>> getCourseLessonList(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID courseId
+    ){
+        String auth0id = jwt.getSubject();
+        List<LessonSummaryResponse> lessonResponseList = courseService.getCourseLessonList(auth0id,courseId);
         return ResponseEntity.ok(lessonResponseList);
     }
 }

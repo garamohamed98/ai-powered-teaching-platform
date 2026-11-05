@@ -105,9 +105,14 @@ public class CourseService {
 
     }
 
-    public List<LessonSummaryResponse> getCourseLessonList(UUID courseId) {
-        courseRepository.findById(courseId).orElseThrow(()->new CourseNotFoundException());
-        List<Lesson> lessonList = lessonRepository.findByCourseId(courseId);
+    @Transactional
+    public List<LessonSummaryResponse> getCourseLessonList(String authenticatedUserId, UUID courseId) {
+        Course course = courseRepository.findCourseByOwnerIdAndCourseId(
+                authenticatedUserId,
+                courseId
+        ).orElseThrow(()-> new CourseNotFoundException());
+
+        List<Lesson> lessonList = lessonRepository.findByCourseId(course.getId());
 
         return lessonResponseMapper.toLessonResponseSummaryList(lessonList);
     }

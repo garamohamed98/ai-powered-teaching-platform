@@ -633,8 +633,26 @@ public class CourseIntegrationTests {
     }
 
     @Test
+    void getCourseLessonList_shouldReturn401_whenNoTokenProvided() throws Exception {
+        Course saved = courseRepository.save(Course.builder()
+                .title("Spring Boot Course")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
+
+        mockMvc.perform(get("/api/course/{courseId}/lesson", saved.getId()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void getCourseLessonList_shouldReturnEmptyListWhenNoLessonsExist() throws Exception {
-        Course saved = courseRepository.save(Course.builder().title("Empty Course").build());
+        Course saved = courseRepository.save(Course.builder()
+                .title("Empty Course")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
 
         mockMvc.perform(get("/api/course/{courseId}/lesson", saved.getId()).with(asOwner()))
                 .andExpect(status().isOk())
@@ -648,4 +666,17 @@ public class CourseIntegrationTests {
         mockMvc.perform(get("/api/course/{courseId}/lesson", randomId).with(asOwner()))
                 .andExpect(status().isNotFound());
     }
+
+        @Test
+        void getCourseLessonList_shouldReturn404WhenCourseBelongsToAnotherOwner() throws Exception {
+                Course saved = courseRepository.save(Course.builder()
+                                .title("Another Owner's Course")
+                                .category(courseCategory)
+                                .visibility(CourseVisibility.PUBLIC)
+                                .ownerId(OWNER_SUB2)
+                                .build());
+
+                mockMvc.perform(get("/api/course/{courseId}/lesson", saved.getId()).with(asOwner()))
+                                .andExpect(status().isNotFound());
+        }
 }
