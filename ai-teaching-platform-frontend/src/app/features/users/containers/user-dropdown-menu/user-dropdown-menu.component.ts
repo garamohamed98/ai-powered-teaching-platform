@@ -24,6 +24,12 @@ export class UserDropdownMenuComponent {
   user$ = this.auth.user$;
 
   userItems: MenuItem[] = [
+    {
+      label: 'My Courses',
+      icon: 'pi pi-book',
+      styleClass:'my-course-item',
+      routerLink: '/courses',
+    },
     { separator: true },
     {
       label: 'Logout',

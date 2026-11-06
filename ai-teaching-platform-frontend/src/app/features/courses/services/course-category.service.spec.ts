@@ -19,8 +19,8 @@ describe('CourseCategoryService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),          // the real HttpClient...
-        provideHttpClientTesting(),   // ...wired to the fake backend (order matters)
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     });
 
@@ -29,7 +29,7 @@ describe('CourseCategoryService', () => {
   });
 
   afterEach(() => {
-    httpMock.verify();   // fails if any request was made but never flushed/expected
+    httpMock.verify();
   });
 
   it('should be created', () => {

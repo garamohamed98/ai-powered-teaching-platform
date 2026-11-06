@@ -1,10 +1,12 @@
-import {ComponentFixture, fakeAsync, flush, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
 
 import { UserDropdownMenuComponent } from './user-dropdown-menu.component';
 import {AuthService} from '@auth0/auth0-angular';
 import {BehaviorSubject} from 'rxjs';
 import {By} from '@angular/platform-browser';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
+import {provideRouter, Router} from '@angular/router';
+import {Component} from '@angular/core';
 
 
 const FALL_BACK_NAME = 'Account name';
@@ -14,6 +16,9 @@ const MOCK_USER = {
   name:"John Doe",
   email:"johndoe@gmail.com"
 }
+@Component({template: ''})
+class DummyComponent {
+}
 
 describe('UserDropdownMenuComponent', () => {
   let component: UserDropdownMenuComponent;
@@ -22,6 +27,7 @@ describe('UserDropdownMenuComponent', () => {
   let authUserSubject: BehaviorSubject<any>;
   let isAuthenticatedSubject: BehaviorSubject<boolean>;
   let isLoadingSubject: BehaviorSubject<boolean>;
+  let router: Router;
 
 
   beforeEach(async () => {
@@ -44,6 +50,7 @@ describe('UserDropdownMenuComponent', () => {
       imports: [UserDropdownMenuComponent],
       providers:[
         {provide: AuthService, useValue: authService},
+        provideRouter([{ path: 'courses', component: DummyComponent }]),
         provideNoopAnimations()
       ]
     })
@@ -51,6 +58,7 @@ describe('UserDropdownMenuComponent', () => {
 
     fixture = TestBed.createComponent(UserDropdownMenuComponent);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
   });
 
   it('should create', () => {
@@ -145,6 +153,13 @@ describe('UserDropdownMenuComponent', () => {
 
       }
 
+      const clickMyCourseButton = ()=>{
+        fixture.detectChanges();
+
+        const myCourse = document.querySelector('.my-course-item a') as HTMLElement;
+        myCourse.click();
+      }
+
       it('should open menu when clicked',fakeAsync(()=>{
 
         clickMenuButton();
@@ -162,6 +177,15 @@ describe('UserDropdownMenuComponent', () => {
         const logout = document.querySelector('.logout-menu-item')
 
         expect(logout).toBeNull();
+      }))
+
+      it('should navigate to courses when my courses button is clicked',fakeAsync(()=>{
+        clickMenuButton();
+        clickMyCourseButton();
+
+        tick();
+
+        expect(router.url).toEqual('/courses');
       }))
 
       it('should call logout when logout button is clicked',fakeAsync(()=>{
