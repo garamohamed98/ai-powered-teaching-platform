@@ -576,9 +576,30 @@ public class CourseIntegrationTests {
         assert lessonRepository.count() == 1;
     }
 
+        @Test
+        void createLesson_shouldReturn401_whenNoTokenProvided() throws Exception {
+                Course saved = courseRepository.save(Course.builder()
+                                .title("Spring Boot Course")
+                                .category(courseCategory)
+                                .visibility(CourseVisibility.PUBLIC)
+                                .ownerId(OWNER_SUB)
+                                .build());
+                CreateLessonRequest request = new CreateLessonRequest("Introduction to Controllers");
+
+                mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(objectMapper.writeValueAsString(request)))
+                                .andExpect(status().isUnauthorized());
+        }
+
     @Test
     void createLesson_shouldReturn400WhenTitleIsBlank() throws Exception {
-        Course saved = courseRepository.save(Course.builder().title("Spring Boot Course").build());
+                Course saved = courseRepository.save(Course.builder()
+                                .title("Spring Boot Course")
+                                .category(courseCategory)
+                                .visibility(CourseVisibility.PUBLIC)
+                                .ownerId(OWNER_SUB)
+                                .build());
         CreateLessonRequest request = new CreateLessonRequest("");
 
         mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
@@ -592,7 +613,12 @@ public class CourseIntegrationTests {
 
     @Test
     void createLesson_shouldReturn400WhenTitleTooShort() throws Exception {
-        Course saved = courseRepository.save(Course.builder().title("Spring Boot Course").build());
+        Course saved = courseRepository.save(Course.builder()
+                .title("Spring Boot Course")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB)
+                .build());
         CreateLessonRequest request = new CreateLessonRequest("ab");
 
         mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
@@ -612,6 +638,25 @@ public class CourseIntegrationTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createLesson_shouldReturn404WhenCourseBelongsToAnotherOwner() throws Exception {
+        Course saved = courseRepository.save(Course.builder()
+                .title("Another Owner's Course")
+                .category(courseCategory)
+                .visibility(CourseVisibility.PUBLIC)
+                .ownerId(OWNER_SUB2)
+                .build());
+        CreateLessonRequest request = new CreateLessonRequest("Introduction to Controllers");
+
+        mockMvc.perform(post("/api/course/{courseId}/lesson", saved.getId())
+                        .with(asOwner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+
+        assert lessonRepository.count() == 0;
     }
 
     @Test

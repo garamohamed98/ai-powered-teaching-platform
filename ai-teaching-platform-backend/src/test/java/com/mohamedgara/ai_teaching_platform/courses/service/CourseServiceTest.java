@@ -488,11 +488,17 @@ public class CourseServiceTest {
     @Test
     public void createLesson_shouldReturnLessonResponse_whenCourseExists(){
         //Arrange
+        String authenticatedUserId = "id";
         UUID courseId = UUID.randomUUID();
         UUID lessonId = UUID.randomUUID();
-        Course course = Course.builder().id(courseId).title("Course Title").build();
+        Course course = Course.builder()
+                .id(courseId)
+                .title("Course Title")
+                .ownerId(authenticatedUserId)
+                .build();
 
-        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.of(course));
+        Mockito.when(courseRepository.findCourseByOwnerIdAndCourseId(authenticatedUserId, courseId))
+                .thenReturn(Optional.of(course));
         Mockito.when(lessonRepository.save(Mockito.any(Lesson.class)))
                 .thenAnswer(invocationOnMock -> {
                     Lesson lesson = invocationOnMock.getArgument(0);
@@ -503,7 +509,7 @@ public class CourseServiceTest {
         CreateLessonRequest createLessonRequest = new CreateLessonRequest("lesson title");
 
         //Act
-        LessonResponse result = courseService.createLesson(courseId, createLessonRequest);
+        LessonResponse result = courseService.createLesson(authenticatedUserId, courseId, createLessonRequest);
 
         //Assert
         Assertions.assertThat(result).isNotNull();
@@ -511,7 +517,7 @@ public class CourseServiceTest {
         Assertions.assertThat(result.title()).isEqualTo(createLessonRequest.title());
         Assertions.assertThat(result.courseId()).isEqualTo(courseId);
 
-        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(courseRepository).findCourseByOwnerIdAndCourseId(authenticatedUserId, courseId);
         Mockito.verify(lessonRepository).save(Mockito.any(Lesson.class));
         Mockito.verify(lessonResponseMapper).toLessonResponse(Mockito.any(Lesson.class));
     }
@@ -519,17 +525,19 @@ public class CourseServiceTest {
     @Test
     public void createLesson_shouldThrowCourseNotFoundException_whenCourseDoesNotExist(){
         //Arrange
+        String authenticatedUserId = "id";
         UUID courseId = UUID.randomUUID();
 
-        Mockito.when(courseRepository.findById(courseId)).thenReturn(Optional.empty());
+        Mockito.when(courseRepository.findCourseByOwnerIdAndCourseId(authenticatedUserId, courseId))
+                .thenReturn(Optional.empty());
 
         CreateLessonRequest createLessonRequest = new CreateLessonRequest("lesson title");
 
         //Act & Assert
         assertThrows(CourseNotFoundException.class,
-                () -> courseService.createLesson(courseId, createLessonRequest));
+                () -> courseService.createLesson(authenticatedUserId, courseId, createLessonRequest));
 
-        Mockito.verify(courseRepository).findById(courseId);
+        Mockito.verify(courseRepository).findCourseByOwnerIdAndCourseId(authenticatedUserId, courseId);
         Mockito.verify(lessonRepository, Mockito.never()).save(Mockito.any());
     }
 

@@ -91,8 +91,9 @@ public class CourseService {
         return courseRepository.existsById(courseId);
     }
 
-    public LessonResponse createLesson(UUID courseId, CreateLessonRequest createLessonRequest) {
-        Course course = courseRepository.findById(courseId).orElseThrow(()-> new CourseNotFoundException());
+    public LessonResponse createLesson(String authenticatedUserId, UUID courseId, CreateLessonRequest createLessonRequest) {
+        Course course = courseRepository.findCourseByOwnerIdAndCourseId(authenticatedUserId,courseId)
+                .orElseThrow(()-> new CourseNotFoundException());
         String lessonTitle = createLessonRequest.title();
 
         Lesson lesson = Lesson.builder()

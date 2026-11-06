@@ -67,8 +67,12 @@ public class CourseController {
     }
 
     @PostMapping("/{courseId}/lesson")
-    public ResponseEntity<LessonResponse> createLesson(@PathVariable UUID courseId, @Valid @RequestBody CreateLessonRequest createLessonRequest){
-        LessonResponse lessonResponse = courseService.createLesson(courseId,createLessonRequest);
+    public ResponseEntity<LessonResponse> createLesson(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID courseId,
+            @Valid @RequestBody CreateLessonRequest createLessonRequest){
+        String auth0id = jwt.getSubject();
+        LessonResponse lessonResponse = courseService.createLesson(auth0id, courseId, createLessonRequest);
         URI location  = URI.create("/api/lesson/"+ lessonResponse.id());
         return ResponseEntity.created(location).body(lessonResponse);
     }
