@@ -1,0 +1,32 @@
+package com.mohamedgara.ai_teaching_platform.courses.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.util.UUID;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name="course_categories")
+public class CourseCategory {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @ColumnDefault("gen_random_uuid()")
+    private UUID id;
+
+    @Column(nullable = false, unique = true, length = 80)
+    private String name;
+
+    @Column(nullable = false, unique = true, length = 80)
+    private String slug;
+
+    @Column(nullable = false)
+    private int displayOrder;
+}

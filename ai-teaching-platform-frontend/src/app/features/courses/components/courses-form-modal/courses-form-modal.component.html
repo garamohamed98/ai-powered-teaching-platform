@@ -1,14 +1,50 @@
-<p-dialog header="Create New Course" [modal]="true" [(visible)]="isVisible" (onHide)="close()" [style]="{ width: '25rem' }">
-  <form [formGroup]="form" (ngSubmit)="submit()" class="courseDialogForm" >
-    @if(form.get('title')?.touched && !form.get('title')?.valid){
-      <div>
-        . More then 3 character in course title is required
-      </div>
+<p-dialog [header]="selectedCourse != null?'Edit Course':'Create New Course'" [modal]="true" [(visible)]="isVisible" (onHide)="close()" [style]="{ width: '80vw', height:'100vh'}">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="modal-form" >
+    @if (form.get('title')?.touched && form.get('title')?.errors; as errors) {
+      <small class="modal-error-container">
+        @if (errors['required']) {
+          Course title is required.
+        } @else if (errors['minlength']) {
+          Course title must contain at least 3 characters.
+        }
+      </small>
     }
-    <div class="formElementContainer">
+    @if (form.get('categoryId')?.touched && form.get('categoryId')?.errors; as errors) {
+      <small class="modal-error-container">
+        @if (errors['required']) {
+          Category is required.
+        }
+      </small>
+    }
+    <div class="modal-form-element">
       <label>Course Title</label>
       <input pInputText formControlName="title" placeholder="Enter Course Title">
     </div>
-    <p-button type="submit" label="Create Course" />
+    <div class="modal-form-element">
+      <label>Category</label>
+      <p-select
+        id="category"
+        [options]="categoryList()"
+        formControlName="categoryId"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Select a Category"
+        [loading]="categoryListLoading()"
+      />
+    </div>
+    <div class="modal-form-element">
+      <label>Visibility</label>
+      <p-select
+        id="visibility"
+        [options]="visibility"
+        formControlName="visibility"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Select a visibility"
+      />
+    </div>
+    <div class="modal-submit-button-container">
+      <p-button type="submit" [label]="selectedCourse?'Update Course':'Create Course'" />
+    </div>
   </form>
 </p-dialog>

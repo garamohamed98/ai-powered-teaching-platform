@@ -8,14 +8,16 @@
     />
   </div>
   <app-courses-form-modal
-    [isVisible]="isCreateModalVisible()"
-    (isVisibleChange)="isCreateModalVisible.set($event)"
-    (courseCreated)="loadCourses()"
+    [isVisible]="isCourseModalVisible()"
+    [selectedCourse]="selectedCourse"
+    (isVisibleChange)="isCourseModalVisible.set($event)"
+    (courseSaved)="loadCourses()"
   ></app-courses-form-modal>
   <app-courses-table
     [maxRows]="maxRows"
     [courses]="courses()"
     [loading]="loading()"
     (courseDeleted)="loadCourses()"
+    (editCourseClicked)="showEditCourseModal($event)"
   ></app-courses-table>
 </div>

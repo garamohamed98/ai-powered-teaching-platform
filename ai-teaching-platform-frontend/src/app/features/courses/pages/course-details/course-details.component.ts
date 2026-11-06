@@ -34,7 +34,13 @@ export class CourseDetailsComponent implements OnInit {
   private lessonsService = inject(LessonsService);
   private router = inject(Router);
 
-  course = signal<Course>({id:"",title:"",content:""});
+  course = signal<Course>({
+    id:"",
+    title:"",
+    category:{name:"",slug:"",id:"",displayOrder:0},
+    visibility:"PRIVATE",
+    createdAt:""
+  });
   lessons = signal<Lesson[]>([])
 
   maxLessonsRow: number = 6;

@@ -1,26 +1,32 @@
-import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {Component, EventEmitter, inject, Input, Output, viewChild} from '@angular/core';
 import {Button} from "primeng/button";
 import {Card} from "primeng/card";
 import {Message} from "primeng/message";
-import {NgIf} from "@angular/common";
-import {MessageService, PrimeTemplate} from "primeng/api";
+import {DatePipe, NgIf} from "@angular/common";
+import {MenuItem, MessageService, PrimeTemplate} from "primeng/api";
 import {RouterLink} from "@angular/router";
 import {Skeleton} from "primeng/skeleton";
 import {TableModule} from "primeng/table";
 import {Course} from '../../models/course.model';
 import {CoursesService} from '../../services/courses.service';
+import {Menu} from 'primeng/menu';
+import {Tag} from 'primeng/tag';
+import {getVisibilityIcon, getVisibilityLabel} from '../../utils/course-visibility.util';
 
 @Component({
   selector: 'app-courses-table',
-    imports: [
-        Button,
-        Card,
-        Message,
-        PrimeTemplate,
-        RouterLink,
-        Skeleton,
-        TableModule
-    ],
+  imports: [
+    Button,
+    Card,
+    Message,
+    PrimeTemplate,
+    RouterLink,
+    Skeleton,
+    TableModule,
+    DatePipe,
+    Menu,
+    Tag
+  ],
   templateUrl: './courses-table.component.html',
   styleUrl: './courses-table.component.scss'
 })
@@ -33,6 +39,40 @@ export class CoursesTableComponent {
   @Input({required:true}) loading!: boolean;
 
   @Output() courseDeleted = new EventEmitter<void>();
+  @Output() editCourseClicked = new EventEmitter<Course>();
+
+  menu = viewChild.required<Menu>('menu');
+  menuItems: MenuItem[] | undefined;
+
+  openMenu(event: Event, course: Course) {
+    event.stopPropagation();
+    this.menuItems = [
+      {
+        label: 'Options',
+        items: [
+          {
+            label: 'View',
+            icon: 'pi pi-file',
+            routerLink: [course.id, 'course-details']
+          },
+          {
+            label: 'Edit',
+            icon: 'pi pi-pencil',
+            command: () => this.editCourseClicked.emit(course),
+          },
+          {
+            separator: true
+          },
+          {
+            label: 'Delete',
+            icon: 'pi pi-trash',
+            command: () => this.onDeleteCourse(course.id)
+          }
+        ]
+      }
+    ];
+    this.menu().toggle(event);
+  }
 
   onDeleteCourse(id: string) {
     this.courseService.deleteCourse(id).subscribe({
@@ -47,4 +87,6 @@ export class CoursesTableComponent {
     })
   }
 
+  protected readonly getVisibilityIcon = getVisibilityIcon;
+  protected readonly getVisibilityLabel = getVisibilityLabel;
 }

@@ -3,6 +3,8 @@ import {HttpClient, HttpResponse} from '@angular/common/http';
 import {Course} from '../models/course.model';
 import {Observable} from 'rxjs';
 import {Lesson} from '../models/lesson.model';
+import {CreateCourseDto} from '../models/create-course.dto';
+import {UpdateCourseDto} from '../models/update-course.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -19,35 +21,19 @@ export class CoursesService {
     return this.http.get<Course[]>(this.baseUrl);
   }
 
-  getCourseDetails(courseId: string) {
-    console.log("fetching course details")
-    return this.http.get<Course>(this.baseUrl +"/" +courseId);
-  }
-
   getLessonsByCourseId(courseId: string) {
     console.log("fetching lessons list for course id: " + courseId)
     return this.http.get<Lesson[]>(`${this.baseUrl}/${courseId}/lesson`);
   }
 
-  updateCourseContent(courseId: string, content: string) {
-    const url = `${this.baseUrl}/${courseId}/content`;
-    const body = {
-      content: content
-    };
-    console.log("updating course content course id: ", courseId,
-      " content: ",content,
-      " in url: ",url,
-      " with body: ",body
-      );
-    return this.http.patch<Course>(url,body);
+  createCourse(createCourseDto: CreateCourseDto) {
+    console.log("creating course: ",createCourseDto);
+    return this.http.post<Course>(this.baseUrl, createCourseDto);
   }
 
-  createCourse(title:string) {
-    const body = {
-      title: title,
-    }
-    console.log("creating course: ",body);
-    return this.http.post<Course>(this.baseUrl, body);
+  updateCourse(courseId: string, updateCourseDto: UpdateCourseDto) {
+    console.log("update course: ",updateCourseDto);
+    return this.http.patch(`${this.baseUrl}/${courseId}`, updateCourseDto);
   }
 
   deleteCourse(id: string) {

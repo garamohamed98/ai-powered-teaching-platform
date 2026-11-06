@@ -4,12 +4,14 @@ import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateLessonRequ
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonResponse;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.LessonSummaryResponse;
 import com.mohamedgara.ai_teaching_platform.courses.service.CourseService;
-import com.mohamedgara.ai_teaching_platform.courses.dto.request.CourseTitleUpdateRequest;
+import com.mohamedgara.ai_teaching_platform.courses.dto.request.UpdateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.request.CreateCourseRequest;
 import com.mohamedgara.ai_teaching_platform.courses.dto.response.CourseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -24,40 +26,64 @@ public class CourseController {
     private final CourseService courseService;
 
     @PostMapping
-    public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CreateCourseRequest createCourseRequest){
-        CourseResponse courseResponse = courseService.createCourse(createCourseRequest);
+    public ResponseEntity<CourseResponse> createCourse(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody CreateCourseRequest createCourseRequest
+    ){
+        String auth0Id = jwt.getSubject();
+        CourseResponse courseResponse = courseService.createCourse(auth0Id,createCourseRequest);
         URI location  = URI.create("/api/course/"+ courseResponse.id());
         return ResponseEntity.created(location).body(courseResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseResponse>> getCourseList(){
-        List<CourseResponse> courseResponseList = courseService.getCourseList();
+    public ResponseEntity<List<CourseResponse>> getCourseList(
+            @AuthenticationPrincipal Jwt jwt
+    ){
+        String auth0Id = jwt.getSubject();
+        System.out.print(auth0Id);
+        List<CourseResponse> courseResponseList = courseService.getCourseList(auth0Id);
         return ResponseEntity.ok(courseResponseList);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable UUID id){
-        courseService.deleteCourse(id);
+    public ResponseEntity<Void> deleteCourse(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id
+    ){
+        String auth0Id = jwt.getSubject();
+        courseService.deleteCourse(auth0Id,id);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{courseId}/title")
-    public ResponseEntity<CourseResponse> updateCourseTitle(@PathVariable UUID courseId, @Valid @RequestBody CourseTitleUpdateRequest courseTitleUpdateRequest){
-        CourseResponse courseResponse = courseService.updateCourseTitle(courseId,courseTitleUpdateRequest);
+    @PatchMapping("/{courseId}")
+    public ResponseEntity<CourseResponse> updateCourse(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID courseId,
+            @Valid @RequestBody UpdateCourseRequest updateCourseRequest){
+        String auth0id = jwt.getSubject();
+        CourseResponse courseResponse = courseService.updateCourse(auth0id,courseId, updateCourseRequest);
         return ResponseEntity.ok(courseResponse);
     }
 
     @PostMapping("/{courseId}/lesson")
-    public ResponseEntity<LessonResponse> createLesson(@PathVariable UUID courseId, @Valid @RequestBody CreateLessonRequest createLessonRequest){
-        LessonResponse lessonResponse = courseService.createLesson(courseId,createLessonRequest);
+    public ResponseEntity<LessonResponse> createLesson(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID courseId,
+            @Valid @RequestBody CreateLessonRequest createLessonRequest){
+        String auth0id = jwt.getSubject();
+        LessonResponse lessonResponse = courseService.createLesson(auth0id, courseId, createLessonRequest);
         URI location  = URI.create("/api/lesson/"+ lessonResponse.id());
         return ResponseEntity.created(location).body(lessonResponse);
     }
 
     @GetMapping("/{courseId}/lesson")
-    public ResponseEntity<List<LessonSummaryResponse>> getCourseLessonList(@PathVariable UUID courseId){
-        List<LessonSummaryResponse> lessonResponseList = courseService.getCourseLessonList(courseId);
+    public ResponseEntity<List<LessonSummaryResponse>> getCourseLessonList(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID courseId
+    ){
+        String auth0id = jwt.getSubject();
+        List<LessonSummaryResponse> lessonResponseList = courseService.getCourseLessonList(auth0id,courseId);
         return ResponseEntity.ok(lessonResponseList);
     }
 }
